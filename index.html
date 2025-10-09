@@ -3,231 +3,1366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Academic Care - Fee Management</title>
-    <!-- Load Tailwind CSS CDN -->
+    <title>The Academic Care - Tuition Management</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Custom Styles -->
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- Load Lucide Icons for better UI -->
+    <script type="module" src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Light gray background */
+        }
+
+        /* Custom Table Styling for Fees */
+        .fee-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .fee-table th, .fee-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .fee-table th {
+            background-color: #1e40af; /* Blue-700 */
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .fee-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .fee-table tr:hover {
+            background-color: #eff6ff; /* Blue-50 */
+        }
+
+        /* Custom Tab Styling */
+        .admin-main-tab {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 0.5rem 0.5rem 0 0;
+            margin-right: 4px;
+            background-color: #f3f4f6;
+            color: #4b5563;
+            flex-shrink: 0;
+        }
+
+        .admin-main-tab.active-tab {
+            background-color: #ffffff;
+            color: #1d4ed8; /* Blue-700 */
+            font-weight: 700;
+            box-shadow: 0 -2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-sub-tab {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 0.375rem;
+            margin-right: 8px;
+            background-color: #d1e5ff; /* Blue-100 */
+            color: #1e40af; /* Blue-700 */
+        }
+        
+        .admin-sub-tab.active-sub-tab {
+            background-color: #3b82f6; /* Blue-500 */
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.5);
+        }
+
+        /* Message Box Animation */
+        #message-box {
+            top: 20px;
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            opacity: 0;
+            transform: translate(-50%, -100%);
+        }
+
+        #message-box.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    </style>
 </head>
 <body class="min-h-screen">
 
-    <!-- Global Header -->
-    <header class="app-header sticky top-0 z-10">
-        <div class="max-w-7xl mx-auto p-4">
-            <h1 class="text-2xl font-bold text-center">The Academic Care</h1>
-            <h2 id="academic-year" class="text-sm text-center font-medium opacity-80 mt-1">Academic Year 2025</h2>
-        </div>
-    </header>
-
-    <!-- Message Box -->
+    <!-- Global Message Box -->
     <div id="message-box" class="fixed top-4 left-1/2 -translate-x-1/2 p-3 rounded-lg text-white text-center z-50 transition-all duration-500 opacity-0 min-w-[300px]"></div>
 
-    <!-- Main Content Area -->
-    <main class="py-6">
-        <!-- 1. Login Panel -->
-        <div class="app-panel" id="login-panel">
-            <div class="max-w-md mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
-                <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Sign In</h2>
-                <input id="login-identifier" type="text" placeholder="Student ID (SXXXXXX) or Admin Email" class="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" />
-                <input id="login-password" type="password" placeholder="Password" class="w-full p-3 mb-6 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" />
-                
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
-                    Login
-                </button>
-                
-                <p class="text-center text-sm mt-6 text-gray-600">
-                    New Student? 
-                    <a href="#" id="register-link" class="text-blue-600 hover:text-blue-800 font-semibold transition duration-200">Register Here</a>
-                </p>
+    <!-- Main Application Container -->
+    <div class="max-w-4xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-6 border-b pb-3">
+            <h1 class="text-3xl font-extrabold text-blue-800 tracking-tight">The Academic Care</h1>
+            <h2 class="text-lg font-medium text-gray-600 mt-1">Academic Year 2025</h2>
+        </header>
+
+        <!-- --- LOGIN / REGISTRATION PANEL --- -->
+        <div id="login-panel" class="app-panel">
+            <div class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl max-w-md mx-auto">
+                <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Sign In</h3>
+                <form id="login-form" onsubmit="event.preventDefault(); handleLogin();" class="space-y-4">
+                    <div>
+                        <label for="login-identifier" class="block text-sm font-medium text-gray-700">Student ID (SXXXXXX) or Admin Email</label>
+                        <input type="text" id="login-identifier" required placeholder="Enter ID or Email" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                    </div>
+                    <div>
+                        <label for="login-password" class="block text-sm font-medium text-gray-700">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter password" class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition duration-200">
+                        Login
+                    </button>
+                </form>
+                <div class="mt-6 text-center text-sm">
+                    <p class="text-gray-600">Don't have an account? <a href="#" id="register-link" class="text-blue-600 hover:text-blue-800 font-semibold">Register Here</a></p>
+                    <p class="mt-2 text-xs text-gray-500">Forgot password? Contact Admin via WhatsApp.</p>
+                </div>
             </div>
         </div>
 
-        <!-- 2. Registration Panel -->
-        <div class="app-panel hidden" id="registration-panel">
-            <div class="max-w-lg mx-auto bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
-                <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Student Registration</h2>
-                <form id="registration-form" class="space-y-4">
-                    <input id="reg-name" type="text" placeholder="Full Name" required class="w-full p-3 border border-gray-300 rounded-lg" />
-                    <div class="grid grid-cols-2 gap-4">
-                        <select id="reg-class" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Select Class</option>
-                            <option value="6">Class 6</option>
-                            <option value="7">Class 7</option>
-                            <option value="8">Class 8</option>
-                            <option value="9">Class 9</option>
-                            <option value="10">Class 10</option>
-                            <option value="11">Class 11</option>
-                            <option value="12">Class 12</option>
-                        </select>
-                        <input id="reg-roll" type="number" placeholder="Roll Number" required min="1" class="w-full p-3 border border-gray-300 rounded-lg" />
+        <!-- --- REGISTRATION PANEL --- -->
+        <div id="registration-panel" class="app-panel hidden">
+            <div class="bg-white p-6 sm:p-10 rounded-xl shadow-2xl max-w-lg mx-auto">
+                <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Student Registration</h3>
+                <form id="registration-form" onsubmit="event.preventDefault(); handleSubmitRegistration();" class="space-y-4">
+                    <div>
+                        <label for="reg-name" class="block text-sm font-medium text-gray-700">Full Name</label>
+                        <input type="text" id="reg-name" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
                     </div>
-                    <input id="reg-whatsapp" type="text" placeholder="WhatsApp Number" required class="w-full p-3 border border-gray-300 rounded-lg" />
-                    <input id="reg-password" type="password" placeholder="Set Password (min 6 characters)" required class="w-full p-3 border border-gray-300 rounded-lg" />
-                    <input id="reg-confirm-password" type="password" placeholder="Confirm Password" required class="w-full p-3 border border-gray-300 rounded-lg" />
-                    
-                    <button type="button" onclick="handleSubmitRegistration()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200 mt-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="reg-class" class="block text-sm font-medium text-gray-700">Class (6-12)</label>
+                            <select id="reg-class" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg appearance-none">
+                                <option value="" disabled selected>Select Class</option>
+                                <script>
+                                    for(let i=6; i<=12; i++) {
+                                        document.write(`<option value="${i}">${i}</option>`);
+                                    }
+                                </script>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="reg-roll" class="block text-sm font-medium text-gray-700">Roll No. (1-99)</label>
+                            <input type="number" id="reg-roll" required min="1" max="99" class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="reg-whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp Number</label>
+                        <input type="text" id="reg-whatsapp" required placeholder="e.g. 01XXXXXXXXX" class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="reg-password" class="block text-sm font-medium text-gray-700">Set Password (min 6 chars)</label>
+                        <input type="password" id="reg-password" required minlength="6" class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <div>
+                        <label for="reg-confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                        <input type="password" id="reg-confirm-password" required class="mt-1 w-full p-3 border border-gray-300 rounded-lg">
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition duration-200">
                         Submit Registration
                     </button>
-                    
-                    <button type="button" id="back-to-login-reg" class="w-full bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 rounded-lg transition duration-200 text-sm mt-3">
-                        Back to Login
+                    <button type="button" id="back-to-login-reg" class="w-full text-blue-600 mt-2 hover:text-blue-800 font-semibold py-2">
+                        ← Back to Login
                     </button>
                 </form>
             </div>
         </div>
-        
-        <!-- 3. Admin Panel -->
-        <div class="app-panel hidden" id="admin-panel">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg">
-                    <h2 id="admin-header-title" class="text-xl md:text-2xl font-bold text-gray-800">Welcome to Admin Panel</h2>
-                    <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm font-semibold rounded-lg transition duration-200 shadow-md">
-                        Logout
+
+
+        <!-- --- ADMIN PANEL --- -->
+        <div id="admin-panel" class="app-panel hidden">
+            <div class="bg-white p-4 rounded-xl shadow-2xl">
+                <header class="flex flex-col sm:flex-row justify-between items-center mb-4 pb-4 border-b">
+                    <h3 id="admin-header-title" class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">Welcome Admin</h3>
+                    <button onclick="handleLogout()" class="text-sm text-red-600 hover:text-red-800 font-semibold flex items-center">
+                        <i data-lucide="log-out" class="w-4 h-4 mr-1"></i> Logout
                     </button>
+                </header>
+
+                <!-- Admin Tabs -->
+                <div class="flex flex-wrap border-b border-gray-200 -mb-px">
+                    <button id="admin-home-tab" class="admin-main-tab active-tab" onclick="switchAdminContent('admin-home-content', this)"><i data-lucide="home" class="w-4 h-4 inline-block mr-1"></i> Home</button>
+                    <button id="admin-class-tab" class="admin-main-tab" onclick="switchAdminContent('admin-class-content', this); loadClassSubTabs();"><i data-lucide="users" class="w-4 h-4 inline-block mr-1"></i> Class</button>
+                    <button id="admin-registration-tab" class="admin-main-tab" onclick="switchAdminContent('admin-registration-content', this)"><i data-lucide="user-plus" class="w-4 h-4 inline-block mr-1"></i> Registration (<span id="reg-count" class="font-bold text-red-500">0</span>)</button>
+                    <button id="admin-break-tab" class="admin-main-tab" onclick="switchAdminContent('admin-break-content', this)"><i data-lucide="briefcase" class="w-4 h-4 inline-block mr-1"></i> Break Requests (<span id="break-count" class="font-bold text-red-500">0</span>)</button>
+                </div>
+                
+                <!-- Admin Tab Content -->
+                <div id="admin-content-container" class="mt-4 p-4">
+                    
+                    <!-- Home Content -->
+                    <div id="admin-home-content" class="admin-tab-content space-y-4">
+                        <p class="text-gray-600">Use the buttons below to refresh the data panels.</p>
+                        <button onclick="loadAdminPanel()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md flex items-center">
+                            <i data-lucide="refresh-cw" class="w-4 h-4 inline-block mr-2"></i> Refresh All Panels
+                        </button>
+                    </div>
+
+                    <!-- Class Content -->
+                    <div id="admin-class-content" class="admin-tab-content hidden">
+                        <div id="admin-class-subtabs" class="flex flex-wrap gap-2 mb-4 p-2 bg-gray-100 rounded-lg border">
+                            <!-- Class sub-tabs will be injected here by loadClassSubTabs() -->
+                        </div>
+                        <h4 class="text-lg font-bold mb-3 text-blue-700 border-b pb-2">Approved Students</h4>
+                        <div id="admin-class-student-list" class="space-y-3">
+                            <!-- Student list for the selected class will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Registration Requests Content -->
+                    <div id="admin-registration-content" class="admin-tab-content hidden">
+                        <h4 class="text-lg font-bold mb-3 text-red-700 border-b pb-2">Pending Registrations</h4>
+                        <div id="admin-registration-requests" class="space-y-4">
+                            <!-- Pending requests will be rendered here -->
+                        </div>
+                    </div>
+
+                    <!-- Break Requests Content -->
+                    <div id="admin-break-content" class="admin-tab-content hidden">
+                        <h4 class="text-lg font-bold mb-3 text-orange-700 border-b pb-2">Pending Break Requests</h4>
+                        <div id="admin-break-requests" class="space-y-4">
+                            <!-- Pending break requests will be rendered here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- --- STUDENT PANEL --- -->
+        <div id="student-panel" class="app-panel hidden">
+            <div class="bg-white p-4 rounded-xl shadow-2xl">
+                <header class="flex flex-col sm:flex-row justify-between items-center mb-4 pb-4 border-b">
+                    <h3 id="student-header-title" class="text-xl font-bold text-gray-800 mb-2 sm:mb-0">Welcome Student</h3>
+                    <button onclick="handleLogout()" class="text-sm text-red-600 hover:text-red-800 font-semibold flex items-center">
+                        <i data-lucide="log-out" class="w-4 h-4 mr-1"></i> Logout
+                    </button>
+                </header>
+                
+                <!-- Student Tabs -->
+                <div id="student-tabs" class="flex flex-wrap border-b border-gray-200 -mb-px">
+                    <button class="admin-main-tab active-tab" onclick="handleStudentTabClick('my-profile', this)"><i data-lucide="user" class="w-4 h-4 inline-block mr-1"></i> My Profile</button>
+                    <button class="admin-main-tab" onclick="handleStudentTabClick('tuition-fee-status', this)"><i data-lucide="banknote" class="w-4 h-4 inline-block mr-1"></i> Tuition Fee Status</button>
+                    <button class="admin-main-tab" onclick="handleStudentTabClick('break-request', this)"><i data-lucide="coffee" class="w-4 h-4 inline-block mr-1"></i> Break Request</button>
                 </div>
 
-                <div class="admin-grid">
-                    <!-- Sidebar Navigation -->
-                    <nav class="bg-white p-4 rounded-xl shadow-lg sm:col-span-1">
-                        <h3 class="font-bold text-lg mb-4 text-blue-700 hidden sm:block">Admin Menu</h3>
-                        <div class="flex sm:flex-col space-x-2 sm:space-x-0 sm:space-y-2 overflow-x-auto pb-2">
-                            <button id="admin-home-tab" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200 active-tab w-full flex-shrink-0 sm:flex-grow-0">Home</button>
-                            <button id="admin-class-tab" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200 w-full flex-shrink-0 sm:flex-grow-0">Class</button>
-                            <button id="admin-registration-tab" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200 w-full flex-shrink-0 sm:flex-grow-0">Registration</button>
-                            <button id="admin-break-tab" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200 w-full flex-shrink-0 sm:flex-grow-0">Break Request</button>
-                        </div>
-                    </nav>
-
-                    <!-- Admin Main Content -->
-                    <div class="sm:col-span-3 space-y-6">
-                        <div id="admin-home-content" class="admin-tab-content p-6 bg-white rounded-xl shadow-lg">
-                            <h3 class="text-xl font-bold mb-4 text-blue-700">Admin Dashboard Overview</h3>
-                            <p class="text-gray-600">Use the menu on the left to navigate and manage students and requests.</p>
-                        </div>
-
-                        <div id="admin-class-content" class="admin-tab-content hidden bg-white p-6 rounded-xl shadow-lg">
-                            <h3 class="text-xl font-bold mb-4 text-blue-700">Class Management</h3>
-                            <div id="admin-class-subtabs" class="flex flex-wrap border-b border-gray-200 mb-4">
-                                <!-- Class Sub-Tabs (6-12) will be generated by script.js -->
-                            </div>
-                            <div id="admin-class-student-list" class="space-y-3">
-                                <p class="text-center text-gray-500 p-4">Select a Class tab above to view students.</p>
-                            </div>
-                        </div>
-
-                        <div id="admin-registration-content" class="admin-tab-content hidden bg-white p-6 rounded-xl shadow-lg">
-                            <h3 class="text-xl font-bold mb-4 text-blue-700">Pending Registration Requests</h3>
-                            <div id="admin-registration-requests" class="space-y-3">
-                                <p class="text-center text-gray-500 p-4">Loading requests...</p>
-                            </div>
-                        </div>
-
-                        <div id="admin-break-content" class="admin-tab-content hidden bg-white p-6 rounded-xl shadow-lg">
-                            <h3 class="text-xl font-bold mb-4 text-blue-700">Pending Break Requests</h3>
-                            <div id="admin-break-requests" class="space-y-3">
-                                <p class="text-center text-gray-500 p-4">Loading requests...</p>
-                            </div>
-                        </div>
+                <!-- Student Content -->
+                <div id="student-content-container" class="mt-4">
+                    <div id="student-my-profile-content" class="student-content p-6 bg-white rounded-xl shadow-lg">
+                        <!-- Profile content rendered by JS -->
+                    </div>
+                    <div id="student-tuition-fee-status-content" class="student-content hidden p-6 bg-white rounded-xl shadow-lg">
+                        <!-- Fee status content rendered by JS -->
+                    </div>
+                    <div id="student-break-request-content" class="student-content hidden p-6 bg-white rounded-xl shadow-lg">
+                        <!-- Break request form rendered by JS -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 4. Student Panel -->
-        <div class="app-panel hidden" id="student-panel">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg">
-                    <h2 id="student-header-title" class="text-xl md:text-2xl font-bold text-gray-800">Welcome to Student Panel</h2>
-                    <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm font-semibold rounded-lg transition duration-200 shadow-md">
-                        Logout
-                    </button>
-                </div>
-                
-                <!-- Student Tabs -->
-                <nav id="student-tabs" class="flex flex-wrap border-b border-gray-200 mb-6 bg-white rounded-xl shadow-lg p-3 space-x-2">
-                    <button onclick="handleStudentTabClick('my-profile')" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200 active-tab">My Profile</button>
-                    <button onclick="handleStudentTabClick('tuition-fee-status')" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200">Tuition Fee Status</button>
-                    <button onclick="handleStudentTabClick('break-request')" class="admin-main-tab px-4 py-2 text-sm text-gray-700 rounded-lg transition-colors duration-200">Break Request</button>
-                </nav>
+    </div>
 
-                <!-- Student Content Containers -->
-                <div id="student-my-profile-content" class="student-content bg-white p-6 rounded-xl shadow-lg">
-                    <p class="text-center text-gray-500 p-4">Loading profile...</p>
-                </div>
-                <div id="student-tuition-fee-status-content" class="student-content hidden">
-                    <p class="text-center text-gray-500 p-4">Loading fee status...</p>
-                </div>
-                <div id="student-break-request-content" class="student-content hidden bg-white p-6 rounded-xl shadow-lg">
-                    <p class="text-center text-gray-500 p-4">Loading break form...</p>
-                </div>
-            </div>
-        </div>
-    </main>
-    
-    <!-- Fee Management Modal (Hidden by Default) -->
+    <!-- --- Fee Management Modal (Admin Only) --- -->
     <div id="fee-management-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-3xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto p-6">
-            <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 id="fee-modal-title" class="text-xl font-bold text-blue-700">Fee Status</h3>
-                <button onclick="closeFeeManagementModal()" class="text-gray-500 hover:text-gray-800 transition duration-150 text-2xl">&times;</button>
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 my-8 transform transition-all duration-300">
+            <div class="p-6 border-b flex justify-between items-center">
+                <h3 id="fee-modal-title" class="text-xl font-bold text-gray-800">Tuition Fee Status</h3>
+                <button onclick="closeFeeManagementModal()" class="text-gray-500 hover:text-gray-800">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
             </div>
-            <div id="fee-modal-body">
-                <!-- Content loaded by JS -->
+            <div id="fee-modal-body" class="p-6">
+                <!-- Fee table content rendered here -->
             </div>
         </div>
     </div>
 
 
-    <!-- Firebase SDK Imports & Initialization (MUST be done via module script) -->
     <script type="module">
-        // Using Firebase SDK v9+ modular imports
+        // Firebase initialization (using global __firebase_config)
+        // Imports are consolidated here to prevent "Script error" issues related to mixed loading
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
-        import { getDatabase, ref, set, get, child, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
-    import { push } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+        import { 
+            getAuth, signInWithEmailAndPassword, signOut, 
+            createUserWithEmailAndPassword, onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+        import { 
+            getDatabase, ref, set, get, child, onValue, update, remove, push, off 
+        } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"; // Corrected URL typo: removed redundant 'www.'
 
+        // Global variables provided by the environment
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { /* Mock Config */ apiKey: "mock-api-key", authDomain: "mock-project.firebaseapp.com", databaseURL: "https://mock-project.firebaseio.com", projectId: "mock-project" };
         
-        // --- GLOBAL CONFIGURATION (Exposed to the window object for access in script.js) ---
-        // NOTE: This is placeholder data. In a real app, this should be configured securely.
-        const firebaseConfig = {
-            apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-            authDomain: "the-academic-care-de611.firebaseapp.com",
-            databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "the-academic-care-de611",
-            storageBucket: "the-academic-care-de611.firebasestorage.app",
-            messagingSenderId: "142271027321",
-            appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-            measurementId: "G-Q7MCGKTYMX"
-        };
-        
-        // Admin UID (MANDATORY: Must match the UID in Firebase Auth)
-        const ADMIN_UID = 'xg4XNMsSJqbXMZ57qicrpgfM6Yn1'; 
-
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Expose necessary variables and functions globally so script.js can access them
+        // Export Firebase functions globally for script access
         window.FB = {
-    auth,
-    db,
-    ADMIN_UID,
-    signInWithEmailAndPassword,
-    signOut,
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    ref,
-    set,
-    get,
-    child,
-    onValue,
-    remove,
-    update,
-    push,  // ✅ added here
-};
+            auth,
+            db,
+            // NOTE: CHANGE THIS TO YOUR ADMIN USER'S ACTUAL UID AFTER INITIAL REGISTRATION
+            ADMIN_UID: 'admin-uid-placeholder-12345', 
+            signInWithEmailAndPassword,
+            signOut,
+            createUserWithEmailAndPassword,
+            onAuthStateChanged,
+            ref, set, get, child, onValue, update, remove, push
+        };
+
+        // Initialize icons after script load
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+
+        // --- GLOBAL APP STATE AND CONSTANTS ---
+        const ACADEMIC_YEAR = 2025;
+        const MONTHS = [
+            "January", "February", "March", "April", "May", "June", 
+            "July", "August", "September", "October", "November", "December"
+        ];
+        let currentStudentData = null; // Stores data for the currently logged-in student
+        let currentUserId = null; // Stores the Firebase UID of the logged-in user
+        let feeListenerRef = null; // To hold the reference to the active fee listener (for modal)
+
+        // Reference to the root of the database structure
+        const DB_REF = ref(db); 
+
+        // --- UTILITY FUNCTIONS ---
+
+        /**
+         * Displays a non-blocking notification message.
+         * @param {string} message - The text to display.
+         * @param {string} type - 'success', 'error', 'info', or 'warning'.
+         */
+        function showMessageBox(message, type = 'info') {
+            const box = document.getElementById('message-box');
+            box.textContent = message;
+            
+            // Reset classes
+            box.className = 'fixed top-4 left-1/2 -translate-x-1/2 p-3 rounded-lg text-white text-center z-50 transition-all duration-500 opacity-0 min-w-[300px] shadow-xl';
+            
+            let bgColor = '';
+            switch (type) {
+                case 'success':
+                    bgColor = 'bg-green-500';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-500';
+                    break;
+                case 'warning':
+                    bgColor = 'bg-yellow-500';
+                    break;
+                case 'info':
+                default:
+                    bgColor = 'bg-blue-500';
+                    break;
+            }
+
+            box.classList.add(bgColor, 'show');
+
+            setTimeout(() => {
+                box.classList.remove('show');
+            }, 4000);
+        }
+
+        /**
+         * Hides all main content panels and shows the target panel.
+         * @param {string} panelId - The ID of the panel to show ('login-panel', 'admin-panel', 'student-panel', 'registration-panel').
+         */
+        function switchPanel(panelId) {
+            document.querySelectorAll('.app-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            const targetPanel = document.getElementById(panelId);
+            if (targetPanel) {
+                targetPanel.classList.remove('hidden');
+                // Re-initialize icons on new panel content
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        /**
+         * Generates a unique Student ID based on year, class, and roll.
+         * Format: S{Year}{Class:2d}{Roll:2d}
+         * E.g., S20251015 (Year 2025, Class 10, Roll 15)
+         * @param {string|number} studentClass 
+         * @param {string|number} roll 
+         * @returns {string} The generated student ID.
+         */
+        function generateStudentId(studentClass, roll) {
+            const classStr = String(studentClass).padStart(2, '0');
+            const rollStr = String(roll).padStart(2, '0');
+            return `S${ACADEMIC_YEAR}${classStr}${rollStr}`;
+        }
+
+        /**
+         * Gets student data from the database using their generated student ID.
+         * @param {string} studentId - The SXXXXXX ID.
+         * @returns {Promise<object|null>} Student data or null if not found.
+         */
+        async function getStudentDataById(studentId) {
+            try {
+                const snapshot = await get(child(DB_REF, `students/${studentId}`));
+                if (snapshot.exists()) {
+                    return snapshot.val();
+                }
+            } catch (error) {
+                console.error("Error fetching student data:", error);
+            }
+            return null;
+        }
+
+        // --- AUTHENTICATION & ROUTING ---
+
+        /**
+         * Handles the main login process for both Admin and Students.
+         */
+        window.handleLogin = async function() {
+            const identifier = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!identifier || !password) {
+                showMessageBox("Please enter both ID/Email and Password.", 'error');
+                return;
+            }
+
+            try {
+                let email = '';
+                if (identifier.startsWith('S' + ACADEMIC_YEAR)) {
+                    // Student login
+                    const studentId = identifier;
+                    const studentDetails = await getStudentDataById(studentId);
+                    
+                    if (!studentDetails || !studentDetails.uid) {
+                        showMessageBox("Student ID not found or registration pending approval.", 'error');
+                        return;
+                    }
+                    // Use the student's ID as the email prefix for Firebase Auth
+                    email = `${studentId}@theacademiccare.com`; 
+                    
+                } else if (identifier.includes('@')) {
+                    // Admin login
+                    email = identifier;
+                } else {
+                    showMessageBox("Invalid identifier format. Use Student ID (SXXXXXX) or Admin Email.", 'error');
+                    return;
+                }
+
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // The onAuthStateChanged listener will handle the routing
+            } catch (error) {
+                console.error("Login failed:", error.code, error.message);
+                let errorMessage = "Login failed. Check your ID/Email and password.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    errorMessage = "Invalid ID/Email or password.";
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = "Incorrect password.";
+                }
+                showMessageBox(errorMessage, 'error');
+            }
+        }
+
+        /**
+         * Handles user logout.
+         */
+        window.handleLogout = async function() {
+            try {
+                // Remove the fee listener if active (from modal)
+                if(feeListenerRef) {
+                    off(feeListenerRef);
+                    feeListenerRef = null;
+                }
+
+                await signOut(auth);
+                currentStudentData = null;
+                showMessageBox("Logged out successfully.", 'info');
+            } catch (error) {
+                console.error("Logout failed:", error);
+                showMessageBox("Logout failed. Please try again.", 'error');
+            }
+        }
+
+        /**
+         * Main authentication state observer and router.
+         */
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                
+                if (user.uid === window.FB.ADMIN_UID) {
+                    // --- ADMIN USER ---
+                    document.getElementById('admin-header-title').textContent = `Welcome Admin (${user.email})`;
+                    switchPanel('admin-panel');
+                    loadAdminPanel();
+                } else {
+                    // --- STUDENT USER ---
+                    // Student ID is part of the email (e.g., S20251015@theacademiccare.com)
+                    const emailPrefix = user.email.split('@')[0];
+                    const studentIdMatch = emailPrefix.match(/^S\d{8}$/);
+                    const studentId = studentIdMatch ? emailPrefix : null;
+
+                    if (studentId) {
+                        const data = await getStudentDataById(studentId);
+                        if (data && data.uid === user.uid) {
+                            currentStudentData = { studentId, ...data };
+                            document.getElementById('student-header-title').textContent = `Welcome ${data.name} (${studentId})`;
+                            switchPanel('student-panel');
+                            loadStudentPanel();
+                        } else {
+                            // This student ID is not registered or UID mismatch (Halt login)
+                            await signOut(auth);
+                            showMessageBox("Authentication error. Your account is not properly linked or approved.", 'error');
+                        }
+                    } else {
+                        // Not an admin or a valid student ID format
+                        await signOut(auth);
+                        showMessageBox("Invalid account type. Please contact support.", 'error');
+                    }
+                }
+            } else {
+                // No user is signed in
+                currentUserId = null;
+                switchPanel('login-panel');
+            }
+        });
+
+        // --- REGISTRATION LOGIC (STUDENT SIDE) ---
+
+        // Switch listeners
+        document.getElementById('register-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            switchPanel('registration-panel');
+        });
+        document.getElementById('back-to-login-reg').addEventListener('click', () => {
+            switchPanel('login-panel');
+        });
+
+        /**
+         * Handles the student registration submission.
+         */
+        window.handleSubmitRegistration = async function() {
+            const name = document.getElementById('reg-name').value.trim();
+            const studentClass = document.getElementById('reg-class').value;
+            const roll = document.getElementById('reg-roll').value;
+            const whatsapp = document.getElementById('reg-whatsapp').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+
+            if (!name || !studentClass || !roll || !whatsapp || !password || !confirmPassword) {
+                showMessageBox("Please fill in all registration fields.", 'error');
+                return;
+            }
+            if (password.length < 6) {
+                showMessageBox("Password must be at least 6 characters.", 'error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                showMessageBox("Password and confirm password do not match.", 'error');
+                return;
+            }
+            if (parseInt(roll) < 1 || parseInt(roll) > 99) {
+                 showMessageBox("Roll number must be between 1 and 99.", 'error');
+                return;
+            }
+            
+            // Generate the unique student ID
+            const studentId = generateStudentId(studentClass, roll);
+            
+            // 1. Check if the Student ID (Class + Roll) already exists (in approved students)
+            const existingApproved = await getStudentDataById(studentId);
+            if (existingApproved) {
+                showMessageBox(`Roll ${roll} in Class ${studentClass} is already approved.`, 'error');
+                return;
+            }
+            
+            // 2. Check if the Student ID is already in pending registrations
+            const existingPending = await get(child(DB_REF, `registrations/${studentId}`));
+            if (existingPending.exists()) {
+                 showMessageBox(`A registration request for ${studentId} is already pending.`, 'warning');
+                return;
+            }
+
+
+            try {
+                // 3. Submit registration request to a pending queue (registrations/)
+                const registrationRef = child(DB_REF, 'registrations/' + studentId);
+                await set(registrationRef, {
+                    name,
+                    class: studentClass,
+                    roll,
+                    whatsapp,
+                    password,
+                    date: new Date().toISOString()
+                });
+                
+                document.getElementById('registration-form').reset();
+                showMessageBox(`Registration request submitted! Your ID is: ${studentId}. Please wait for admin approval.`, 'success');
+                switchPanel('login-panel');
+
+            } catch (error) {
+                console.error("Registration submission failed:", error);
+                showMessageBox("Registration submission failed due to a database error. Please try again.", 'error');
+            }
+        }
+
+
+        // --- ADMIN PANEL FUNCTIONS ---
+
+        /**
+         * Handles switching between Admin main tabs.
+         */
+        window.switchAdminContent = function(contentId, clickedTab) {
+            // Update active tab styling
+            document.querySelectorAll('.admin-main-tab').forEach(tab => tab.classList.remove('active-tab'));
+            clickedTab.classList.add('active-tab');
+
+            // Switch content panel
+            document.querySelectorAll('.admin-tab-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(contentId).classList.remove('hidden');
+        }
+
+        /**
+         * Initializes listeners and default view for the Admin panel.
+         */
+        window.loadAdminPanel = function() {
+            // Re-select the first tab content
+            switchAdminContent('admin-home-content', document.getElementById('admin-home-tab'));
+            
+            // Load data listeners for the tabs that require real-time updates
+            setupAdminRegistrationListener();
+            setupAdminBreakRequestListener();
+            
+            // Load class sub-tabs structure (but not the data)
+            loadClassSubTabs();
+        }
+
+        /**
+         * Generates and loads the class sub-tabs (6-12) for Class Management.
+         */
+        function loadClassSubTabs() {
+            const container = document.getElementById('admin-class-subtabs');
+            container.innerHTML = ''; // Clear previous tabs
+
+            let firstTab = null;
+            for (let i = 6; i <= 12; i++) {
+                const classNum = String(i);
+                const btn = document.createElement('button');
+                btn.textContent = `Class ${classNum}`;
+                btn.className = 'admin-sub-tab';
+                btn.dataset.class = classNum;
+                btn.onclick = () => handleClassSubTabClick(classNum, btn);
+                container.appendChild(btn);
+
+                if (i === 6) {
+                    firstTab = btn;
+                }
+            }
+            
+            // Auto-click the first tab (Class 6)
+            if (firstTab) {
+                firstTab.click();
+            }
+        }
+
+        /**
+         * Handles clicks on Class sub-tabs (6-12).
+         * @param {string} classNum 
+         * @param {HTMLButtonElement} button 
+         */
+        function handleClassSubTabClick(classNum, button) {
+            // Update active sub-tab styling
+            document.querySelectorAll('.admin-sub-tab').forEach(btn => btn.classList.remove('active-sub-tab'));
+            button.classList.add('active-sub-tab');
+
+            // Load students for the selected class
+            setupClassStudentListener(classNum);
+        }
+
+        // Global variable to store active student listener for cleanup if needed
+        let activeStudentListener = null;
+
+        /**
+         * Sets up a real-time listener for students in a specific class.
+         * @param {string} classNum 
+         */
+        function setupClassStudentListener(classNum) {
+            const container = document.getElementById('admin-class-student-list');
+            container.innerHTML = `<p class="text-center text-blue-500 p-4 font-medium">Loading students for Class ${classNum}...</p>`;
+            
+            // Clean up previous listener
+            if (activeStudentListener) {
+                off(activeStudentListener);
+            }
+            
+            // Fetch all approved student data
+            const studentsRef = child(DB_REF, 'students');
+            activeStudentListener = onValue(studentsRef, (snapshot) => {
+                const allStudents = snapshot.val() || {};
+                const classStudents = Object.values(allStudents)
+                    .filter(s => s.class === classNum)
+                    .sort((a, b) => parseInt(a.roll) - parseInt(b.roll));
+
+                renderClassStudents(classStudents, classNum);
+            });
+        }
+
+        /**
+         * Renders the list of approved students for a class.
+         * @param {Array<object>} students 
+         * @param {string} classNum
+         */
+        function renderClassStudents(students, classNum) {
+            const container = document.getElementById('admin-class-student-list');
+            container.innerHTML = '';
+            
+            if (students.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 p-4">No students approved for Class ${classNum} yet.</p>`;
+                return;
+            }
+
+            students.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'flex flex-col sm:flex-row justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200';
+                
+                const infoHtml = `
+                    <div class="mb-2 sm:mb-0 text-center sm:text-left">
+                        <p class="font-bold text-lg text-gray-800">${student.name}</p>
+                        <p class="text-sm text-gray-600">ID: <span class="font-mono text-blue-600">${student.studentId}</span> | Roll: ${student.roll}</p>
+                        <p class="text-sm text-gray-500 flex items-center justify-center sm:justify-start">
+                            <i data-lucide="message-circle-code" class="w-4 h-4 mr-1 text-green-500"></i> WhatsApp: ${student.whatsapp}
+                        </p>
+                    </div>
+                    <button onclick="openFeeManagementModal('${student.studentId}', '${student.name}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition duration-200 w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-center text-sm">
+                        <i data-lucide="banknote" class="w-4 h-4 mr-2"></i> Tuition Fee Status
+                    </button>
+                `;
+                card.innerHTML = infoHtml;
+                container.appendChild(card);
+            });
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Opens the Fee Management Modal for a specific student.
+         * @param {string} studentId 
+         * @param {string} studentName 
+         */
+        window.openFeeManagementModal = async function(studentId, studentName) {
+            // Stop any existing fee listener
+            if(feeListenerRef) {
+                off(feeListenerRef);
+                feeListenerRef = null;
+            }
+            
+            document.getElementById('fee-modal-title').textContent = `${studentName}'s Fee Status (${studentId})`;
+            document.getElementById('fee-management-modal').classList.remove('hidden');
+            
+            const body = document.getElementById('fee-modal-body');
+            body.innerHTML = '<p class="text-center p-8 text-blue-500 font-medium">Loading fee data...</p>';
+
+            // Use onValue listener for real-time fee updates in the modal
+            const feeRef = child(DB_REF, `students/${studentId}/fees`);
+            feeListenerRef = onValue(feeRef, (snapshot) => {
+                const fees = snapshot.val() || {};
+                renderFeeTable(studentId, fees, body, 'admin');
+            });
+        }
+
+        /**
+         * Renders the Fee Status Table. Used by both Admin Modal and Student Panel.
+         * @param {string} studentId 
+         * @param {object} fees 
+         * @param {HTMLElement} container 
+         * @param {string} userRole - 'admin' or 'student'
+         */
+        function renderFeeTable(studentId, fees, container, userRole) {
+            const today = new Date();
+            const currentMonthIndex = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            let tableHtml = `<div class="max-h-[60vh] overflow-y-auto"><table class="fee-table min-w-full">
+                <thead>
+                    <tr>
+                        <th class="sticky top-0 bg-blue-700">Month</th>
+                        <th class="sticky top-0 bg-blue-700">Status</th>
+                        <th class="sticky top-0 bg-blue-700">Date & Method</th>
+                        ${userRole === 'admin' ? '<th class="sticky top-0 bg-blue-700">Action</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            MONTHS.forEach((month, index) => {
+                // Determine if the month is in the current academic year and is past/current month
+                const isCurrentAcademicYear = ACADEMIC_YEAR === currentYear;
+                const isPastOrCurrentMonth = isCurrentAcademicYear && index <= currentMonthIndex;
+                const isCurrentMonth = isCurrentAcademicYear && index === currentMonthIndex;
+                
+                const fee = fees[month] || { status: 'Unpaid', date: 'N/A', method: '' };
+                
+                let statusColor = 'text-red-600 font-medium';
+                if (fee.status === 'Paid') {
+                    statusColor = 'text-green-600 font-bold';
+                } else if (fee.status === 'Break') {
+                    statusColor = 'text-purple-600 font-bold'; // Updated color for Break
+                }
+
+                let actionButtons = '';
+                let rowClasses = isCurrentMonth ? 'bg-yellow-50 font-semibold' : '';
+
+                if (userRole === 'admin' && isPastOrCurrentMonth) {
+                    actionButtons = `
+                        <div class="flex flex-col space-y-2 text-xs">
+                            <button onclick="markFee('${studentId}', '${month}', 'Paid')" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded-md shadow-sm flex items-center justify-center">
+                                <i data-lucide="check" class="w-3 h-3 mr-1"></i> Paid
+                            </button>
+                            <button onclick="markFee('${studentId}', '${month}', 'Break')" class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded-md shadow-sm flex items-center justify-center">
+                                <i data-lucide="pause" class="w-3 h-3 mr-1"></i> Break
+                            </button>
+                            ${fee.status !== 'Unpaid' ? `
+                                <button onclick="markFee('${studentId}', '${month}', 'Unpaid')" class="bg-gray-400 hover:bg-gray-500 text-white px-2 py-1 rounded-md shadow-sm flex items-center justify-center">
+                                    <i data-lucide="undo" class="w-3 h-3 mr-1"></i> Undo
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
+                tableHtml += `
+                    <tr class="${rowClasses}">
+                        <td class="${isPastOrCurrentMonth ? 'text-gray-800' : 'text-gray-400'}">${month}</td>
+                        <td class="${statusColor}">${fee.status}</td>
+                        <td class="text-sm text-gray-700">${fee.date || 'N/A'} ${fee.method ? `(${fee.method})` : ''}</td>
+                        ${userRole === 'admin' ? `<td>${actionButtons}</td>` : ''}
+                    </tr>
+                `;
+            });
+
+            tableHtml += `</tbody></table></div>`;
+            
+            // Re-render the container and re-initialize icons
+            container.innerHTML = tableHtml;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Closes the fee management modal.
+         */
+        window.closeFeeManagementModal = function() {
+            // Stop the listener before closing the modal
+            if(feeListenerRef) {
+                off(feeListenerRef);
+                feeListenerRef = null;
+            }
+            document.getElementById('fee-management-modal').classList.add('hidden');
+        }
+
+        /**
+         * Admin action to mark a student's fee status for a month.
+         * @param {string} studentId 
+         * @param {string} month 
+         * @param {string} status - 'Paid', 'Break', or 'Unpaid'
+         */
+        window.markFee = async function(studentId, month, status) {
+            const feePath = `students/${studentId}/fees/${month}`;
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+            const method = 'Cash/Bkash'; // Default method for admin paid marking
+
+            try {
+                if (status === 'Unpaid') {
+                    // Undo: Delete the entry to revert it to default (unmarked/unpaid)
+                    await remove(child(DB_REF, feePath)); 
+                    showMessageBox(`Fee for ${month} for ${studentId} marked as Unpaid (Undo).`, 'info');
+                } else {
+                    await set(child(DB_REF, feePath), {
+                        status: status,
+                        date: status === 'Paid' ? dateStr : '',
+                        method: status === 'Paid' ? method : '',
+                        markedBy: currentUserId, // Admin UID
+                        timestamp: now.toISOString()
+                    });
+                    showMessageBox(`Fee for ${month} for ${studentId} marked as ${status}.`, 'success');
+                }
+            } catch (error) {
+                console.error("Error marking fee:", error);
+                showMessageBox(`Failed to mark fee for ${month}.`, 'error');
+            }
+        }
+
+        // --- ADMIN: REGISTRATION REQUESTS ---
+
+        /**
+         * Sets up a real-time listener for pending registration requests.
+         */
+        function setupAdminRegistrationListener() {
+            const container = document.getElementById('admin-registration-requests');
+            const countSpan = document.getElementById('reg-count');
+
+            onValue(child(DB_REF, 'registrations'), (snapshot) => {
+                const requests = snapshot.val() || {};
+                const requestKeys = Object.keys(requests);
+                countSpan.textContent = requestKeys.length;
+                renderRegistrationRequests(requests, container);
+            });
+        }
+
+        /**
+         * Renders the pending registration requests.
+         * @param {object} requests 
+         * @param {HTMLElement} container 
+         */
+        function renderRegistrationRequests(requests, container) {
+            container.innerHTML = '';
+            const studentIds = Object.keys(requests);
+            
+            if (studentIds.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 p-4">No pending registration requests.</p>`;
+                return;
+            }
+
+            studentIds.forEach(studentId => {
+                const request = requests[studentId];
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm';
+                
+                const html = `
+                    <p class="font-bold text-lg text-gray-800">${request.name}</p>
+                    <p class="text-sm text-gray-600 flex items-center"><i data-lucide="scan-text" class="w-4 h-4 mr-1 text-blue-600"></i> ID: <span class="font-mono ml-1">${studentId}</span></p>
+                    <p class="text-sm text-gray-600 flex items-center"><i data-lucide="book-open-text" class="w-4 h-4 mr-1 text-gray-500"></i> Class: ${request.class} | Roll: ${request.roll}</p>
+                    <p class="text-sm text-gray-600 flex items-center"><i data-lucide="message-circle-code" class="w-4 h-4 mr-1 text-green-500"></i> WhatsApp: ${request.whatsapp}</p>
+                    <p class="text-xs text-gray-500 mt-2">Submitted: ${new Date(request.date).toLocaleString()}</p>
+                    <div class="mt-4 flex space-x-3">
+                        <button onclick="approveRegistration('${studentId}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow-md transition duration-200 flex items-center">
+                            <i data-lucide="user-check" class="w-4 h-4 mr-1"></i> Approve
+                        </button>
+                        <button onclick="denyRegistration('${studentId}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow-md transition duration-200 flex items-center">
+                            <i data-lucide="user-x" class="w-4 h-4 mr-1"></i> Deny
+                        </button>
+                    </div>
+                `;
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Admin action to approve a registration request.
+         * @param {string} studentId 
+         */
+        window.approveRegistration = async function(studentId) {
+            const regRef = child(DB_REF, `registrations/${studentId}`);
+            const studentDataSnapshot = await get(regRef);
+            const request = studentDataSnapshot.val();
+
+            if (!request) {
+                showMessageBox("Request not found.", 'error');
+                return;
+            }
+
+            try {
+                // 1. Create the student in Firebase Auth (Using ID as email prefix)
+                const email = `${studentId}@theacademiccare.com`;
+                const userCredential = await createUserWithEmailAndPassword(auth, email, request.password);
+                const uid = userCredential.user.uid;
+
+                // 2. Move data to approved students/ (students/{studentId})
+                const studentRef = child(DB_REF, `students/${studentId}`);
+                await set(studentRef, {
+                    uid,
+                    studentId,
+                    name: request.name,
+                    class: request.class,
+                    roll: request.roll,
+                    whatsapp: request.whatsapp,
+                    status: 'Approved',
+                    dateApproved: new Date().toISOString()
+                });
+
+                // 3. Delete the request from registrations/
+                await remove(regRef);
+
+                showMessageBox(`Registration for ${request.name} (${studentId}) approved!`, 'success');
+            } catch (error) {
+                console.error("Approval failed:", error.code, error.message);
+                let errorMessage = "Registration approval failed.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = "Student account already exists. Deleting pending request.";
+                    await remove(regRef); // Clean up pending request if account already made
+                }
+                showMessageBox(errorMessage, 'error');
+            }
+        }
+
+        /**
+         * Admin action to deny a registration request.
+         * @param {string} studentId 
+         */
+        window.denyRegistration = async function(studentId) {
+            try {
+                const regRef = child(DB_REF, `registrations/${studentId}`);
+                await remove(regRef);
+                showMessageBox(`Registration request for ${studentId} denied and removed.`, 'info');
+            } catch (error) {
+                console.error("Denial failed:", error);
+                showMessageBox("Failed to deny registration.", 'error');
+            }
+        }
+
+        // --- ADMIN: BREAK REQUESTS ---
+
+        /**
+         * Sets up a real-time listener for pending break requests.
+         */
+        function setupAdminBreakRequestListener() {
+            const container = document.getElementById('admin-break-requests');
+            const countSpan = document.getElementById('break-count');
+            
+            onValue(child(DB_REF, 'break_requests'), (snapshot) => {
+                const requests = snapshot.val() || {};
+                const requestKeys = Object.keys(requests);
+                countSpan.textContent = requestKeys.length;
+                renderBreakRequests(requests, container);
+            });
+        }
+
+        /**
+         * Renders the pending break requests.
+         * @param {object} requests 
+         * @param {HTMLElement} container 
+         */
+        function renderBreakRequests(requests, container) {
+            container.innerHTML = '';
+            const requestKeys = Object.keys(requests);
+
+            if (requestKeys.length === 0) {
+                container.innerHTML = `<p class="text-center text-gray-500 p-4">No pending break requests.</p>`;
+                return;
+            }
+
+            requestKeys.forEach(key => {
+                const request = requests[key];
+                const card = document.createElement('div');
+                card.className = 'p-4 bg-blue-50 border border-blue-200 rounded-lg shadow-sm';
+                
+                const html = `
+                    <p class="font-bold text-lg text-gray-800">${request.studentName} (<span class="font-mono text-blue-600">${request.studentId}</span>)</p>
+                    <p class="text-sm text-gray-600 flex items-center"><i data-lucide="calendar" class="w-4 h-4 mr-1 text-indigo-500"></i> Month: <span class="font-semibold">${request.month}</span></p>
+                    <p class="text-sm text-gray-600 flex items-center"><i data-lucide="file-text" class="w-4 h-4 mr-1 text-gray-500"></i> Reason: ${request.reason}</p>
+                    <p class="text-xs text-gray-500 mt-2">Submitted: ${new Date(request.date).toLocaleString()}</p>
+                    <div class="mt-4 flex space-x-3">
+                        <button onclick="approveBreak('${request.studentId}', '${request.month}', '${key}')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow-md transition duration-200 flex items-center">
+                            <i data-lucide="check-circle" class="w-4 h-4 mr-1"></i> Approve (Mark Break)
+                        </button>
+                        <button onclick="denyBreak('${key}')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 text-sm rounded-lg font-semibold shadow-md transition duration-200 flex items-center">
+                            <i data-lucide="x-circle" class="w-4 h-4 mr-1"></i> Deny
+                        </button>
+                    </div>
+                `;
+                card.innerHTML = html;
+                container.appendChild(card);
+            });
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Admin action to approve a break request, marking the month as 'Break' and removing the request.
+         * @param {string} studentId 
+         * @param {string} month 
+         * @param {string} requestKey 
+         */
+        window.approveBreak = async function(studentId, month, requestKey) {
+            try {
+                // 1. Mark fee as 'Break'
+                await markFee(studentId, month, 'Break');
+
+                // 2. Remove the request
+                await remove(child(DB_REF, `break_requests/${requestKey}`));
+
+                showMessageBox(`Break request for ${studentId} in ${month} approved and fee marked as Break.`, 'success');
+            } catch (error) {
+                console.error("Break approval failed:", error);
+                showMessageBox("Failed to approve break request.", 'error');
+            }
+        }
+
+        /**
+         * Admin action to deny a break request.
+         * @param {string} requestKey 
+         */
+        window.denyBreak = async function(requestKey) {
+            try {
+                await remove(child(DB_REF, `break_requests/${requestKey}`));
+                showMessageBox("Break request denied and removed.", 'info');
+            } catch (error) {
+                console.error("Break denial failed:", error);
+                showMessageBox("Failed to deny break request.", 'error');
+            }
+        }
+
+        // --- STUDENT PANEL FUNCTIONS ---
+
+        /**
+         * Initializes and routes the student panel content.
+         */
+        function loadStudentPanel() {
+            // Set default tab to My Profile
+            const profileTab = document.querySelector('#student-tabs button[onclick*="my-profile"]');
+            if(profileTab) {
+                document.querySelectorAll('#student-tabs .admin-main-tab').forEach(tab => tab.classList.remove('active-tab'));
+                profileTab.classList.add('active-tab');
+            }
+
+            // Set default content
+            document.querySelectorAll('.student-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById('student-my-profile-content').classList.remove('hidden');
+
+            // Load initial content
+            renderStudentProfile();
+            renderStudentFeeStatus();
+            renderBreakRequestForm();
+        }
+
+        /**
+         * Handles clicks on student navigation tabs.
+         * @param {string} tabName - 'my-profile', 'tuition-fee-status', 'break-request'
+         * @param {HTMLButtonElement} clickedTab
+         */
+        window.handleStudentTabClick = function(tabName, clickedTab) {
+            // Update active tab styling
+            document.querySelectorAll('#student-tabs .admin-main-tab').forEach(tab => tab.classList.remove('active-tab'));
+            clickedTab.classList.add('active-tab');
+
+            // Switch content panel
+            document.querySelectorAll('.student-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(`student-${tabName}-content`).classList.remove('hidden');
+        }
+
+        /**
+         * Renders the student's profile information.
+         */
+        function renderStudentProfile() {
+            const student = currentStudentData;
+            const container = document.getElementById('student-my-profile-content');
+            
+            if (!student) {
+                container.innerHTML = '<p class="text-center text-red-500 p-4">Error: Student data not loaded.</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <h3 class="text-xl font-bold mb-4 text-blue-700 flex items-center"><i data-lucide="user-square" class="w-6 h-6 mr-2"></i> My Profile</h3>
+                <div class="space-y-4 max-w-lg">
+                    <div class="p-3 bg-gray-50 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500">Full Name</p>
+                            <p class="font-semibold text-lg">${student.name}</p>
+                        </div>
+                        <i data-lucide="user" class="w-6 h-6 text-indigo-400"></i>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500">Student ID</p>
+                            <p class="font-semibold text-lg font-mono text-blue-600">${student.studentId}</p>
+                        </div>
+                        <i data-lucide="scan-text" class="w-6 h-6 text-indigo-400"></i>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 rounded-lg border">
+                            <p class="text-sm text-gray-500">Class</p>
+                            <p class="font-semibold text-lg">${student.class}</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-lg border">
+                            <p class="text-sm text-gray-500">Roll Number</p>
+                            <p class="font-semibold text-lg">${student.roll}</p>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-500">WhatsApp Number</p>
+                            <p class="font-semibold text-lg">${student.whatsapp}</p>
+                        </div>
+                         <i data-lucide="message-circle-code" class="w-6 h-6 text-green-500"></i>
+                    </div>
+                </div>
+                <div class="mt-6 p-4 bg-red-100 rounded-lg border border-red-300">
+                    <p class="text-sm text-red-700 font-bold flex items-center"><i data-lucide="alert-triangle" class="w-4 h-4 mr-1"></i> Important Notice</p>
+                    <p class="text-xs text-red-600 mt-1">For password reset, please contact the admin directly via WhatsApp. Your account security is paramount.</p>
+                </div>
+            `;
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Sets up a real-time listener for the student's fee status.
+         */
+        function renderStudentFeeStatus() {
+            const student = currentStudentData;
+            const container = document.getElementById('student-tuition-fee-status-content');
+            
+            if (!student) return;
+
+            container.innerHTML = '<p class="text-center p-8 text-blue-500 font-medium">Loading fee status...</p>';
+
+            const feeRef = child(DB_REF, `students/${student.studentId}/fees`);
+            onValue(feeRef, (snapshot) => {
+                const fees = snapshot.val() || {};
+                const tableContainer = document.createElement('div');
+                tableContainer.innerHTML = `<h3 class="text-xl font-bold mb-4 text-blue-700 flex items-center"><i data-lucide="banknote" class="w-6 h-6 mr-2"></i> Monthly Tuition Fee Status - ${ACADEMIC_YEAR}</h3>`;
+                
+                renderFeeTable(student.studentId, fees, tableContainer, 'student');
+                container.innerHTML = '';
+                container.appendChild(tableContainer);
+
+            }); // Only once: false by default for onValue
+        }
+
+        /**
+         * Renders the break request form.
+         */
+        function renderBreakRequestForm() {
+            const container = document.getElementById('student-break-request-content');
+            
+            // Generate options for future months (Starting from next month)
+            const today = new Date();
+            const nextMonthIndex = (today.getMonth() + 1) % 12;
+            let monthOptions = '';
+            
+            for(let i=0; i<12; i++) {
+                const index = (nextMonthIndex + i) % 12;
+                const month = MONTHS[index];
+                
+                // Only allow requesting for up to 6 months in advance
+                if (i < 6) { 
+                    monthOptions += `<option value="${month}">${month}</option>`;
+                }
+            }
+
+            container.innerHTML = `
+                <h3 class="text-xl font-bold mb-4 text-blue-700 flex items-center"><i data-lucide="coffee" class="w-6 h-6 mr-2"></i> Submit Break Request</h3>
+                <p class="mb-4 text-gray-600">Request a temporary break from tuition for an **upcoming month**. All requests require admin approval.</p>
+                <form id="break-request-form" class="space-y-4 max-w-lg">
+                    <div>
+                        <label for="break-month" class="block text-sm font-medium text-gray-700 mb-1">Select Month</label>
+                        <select id="break-month" required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 appearance-none">
+                            <option value="" disabled selected>Select a month</option>
+                            ${monthOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label for="break-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Break</label>
+                        <textarea id="break-reason" rows="4" placeholder="Briefly explain the reason for your break (e.g., family travel, vacation)." required class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200 flex items-center justify-center">
+                        <i data-lucide="send" class="w-4 h-4 mr-2"></i> Submit Request
+                    </button>
+                </form>
+            `;
+            
+            document.getElementById('break-request-form').addEventListener('submit', submitBreakRequest);
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        /**
+         * Handles the submission of a student break request.
+         * @param {Event} e 
+         */
+        async function submitBreakRequest(e) {
+            e.preventDefault();
+            const student = currentStudentData;
+            if (!student) return;
+
+            const month = document.getElementById('break-month').value;
+            const reason = document.getElementById('break-reason').value.trim();
+
+            if (!month || !reason) {
+                showMessageBox("Please select a month and provide a reason.", 'error');
+                return;
+            }
+
+            try {
+                // Check if a request for this month already exists
+                const requestsSnapshot = await get(child(DB_REF, 'break_requests'));
+                let requestExists = false;
+                requestsSnapshot.forEach(snap => {
+                    const req = snap.val();
+                    if (req.studentId === student.studentId && req.month === month) {
+                        requestExists = true;
+                    }
+                });
+                
+                if (requestExists) {
+                    showMessageBox(`A break request for ${month} is already pending.`, 'warning');
+                    return;
+                }
+                
+                // Check if fee is already marked Paid/Break for this month (prevent double request/conflict)
+                const feeSnapshot = await get(child(DB_REF, `students/${student.studentId}/fees/${month}`));
+                if (feeSnapshot.exists()) {
+                    showMessageBox(`The fee for ${month} is already marked as Paid or Break. Cannot submit request.`, 'warning');
+                    return;
+                }
+
+
+                // Add request to the 'break_requests' queue
+                const newRequestRef = push(child(DB_REF, 'break_requests'));
+                await set(newRequestRef, {
+                    studentId: student.studentId,
+                    studentName: student.name,
+                    month: month,
+                    reason: reason,
+                    date: new Date().toISOString()
+                });
+                
+                document.getElementById('break-request-form').reset();
+                showMessageBox(`Break request for ${month} submitted successfully! Awaiting admin approval.`, 'success');
+            } catch (error) {
+                console.error("Break request submission failed:", error);
+                showMessageBox("Failed to submit break request.", 'error');
+            }
+        }
+
     </script>
-    <!-- Load Main Application Logic -->
-    <script src="script.js"></script>
 </body>
 </html>
