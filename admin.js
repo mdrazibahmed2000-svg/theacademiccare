@@ -174,42 +174,47 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --------------------------
-  // REGISTRATION & BREAK REQUESTS
-  // --------------------------
   function loadRegistrationRequests() {
-    const regRef = ref(db, "students");
-    const container = document.getElementById("registrationList");
-    onValue(regRef, (snapshot) => {
-      container.innerHTML = "";
-      snapshot.forEach((child) => {
-        const student = child.val();
-        if (student.status === "pending") {
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <p>${student.name} (ID: ${student.studentId})</p>
-            <button class="approveBtn" data-id="${student.studentId}">Approve</button>
-            <button class="denyBtn" data-id="${student.studentId}">Deny</button>
-          `;
-          container.appendChild(div);
-        }
-      });
+  const regRef = ref(db, "students");
+  const container = document.getElementById("Registration");
+  
+  onValue(regRef, (snapshot) => {
+    container.innerHTML = ""; // clear previous
 
-      document.querySelectorAll(".approveBtn").forEach(btn => {
-        btn.addEventListener("click", e => {
-          const id = e.target.getAttribute("data-id");
-          update(ref(db, `students/${id}`), { status: "approved" });
-        });
-      });
+    snapshot.forEach((child) => {
+      const student = child.val();
+      // Only show pending registrations
+      if (student.status === "pending") {
+        const div = document.createElement("div");
+        div.className = "reg-card";
+        div.innerHTML = `
+          <p><strong>${student.name}</strong> (ID: ${student.studentId}) - Class ${student.class}</p>
+          <p>WhatsApp: ${student.whatsapp}</p>
+          <button class="approveBtn" data-id="${student.studentId}">Approve</button>
+          <button class="denyBtn" data-id="${student.studentId}">Deny</button>
+        `;
+        container.appendChild(div);
+      }
+    });
 
-      document.querySelectorAll(".denyBtn").forEach(btn => {
-        btn.addEventListener("click", e => {
-          const id = e.target.getAttribute("data-id");
-          remove(ref(db, `students/${id}`));
-        });
+    // Approve buttons
+    document.querySelectorAll(".approveBtn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = e.target.getAttribute("data-id");
+        update(ref(db, `students/${id}`), { status: "approved" });
       });
     });
-  }
+
+    // Deny buttons
+    document.querySelectorAll(".denyBtn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const id = e.target.getAttribute("data-id");
+        remove(ref(db, `students/${id}`));
+      });
+    });
+  });
+}
+
 
   function loadBreakRequests() {
     const breakRef = ref(db, "breakRequests");
