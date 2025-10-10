@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, update, onChildChanged, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
@@ -16,92 +16,109 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
-const studentId = localStorage.getItem("studentId");
 
-// Logout
+// ------------------ Logout ------------------
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(()=>window.location.href="index.html");
+  signOut(auth).then(() => window.location.href="index.html");
 });
 
-// Tab switching
+// ------------------ Tab Switching ------------------
 window.showTab = (tabName) => {
   ["home","profile","tuition","break"].forEach(t=>{
     document.getElementById(t).style.display = (t===tabName)?"block":"none";
   });
 };
 
-// Load profile
-async function loadProfile(){
+// ------------------ Load Profile ------------------
+async function loadProfile(studentId){
   const snapshot = await get(ref(db, `registrations/${studentId}`));
   if(snapshot.exists()){
-    const data = snapshot.val();
-    document.getElementById("profileName").innerText = data.name;
-    document.getElementById("profileClass").innerText = data.class;
-    document.getElementById("profileRoll").innerText = data.roll;
-    document.getElementById("profileWhatsApp").innerText = data.whatsapp;
+    const student = snapshot.val();
+    const container = document.getElementById("profileInfo");
+    container.innerHTML = `
+      <p><strong>Name:</strong> ${student.name}</p>
+      <p><strong>Class:</strong> ${student.class}</p>
+      <p><strong>Roll:</strong> ${student.roll}</p>
+      <p><strong>WhatsApp:</strong> ${student.whatsapp}</p>
+    `;
   }
 }
 
-// Load tuition table
-function loadTuition(){
-  const table = document.getElementById("tuitionTable");
+// ------------------ Load Tuition ------------------
+async function loadTuition(studentId){
+  const tuitionDiv = document.getElementById("tuitionTableContainer");
+  tuitionDiv.innerHTML = "";
+  const table = document.createElement("table");
+  table.border = "1";
+  table.style.width = "100%";
+
+  const header = table.insertRow();
+  ["Month","Status","Date & Method"].forEach(text=>{
+    const th = document.createElement("th");
+    th.innerText = text;
+    header.appendChild(th);
+  });
+
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   const currentMonth = new Date().getMonth();
-  table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
 
   const tuitionRef = ref(db, `tuition/${studentId}`);
-  onValue(tuitionRef, snapshot=>{
-    const data = snapshot.val() || {};
-    table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
-    for(let i=0;i<=currentMonth;i++){
-      const month = months[i];
-      const row = table.insertRow();
-      row.insertCell().innerText = month;
-      let status = "Unpaid", color="red", dateMethod="";
-      if(data[month]){
-        status = data[month].status;
-        dateMethod = data[month].date ? `${data[month].date} | ${data[month].method}` : "";
-        if(status==="Paid") color="green";
-        if(status==="Break") color="purple";
-      }
-      row.insertCell().innerHTML = `<span style="color:${color}">${status}</span>`;
-      row.insertCell().innerText = dateMethod;
+  const snapshot = await get(tuitionRef);
+  const tuitionData = snapshot.exists() ? snapshot.val() : {};
+
+  for(let i=0;i<=currentMonth;i++){
+    const month = months[i];
+    const row = table.insertRow();
+    row.setAttribute("data-month", month);
+    row.insertCell().innerText = month;
+
+    let status="Unpaid", color="red", dateMethod="";
+    if(tuitionData[month]){
+      status = tuitionData[month].status;
+      dateMethod = tuitionData[month].date ? `${tuitionData[month].date} | ${tuitionData[month].method}` : "";
+      if(status==="Paid") color="green";
+      if(status==="Break") color="purple";
     }
-  });
-}
-
-// Break requests
-const breakContainer = document.getElementById("breakRequestContainer");
-const submitBreakBtn = document.getElementById("submitBreakRequest");
-const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const todayMonth = new Date().getMonth();
-
-for(let i=todayMonth+1;i<12;i++){
-  const month = months[i];
-  const checkbox = document.createElement("input");
-  checkbox.type="checkbox";
-  checkbox.id=month;
-  const label = document.createElement("label");
-  label.htmlFor=month;
-  label.innerText = month;
-  breakContainer.appendChild(checkbox);
-  breakContainer.appendChild(label);
-  breakContainer.appendChild(document.createElement("br"));
-}
-
-submitBreakBtn.addEventListener("click", async ()=>{
-  const selected = [];
-  months.forEach((month,i)=>{
-    if(i>todayMonth){
-      const cb = document.getElementById(month);
-      if(cb.checked) selected.push(month);
-    }
-  });
-  for(const month of selected){
-    await set(ref(db, `breakRequests/${studentId}/${month}`), true);
+    row.insertCell().innerHTML = `<span style="color:${color}">${status}</span>`;
+    row.insertCell().innerText = dateMethod;
   }
-  alert("Break request submitted!");
-});
 
-loadProfile();
-loadTuition();
+  tuitionDiv.appendChild(table);
+
+  // Real-time update listener
+  onChildChanged(tuitionRef, (snap)=>{
+    const month = snap.key;
+    const data = snap.val();
+    const row = table.querySelector(`tr[data-month="${month}"]`);
+    if(row){
+      row.cells[1].innerHTML = `<span style="color:${data.status==="Paid"?"green":data.status==="Break"?"purple":"red"}">${data.status}</span>`;
+      row.cells[2].innerText = data.date ? `${data.date} | ${data.method}` : "";
+    }
+  });
+}
+
+// ------------------ Load Break Requests ------------------
+async function loadBreakRequest(studentId){
+  const breakDiv = document.getElementById("breakRequestContainer");
+  breakDiv.innerHTML = "";
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const currentMonth = new Date().getMonth();
+
+  for(let i=currentMonth+1;i<12;i++){ // only upcoming months
+    const month = months[i];
+    const btn = document.createElement("button");
+    btn.innerText = `Request Break: ${month}`;
+    btn.addEventListener("click", async ()=>{
+      await push(ref(db, `breakRequests/${studentId}`), month);
+      alert(`Break requested for ${month}`);
+    });
+    breakDiv.appendChild(btn);
+  }
+}
+
+// ------------------ Initialize Panel ------------------
+window.initStudentPanel = (studentId) => {
+  loadProfile(studentId);
+  loadTuition(studentId);
+  loadBreakRequest(studentId);
+};

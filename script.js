@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -14,95 +13,72 @@ const firebaseConfig = {
   measurementId: "G-Q7MCGKTYMX"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
 
-// Wait for DOM to load
-window.addEventListener("DOMContentLoaded", () => {
+// ------------------ Toggle Registration Form ------------------
+document.getElementById("registerBtn").addEventListener("click", () => {
+  document.getElementById("registrationForm").style.display = "block";
+});
 
-  const loginBtn = document.getElementById("loginBtn");
-  const registrationBtn = document.getElementById("registrationBtn");
-  const submitRegistration = document.getElementById("submitRegistration");
-  const registrationForm = document.getElementById("registrationForm");
+// ------------------ Submit Registration ------------------
+document.getElementById("submitRegistration").addEventListener("click", async () => {
+  const name = document.getElementById("regName").value;
+  const cls = document.getElementById("regClass").value;
+  const roll = document.getElementById("regRoll").value;
+  const whatsapp = document.getElementById("regWhatsapp").value;
+  const pass = document.getElementById("regPassword").value;
+  const confirm = document.getElementById("regConfirmPassword").value;
 
-  // Login button
-  loginBtn.addEventListener("click", async () => {
-    const userInput = document.getElementById("userId").value.trim();
-    const password = document.getElementById("password").value.trim();
+  if(pass !== confirm){
+    alert("Passwords do not match!");
+    return;
+  }
 
-    const adminEmail = "theacademiccare2025@gmail.com";
+  const year = new Date().getFullYear();
+  const studentId = `S${year}${cls}${roll}`;
 
-    // Admin login
-    if(userInput === adminEmail){
-      try{
-        const userCredential = await signInWithEmailAndPassword(auth, adminEmail, password);
-        localStorage.setItem("adminUid", userCredential.user.uid);
-        window.location.href = "adminPanel.html";
-      }catch(error){
-        alert("Admin login failed: " + error.message);
-      }
+  // Save to Firebase Realtime DB
+  await set(ref(db, `registrations/${studentId}`), {
+    name, class: cls, roll, whatsapp, password: pass, approved:false
+  });
+
+  alert(`Registration successful! Your Student ID: ${studentId}`);
+  document.getElementById("registrationForm").reset();
+});
+
+// ------------------ Login ------------------
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const userId = document.getElementById("userId").value;
+  const password = document.getElementById("password").value;
+
+  // Admin login
+  if(userId === "theacademiccare2025@gmail.com"){
+    try {
+      await signInWithEmailAndPassword(auth, userId, password);
+      window.location.href="adminPanel.html";
+    } catch(e){
+      alert("Admin login failed: " + e.message);
+    }
+    return;
+  }
+
+  // Student login
+  const snapshot = await get(ref(db, `registrations/${userId}`));
+  if(snapshot.exists()){
+    const student = snapshot.val();
+    if(!student.approved){
+      alert("Your registration is not approved yet.");
       return;
     }
-
-    // Student login
-    try{
-      const snapshot = await get(ref(db, `registrations/${userInput}`));
-      if(!snapshot.exists()){
-        alert("Student ID not found!");
-        return;
-      }
-      const studentData = snapshot.val();
-      if(!studentData.approved){
-        alert("Your registration is not approved yet.");
-        return;
-      }
-      if(studentData.password !== password){
-        alert("Password is incorrect!");
-        return;
-      }
-      localStorage.setItem("studentId", userInput);
-      window.location.href = "studentPanel.html";
-    }catch(error){
-      alert("Student login failed: " + error.message);
-    }
-  });
-
-  // Toggle Registration Form
-  registrationBtn.addEventListener("click", () => {
-    registrationForm.style.display = registrationForm.style.display === "none" ? "block" : "none";
-  });
-
-  // Submit Registration
-  submitRegistration.addEventListener("click", async () => {
-    const name = document.getElementById("regName").value.trim();
-    const classNum = document.getElementById("regClass").value.trim();
-    const roll = document.getElementById("regRoll").value.trim();
-    const whatsapp = document.getElementById("regWhatsApp").value.trim();
-    const password = document.getElementById("regPassword").value.trim();
-    const confirmPassword = document.getElementById("regConfirmPassword").value.trim();
-
-    if(password !== confirmPassword){
-      alert("Passwords do not match!");
+    if(student.password !== password){
+      alert("Incorrect password!");
       return;
     }
-
-    const year = new Date().getFullYear();
-    const studentId = `S${year}${classNum}${roll}`;
-
-    await set(ref(db, `registrations/${studentId}`), {
-      name,
-      class: parseInt(classNum),
-      roll,
-      whatsapp,
-      password,
-      approved: false
-    });
-
-    alert("Registration submitted! Your Student ID is: " + studentId);
-    registrationForm.reset();
-    registrationForm.style.display = "none";
-  });
-
+    localStorage.setItem("studentId", userId);
+    window.location.href="studentPanel.html";
+  } else {
+    alert("Student ID not found!");
+  }
 });
