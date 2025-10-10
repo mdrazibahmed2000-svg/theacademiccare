@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Academic Care — Student Panel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="title-line">The Academic Care</div>
+    <div class="year-line">Academic Year 2025</div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Student Panel</h2>
+
+      <div class="row" style="gap:12px;">
+        <div>
+          <label>Student ID</label>
+          <input id="student-id" placeholder="e.g. S20251015">
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="student-pass" type="password">
+        </div>
+        <div style="align-self:end;">
+          <button id="student-signin" class="btn">Sign In</button>
+          <button id="student-signout" class="btn ghost hidden">Sign Out</button>
+        </div>
+      </div>
+
+      <div id="student-areas" class="hidden">
+        <nav class="tabs student-nav">
+          <button class="tab active" data-target="s-home">Home</button>
+          <button class="tab" data-target="s-profile">My Profile</button>
+          <button class="tab" data-target="s-tuition">Tuition Fee Status</button>
+          <button class="tab" data-target="s-break">Break Request</button>
+        </nav>
+
+        <div id="s-home" class="student-content">Welcome student. Use tabs to view your info.</div>
+
+        <div id="s-profile" class="student-content hidden">
+          <h4>My Profile</h4>
+          <div id="profile-area"></div>
+        </div>
+
+        <div id="s-tuition" class="student-content hidden">
+          <h4>Tuition Fee Status (up to current month)</h4>
+          <div id="tuition-area"></div>
+        </div>
+
+        <div id="s-break" class="student-content hidden">
+          <h4>Break Request (upcoming months)</h4>
+          <div id="break-area"></div>
+          <button id="send-break" class="btn">Submit Break Request</button>
+          <div id="break-result" class="result"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="site-footer"><small>Student — The Academic Care</small></footer>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

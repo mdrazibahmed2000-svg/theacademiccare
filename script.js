@@ -1,16 +1,14 @@
-// script.js (module)
+// script.js (module) — shared by index.html, admin.html, student.html
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import {
   getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-  sendPasswordResetEmail
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 import {
-  getDatabase, ref, set, push, child, get, onValue, update, remove
+  getDatabase, ref, set, push, get, onValue, update, remove
 } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-/* -----------------------
-  Firebase config (from you)
--------------------------*/
+/* ---------------- CONFIG ---------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -22,516 +20,431 @@ const firebaseConfig = {
   measurementId: "G-Q7MCGKTYMX"
 };
 
+const ACADEMIC_YEAR = 2025;
+const ADMIN_EMAIL = "theacademiccare2025@gmail.com";
+const WA_ADMIN_NUMBER = ""; // set +8801... if you want direct WA to admin
+
+/* ---------------- INIT ---------------- */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
-
-/* ---------- App constants ---------- */
-const ACADEMIC_YEAR = 2025; // fixed per your spec
-const ADMIN_UID = "xg4XNMsSJqbXMZ57qicrpgfM6Yn1"; // you provided earlier (not used directly here)
-const WA_ADMIN_NUMBER = ""; // optionally put admin whatsapp number like +8801XXXXXXXXX
-
-/* ---------- helpers ---------- */
-const $ = id => document.getElementById(id);
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
-function nowYear() { return ACADEMIC_YEAR; }
-function currentMonthIndex() { return new Date().getMonth(); } // 0-based
-function formatDate(ts = Date.now()){ const d=new Date(ts); return d.toLocaleDateString();}
+function $(id){ return document.getElementById(id); }
+function nowDate(){ return Date.now(); }
+function formatDate(ts){ return new Date(ts).toLocaleDateString(); }
+function currentMonthIndex(){ return new Date().getMonth(); }
 
-/* ---------- UI references ---------- */
-const identifier = $('identifier');
-const adminEmailRow = $('admin-email-row');
-const adminEmail = $('admin-email');
-const password = $('password');
-const loginBtn = $('login-btn');
-const resetWA = $('reset-wa');
+/* ---------------- PAGE DETECTION ---------------- */
+const isIndex = !!document.querySelector('.auth-card') && !!document.querySelector('.register-card');
+const isAdminPage = !!document.querySelector('.admin-top');
+const isStudentPage = !!document.querySelector('#student-id');
 
-const submitRegistration = $('submit-registration');
-const regResult = $('reg-result');
+/* ---------------- INDEX PAGE LOGIC ---------------- */
+if(isIndex){
+  // elements
+  const idInput = $('login-identifier');
+  const passInput = $('login-password');
+  const btnLogin = $('btn-login');
+  const btnOpenAdmin = $('btn-open-admin');
+  const btnResetWA = $('btn-reset-wa');
 
-const regName = $('reg-name');
-const regClass = $('reg-class');
-const regRoll = $('reg-roll');
-const regWhatsapp = $('reg-whatsapp');
-const regPass = $('reg-pass');
-const regPassConfirm = $('reg-pass-confirm');
+  const regName = $('reg-name');
+  const regClass = $('reg-class');
+  const regRoll = $('reg-roll');
+  const regWa = $('reg-wa');
+  const regPass = $('reg-pass');
+  const regPassc = $('reg-passc');
+  const btnRegister = $('btn-register');
+  const regResult = $('reg-result');
 
-const authSection = $('auth-section');
-const appSection = $('app-section');
+  btnLogin.addEventListener('click', async ()=>{
+    const idv = idInput.value.trim();
+    const pass = passInput.value;
+    if(!idv || !pass){ alert('Provide identifier and password'); return; }
 
-const tabs = document.querySelectorAll('.tab-btn');
-const tabContents = document.querySelectorAll('.tab-content');
+    // If email-like, treat as admin or email-based sign-in
+    if(idv === ADMIN_EMAIL || idv.includes('@')){
+      // Attempt sign-in with given email
+      try{
+        await signInWithEmailAndPassword(auth, idv, pass);
+        // If admin email -> open admin panel
+        if(idv === ADMIN_EMAIL){
+          window.location.href = 'admin.html';
+        } else {
+          // other emails open student panel (fallback)
+          window.location.href = 'student.html';
+        }
+      }catch(err){
+        alert('Sign-in failed: '+err.message);
+      }
+      return;
+    }
 
-const adminPanel = $('admin-panel');
-const studentPanel = $('student-panel');
-const welcomeText = $('welcome-text');
+    // else treat as Student ID (S2025...)
+    const studentId = idv.toUpperCase();
+    const studentEmail = `${studentId}@student.theacademiccare`;
+    try{
+      await signInWithEmailAndPassword(auth, studentEmail, pass);
+      // store studentId locally and open student panel
+      localStorage.setItem('studentId', studentId);
+      window.location.href = 'student.html';
+    }catch(err){
+      alert('Student sign-in failed: '+err.message + '\n\nNote: if your account was not created in Authentication yet, wait for admin approval.');
+    }
+  });
 
-/* Admin UI refs */
-const classSubtabs = $('class-subtabs');
-const classList = $('class-list');
-const tuitionModal = $('tuition-modal');
-const tuitionModalTitle = $('tuition-modal-title');
-const tuitionTableWrap = $('tuition-table-wrap');
-const closeTuition = $('close-tuition');
+  btnOpenAdmin.addEventListener('click', ()=> window.open('admin.html','_blank'));
 
-const registrationRequests = $('registration-requests');
-const adminBreakRequests = $('admin-break-requests');
+  btnResetWA.addEventListener('click', ()=>{
+    const idval = idInput.value.trim() || 'MyStudentID';
+    const message = encodeURIComponent(`Hello Admin, I (${idval}) forgot my password. Please help to reset. My WhatsApp number: __________`);
+    const waUrl = WA_ADMIN_NUMBER ? `https://wa.me/${WA_ADMIN_NUMBER}?text=${message}` : `https://wa.me/?text=${message}`;
+    window.open(waUrl,'_blank');
+  });
 
-/* Student UI refs */
-const profileInfo = $('profile-info');
-const studentTuitionTable = $('student-tuition-table');
-const studentBreakList = $('student-break-list');
-const breakResult = $('break-result');
-const submitBreakRequestBtn = $('submit-break-request');
+  btnRegister.addEventListener('click', async ()=>{
+    const name = regName.value.trim();
+    const cls = regClass.value.trim();
+    const roll = regRoll.value.trim();
+    const wa = regWa.value.trim();
+    const p1 = regPass.value;
+    const p2 = regPassc.value;
+    if(!name || !cls || !roll || !wa || !p1 || !p2){ regResult.innerText = 'Fill all fields'; return; }
+    if(p1 !== p2){ regResult.innerText = 'Passwords do not match'; return; }
+    const classP = cls.toString().padStart(2,'0');
+    const rollP = roll.toString().padStart(2,'0');
+    const studentId = `S${ACADEMIC_YEAR}${classP}${rollP}`;
+    // save registration
+    await set(ref(db, `registrations/${studentId}`), {
+      studentId, name, class: cls, roll, whatsapp: wa, password: p1, status:'pending', createdAt: nowDate()
+    });
+    regResult.innerText = `Submitted. Your temporary student ID: ${studentId}. Wait for admin approval.`;
+    // clear
+    regName.value=''; regClass.value=''; regRoll.value=''; regWa.value=''; regPass.value=''; regPassc.value='';
+  });
+}
 
-/* ---------- Basic interactivity ---------- */
-identifier.addEventListener('input', e=>{
-  const v = e.target.value.trim().toLowerCase();
-  if(v === 'admin'){
-    adminEmailRow.classList.remove('hidden');
-    adminEmail.required = true;
-  } else {
-    adminEmailRow.classList.add('hidden');
-    adminEmail.required = false;
+/* ---------------- ADMIN PAGE LOGIC ---------------- */
+if(isAdminPage){
+  const adminEmailInput = $('admin-email');
+  const adminPassInput = $('admin-pass');
+  const adminSignInBtn = $('admin-signin');
+  const adminSignOutBtn = $('admin-signout');
+  const adminAreas = $('admin-areas');
+
+  const tabs = document.querySelectorAll('.tab');
+  const adminHome = $('admin-home');
+  const adminClass = $('admin-class');
+  const adminReg = $('admin-registration');
+  const adminBreaks = $('admin-breaks');
+
+  const classSubtabs = $('class-subtabs');
+  const classStudents = $('class-students');
+  const registrationList = $('registration-list');
+  const breakRequestList = $('break-request-list');
+
+  function showTab(target){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.admin-content').forEach(c=>c.classList.add('hidden'));
+    const btn = Array.from(tabs).find(t=>t.dataset.target === target);
+    if(btn) btn.classList.add('active');
+    $(target).classList.remove('hidden');
   }
-});
 
-/* Tabs */
-tabs.forEach(t => t.addEventListener('click', (ev)=>{
-  tabs.forEach(x=>x.classList.remove('active'));
-  ev.currentTarget.classList.add('active');
-  const target = ev.currentTarget.dataset.target;
-  tabContents.forEach(c=>c.classList.add('hidden'));
-  $(target).classList.remove('hidden');
-}));
+  tabs.forEach(b=>{
+    b.addEventListener('click', ()=> showTab(b.dataset.target));
+  });
 
-/* Basic auth/login */
-loginBtn.addEventListener('click', async ()=>{
-  const idval = identifier.value.trim();
-  const pass = password.value;
-  if(!idval || !pass){ alert('Provide ID/email and password'); return; }
-
-  if(idval.toLowerCase() === 'admin'){
-    const email = adminEmail.value.trim();
-    if(!email){ alert('Enter admin email'); return;}
-    // admin login using Firebase Auth (email/password)
+  // Sign in admin
+  adminSignInBtn.addEventListener('click', async ()=>{
+    const email = adminEmailInput.value.trim();
+    const pass = adminPassInput.value;
+    if(!email || !pass){ alert('Provide admin email & password'); return; }
     try{
       const cred = await signInWithEmailAndPassword(auth, email, pass);
-      // Show admin panel
-      setupAfterLogin({role:'admin', uid: cred.user.uid, email});
+      // only allow if email matches ADMIN_EMAIL
+      if(email !== ADMIN_EMAIL){
+        alert('Signed in but not admin email. This panel is for admin email only.');
+      }
+      adminSignOutBtn.classList.remove('hidden');
+      adminSignInBtn.classList.add('hidden');
+      adminAreas.classList.remove('hidden');
+      loadAdminFeatures();
     }catch(err){
       alert('Admin sign-in failed: '+err.message);
     }
-  } else {
-    // treat as student id; we use email-based auth where student was created with email = studentId@example.com or stored in DB
-    // This sample approach: we attempt to sign in with student email = studentId + "@student.theacademiccare"
-    // If you register students in auth with real email, you should adapt.
-    const studentId = idval;
-    const studentEmail = `${studentId}@student.theacademiccare`;
+  });
+
+  adminSignOutBtn.addEventListener('click', async ()=>{
+    try{ await signOut(auth); adminSignOutBtn.classList.add('hidden'); adminSignInBtn.classList.remove('hidden'); adminAreas.classList.add('hidden'); }catch(e){console.error(e);}
+  });
+
+  /* ADMIN FEATURES */
+  function loadAdminFeatures(){
+    // build class subtabs 6..12
+    classSubtabs.innerHTML = '';
+    for(let c=6;c<=12;c++){
+      const btn = document.createElement('button');
+      btn.textContent = `Class ${c}`;
+      btn.addEventListener('click', ()=> loadClassStudents(c));
+      classSubtabs.appendChild(btn);
+    }
+
+    // watch registrations
+    const regsRef = ref(db, 'registrations');
+    onValue(regsRef, snap=>{
+      const val = snap.val() || {};
+      renderRegistrations(val);
+    });
+
+    // watch break requests
+    const brRef = ref(db, 'breakRequests');
+    onValue(brRef, snap=>{
+      const val = snap.val() || {};
+      renderBreakRequests(val);
+    });
+  }
+
+  async function loadClassStudents(cls){
+    classStudents.innerHTML = '<div class="small-muted">Loading...</div>';
+    const snap = await get(ref(db, 'students'));
+    const all = snap.exists() ? snap.val() : {};
+    const arr = Object.values(all).filter(s => s.class == cls && s.status === 'approved');
+    if(arr.length === 0){ classStudents.innerHTML = `<div class="small-muted">No approved students in Class ${cls}.</div>`; return; }
+    classStudents.innerHTML = '';
+    arr.forEach(s=>{
+      const div = document.createElement('div');
+      div.className = 'class-item row';
+      div.style.justifyContent = 'space-between';
+      div.innerHTML = `<div><strong>${s.name}</strong><div class="small-muted">${s.studentId} • ${s.whatsapp}</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn small" data-student="${s.studentId}">Tuition</button>
+        </div>`;
+      classStudents.appendChild(div);
+      div.querySelector('button').addEventListener('click', ()=> openTuitionModalAdmin(s.studentId, s.name));
+    });
+  }
+
+  async function renderRegistrations(data){
+    registrationList.innerHTML = '';
+    const keys = Object.keys(data || {});
+    if(keys.length === 0){ registrationList.innerHTML = `<div class="small-muted">No registration requests.</div>`; return; }
+    keys.forEach(k=>{
+      const r = data[k];
+      const el = document.createElement('div');
+      el.className = 'student-row';
+      el.style.justifyContent = 'space-between';
+      el.innerHTML = `<div><strong>${r.name}</strong><div class="small-muted">${r.studentId} • Class ${r.class} • ${r.whatsapp} • ${r.status}</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn small" data-act="approve" data-id="${r.studentId}">Approve</button>
+          <button class="btn small ghost" data-act="deny" data-id="${r.studentId}">Deny</button>
+        </div>`;
+      registrationList.appendChild(el);
+      el.querySelector('[data-act="approve"]').addEventListener('click', ()=> approveRegistration(r));
+      el.querySelector('[data-act="deny"]').addEventListener('click', ()=> denyRegistration(r.studentId));
+    });
+  }
+
+  async function approveRegistration(reg){
+    // create student record
+    const studentObj = {
+      studentId: reg.studentId, name: reg.name, class: reg.class, roll: reg.roll, whatsapp: reg.whatsapp,
+      status: 'approved', createdAt: nowDate()
+    };
+    await set(ref(db, `students/${reg.studentId}`), studentObj);
+    await update(ref(db, `registrations/${reg.studentId}`), { status:'approved', approvedAt: nowDate() });
+    // create auth user for student using pattern studentId@student.theacademiccare
+    const email = `${reg.studentId}@student.theacademiccare`;
     try{
-      const cred = await signInWithEmailAndPassword(auth, studentEmail, pass);
-      // load student profile
-      setupAfterLogin({role:'student', uid: cred.user.uid, studentId});
+      await createUserWithEmailAndPassword(auth, email, reg.password);
+      alert(`Approved and auth user created: ${email}`);
     }catch(err){
-      alert('Student sign-in failed: '+err.message + '\n\nNote: This demo expects students to be created in Firebase Authentication with email format ' + studentEmail + '. Alternatively, adapt sign-in flow to use custom auth or create users programmatically.');
+      // creation might fail if user exists; still approval in DB succeeds.
+      console.warn('Auth creation failed (create using Admin SDK if needed):', err.message);
+      alert('Approved, but could not create Firebase Auth user from client. Use Admin SDK if necessary.');
     }
   }
-});
 
-/* Reset via WhatsApp: creates template message and opens wa.me (no specific number set) */
-resetWA.addEventListener('click', ()=>{
-  const idval = identifier.value.trim();
-  const studentId = idval || 'YourStudentID';
-  const message = encodeURIComponent(`Hello Admin, I (${studentId}) forgot my password. Please reset it for me. My WhatsApp contact: __________`);
-  // if you want to open to a specific number put number after wa.me/, e.g. https://wa.me/8801...
-  const url = WA_ADMIN_NUMBER ? `https://wa.me/${WA_ADMIN_NUMBER}?text=${message}` : `https://wa.me/?text=${message}`;
-  window.open(url,'_blank');
-});
-
-/* ------------------ Registration flow ------------------ */
-submitRegistration.addEventListener('click', async ()=>{
-  const name = regName.value.trim();
-  const cls = regClass.value.trim();
-  const roll = regRoll.value.trim();
-  const wa = regWhatsapp.value.trim();
-  const pass = regPass.value;
-  const passc = regPassConfirm.value;
-
-  if(!name || !cls || !roll || !wa || !pass || !passc) { regResult.innerText = 'Fill all fields'; return; }
-  if(pass !== passc){ regResult.innerText = 'Passwords do not match'; return; }
-
-  // generate student id: S[Year][Class][Roll] (class and roll padded)
-  const classP = cls.toString().padStart(2,'0');
-  const rollP = roll.toString().padStart(2,'0');
-  const studentId = `S${nowYear()}${classP}${rollP}`;
-
-  // create a registration request entry
-  const regRef = ref(db, `registrations/${studentId}`);
-  const regObj = {
-    studentId,
-    name,
-    class: cls,
-    roll,
-    whatsapp: wa,
-    password: pass,
-    status: 'pending',
-    createdAt: Date.now()
-  };
-  await set(regRef, regObj);
-  regResult.innerText = `Registration submitted. Your temporary Student ID: ${studentId}. Wait for admin approval.`;
-  // Clear fields (optional)
-  regName.value=''; regClass.value=''; regRoll.value=''; regWhatsapp.value=''; regPass.value=''; regPassConfirm.value='';
-});
-
-/* ------------------ After login setup ------------------ */
-async function setupAfterLogin(session){
-  authSection.classList.add('hidden');
-  appSection.classList.remove('hidden');
-
-  if(session.role === 'admin'){
-    welcomeText.innerText = 'Welcome Admin';
-    adminPanel.classList.remove('hidden');
-    studentPanel.classList.add('hidden');
-    loadAdminPanel();
-  } else {
-    welcomeText.innerText = `Welcome ${session.studentId}`;
-    adminPanel.classList.add('hidden');
-    studentPanel.classList.remove('hidden');
-    loadStudentPanel(session.studentId);
-  }
-}
-
-/* ------------------ ADMIN: load panel ------------------ */
-function loadAdminPanel(){
-  // build class subtabs for 6..12
-  classSubtabs.innerHTML = '';
-  for(let c=6;c<=12;c++){
-    const btn = document.createElement('button');
-    btn.textContent = `Class ${c}`;
-    btn.addEventListener('click', ()=> loadClassList(c));
-    classSubtabs.appendChild(btn);
+  async function denyRegistration(studentId){
+    await update(ref(db, `registrations/${studentId}`), { status:'denied', deniedAt: nowDate() });
+    alert('Registration denied.');
   }
 
-  // watch registration requests
-  const regRef = ref(db, 'registrations');
-  onValue(regRef, snap=>{
-    const val = snap.val() || {};
-    renderRegistrationRequests(val);
-  });
-
-  // watch break requests
-  const brRef = ref(db, 'breakRequests');
-  onValue(brRef, snap=>{
-    const val = snap.val() || {};
-    renderAdminBreakRequests(val);
-  });
-
-  // admin tabs behavior
-  document.querySelectorAll('.admin-tab').forEach(b=>{
-    b.addEventListener('click', ev=>{
-      document.querySelectorAll('.admin-content').forEach(c=>c.classList.add('hidden'));
-      const target = ev.currentTarget.dataset.adminTarget;
-      $(target).classList.remove('hidden');
-    });
-  });
-
-  // show admin home by default
-  document.querySelector('[data-admin-target="admin-home"]').click();
-}
-
-/* load students for class */
-async function loadClassList(cls){
-  classList.innerHTML = `<div class="small-muted">Loading Class ${cls} ...</div>`;
-  const studentsRef = ref(db, 'students');
-  const snap = await get(studentsRef);
-  const all = snap.exists() ? snap.val() : {};
-  // filter by class
-  const arr = Object.values(all).filter(s => s.class == cls && s.status === 'approved');
-  if(arr.length === 0){ classList.innerHTML = `<div class="small-muted">No approved students in Class ${cls}.</div>`; return; }
-
-  classList.innerHTML = '';
-  arr.forEach(s=>{
-    const row = document.createElement('div');
-    row.className = 'student-row';
-    row.innerHTML = `<div><strong>${s.name}</strong><div class="small-muted">${s.studentId} • ${s.whatsapp}</div></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="icon-btn" title="Manage tuition" data-student="${s.studentId}">Tuition</button>
-      </div>`;
-    classList.appendChild(row);
-    row.querySelector('button[data-student]').addEventListener('click', ()=> openTuitionModal(s.studentId, s.name, s.class));
-  });
-}
-
-/* tuition modal */
-async function openTuitionModal(studentId, name, cls){
-  tuitionModalTitle.innerText = `${name} (${studentId}) — Tuition (${ACADEMIC_YEAR})`;
-  tuitionTableWrap.innerHTML = '<div class="small-muted">Loading...</div>';
-  tuitionModal.classList.remove('hidden');
-
-  // Build months up to current month (0-index)
-  const upto = currentMonthIndex();
-  const table = document.createElement('table');
-  table.className = 'table';
-  table.innerHTML = `<thead><tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr></thead>`;
-  const tbody = document.createElement('tbody');
-
-  // fetch current tuition data snapshot for student
-  const tRef = ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}`);
-  const snap = await get(tRef);
-  const tuitionData = snap.exists() ? snap.val() : {};
-
-  for(let m = 0; m<=upto; m++){
-    const row = document.createElement('tr');
-    const monthName = months[m];
-    const monthKey = `m${m+1}`;
-    const data = tuitionData && tuitionData[monthKey] ? tuitionData[monthKey] : null;
-    let statusHtml = `<span class="status-pill unpaid">Unpaid</span>`;
-    let dm = '-';
-    let actions = `<button class="btn small" data-action="mark-paid" data-month="${m}">Mark Paid</button>
-                   <button class="btn small ghost" data-action="mark-break" data-month="${m}">Mark Break</button>`;
-    if(data){
-      if(data.status === 'Paid'){
-        statusHtml = `<span class="status-pill paid">Paid</span>`;
-        dm = `${formatDate(data.date)} • ${data.method || '-'}`;
-        actions = `<button class="btn small ghost" data-action="undo" data-month="${m}">Undo</button>`;
-      } else if(data.status === 'Break'){
-        statusHtml = `<span class="status-pill break">Break</span>`;
-        dm = `${formatDate(data.date)} • ${data.method || '-'}`;
-        actions = `<button class="btn small ghost" data-action="undo" data-month="${m}">Undo</button>`;
+  /* Break Requests */
+  function renderBreakRequests(data){
+    breakRequestList.innerHTML = '';
+    const items = [];
+    for(const sid in data){
+      const reqs = data[sid];
+      for(const rid in reqs){
+        const r = reqs[rid];
+        r.studentId = sid; r.requestId = rid;
+        items.push(r);
       }
     }
-
-    row.innerHTML = `<td>${monthName}</td><td>${statusHtml}</td><td>${dm}</td><td>${actions}</td>`;
-    tbody.appendChild(row);
+    if(items.length === 0){ breakRequestList.innerHTML = `<div class="small-muted">No break requests.</div>`; return; }
+    items.forEach(r=>{
+      const el = document.createElement('div');
+      el.className = 'student-row';
+      el.style.justifyContent = 'space-between';
+      el.innerHTML = `<div><strong>${r.studentId}</strong><div class="small-muted">${r.months.map(m=>months[m]).join(', ')} • ${r.status}</div></div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn small" data-act="approve" data-s="${r.studentId}" data-r="${r.requestId}">Approve</button>
+          <button class="btn small ghost" data-act="deny" data-s="${r.studentId}" data-r="${r.requestId}">Deny</button>
+        </div>`;
+      breakRequestList.appendChild(el);
+      el.querySelector('[data-act="approve"]').addEventListener('click', ()=> adminApproveBreak(r.studentId, r.requestId, r.months));
+      el.querySelector('[data-act="deny"]').addEventListener('click', ()=> adminDenyBreak(r.studentId, r.requestId));
+    });
   }
-  table.appendChild(tbody);
-  tuitionTableWrap.innerHTML = '';
-  tuitionTableWrap.appendChild(table);
 
-  // attach listeners for action buttons
-  tuitionTableWrap.querySelectorAll('button').forEach(btn=>{
-    btn.addEventListener('click', async (ev)=>{
-      const action = btn.dataset.action;
-      const month = parseInt(btn.dataset.month);
-      if(action === 'mark-paid'){
-        const method = prompt('Enter payment method (e.g. bKash tx id, cash):','Cash');
-        if(method === null) return;
-        const obj = { status:'Paid', date:Date.now(), method, actionBy:'admin' };
-        await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${month+1}`), obj);
-        alert('Marked Paid.');
-        openTuitionModal(studentId,name,cls);
-      } else if(action === 'mark-break'){
-        const obj = { status:'Break', date:Date.now(), method:'-', actionBy:'admin' };
-        await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${month+1}`), obj);
-        alert('Marked Break.');
-        openTuitionModal(studentId,name,cls);
-      } else if(action === 'undo'){
-        // undo means remove that month entry
-        await remove(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${month+1}`));
-        alert('Undo performed.');
-        openTuitionModal(studentId,name,cls);
+  async function adminApproveBreak(studentId, requestId, monthsArr){
+    for(const m of monthsArr){
+      await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${m+1}`), { status:'Break', date: nowDate(), method: '-', actionBy:'admin' });
+    }
+    await update(ref(db, `breakRequests/${studentId}/${requestId}`), { status:'approved', actionAt: nowDate() });
+    alert('Break approved & applied.');
+  }
+
+  async function adminDenyBreak(studentId, requestId){
+    await update(ref(db, `breakRequests/${studentId}/${requestId}`), { status:'denied', actionAt: nowDate() });
+    alert('Break request denied.');
+  }
+
+  /* Tuition modal (simple prompt-based) */
+  function openTuitionModalAdmin(studentId, name){
+    (async ()=>{
+      const upto = currentMonthIndex();
+      const snap = await get(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}`));
+      const data = snap.exists() ? snap.val() : {};
+      let table = `Month | Status | Date & Method\n------------------------------\n`;
+      for(let m=0;m<=upto;m++){
+        const key = `m${m+1}`;
+        const d = data && data[key] ? data[key] : null;
+        const status = d ? d.status : 'Unpaid';
+        const dm = d ? `${formatDate(d.date)} • ${d.method || '-'}` : '-';
+        table += `${months[m]} | ${status} | ${dm}\n`;
       }
-    });
-  });
-}
-
-closeTuition.addEventListener('click', ()=> tuitionModal.classList.add('hidden'));
-
-/* Registration requests rendering */
-function renderRegistrationRequests(data){
-  registrationRequests.innerHTML = '';
-  const keys = Object.keys(data || {});
-  if(keys.length === 0){ registrationRequests.innerHTML = `<div class="small-muted">No registration requests.</div>`; return; }
-  keys.forEach(k=>{
-    const r = data[k];
-    const row = document.createElement('div');
-    row.className = 'student-row';
-    row.innerHTML = `<div><strong>${r.name}</strong><div class="small-muted">${r.studentId} • Class ${r.class} • ${r.whatsapp}</div></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn small" data-action="approve" data-id="${r.studentId}">Approve</button>
-        <button class="btn small ghost" data-action="deny" data-id="${r.studentId}">Deny</button>
-      </div>`;
-    registrationRequests.appendChild(row);
-    row.querySelector('[data-action="approve"]').addEventListener('click', ()=> approveRegistration(r));
-    row.querySelector('[data-action="deny"]').addEventListener('click', ()=> denyRegistration(r.studentId));
-  });
-}
-
-async function approveRegistration(reg){
-  // create in /students and mark registration status approved
-  const studentObj = {
-    studentId: reg.studentId,
-    name: reg.name,
-    class: reg.class,
-    roll: reg.roll,
-    whatsapp: reg.whatsapp,
-    status: 'approved',
-    createdAt: Date.now()
-  };
-  await set(ref(db, `students/${reg.studentId}`), studentObj);
-  await update(ref(db, `registrations/${reg.studentId}`), { status:'approved', approvedAt:Date.now() });
-
-  // Optionally create auth user for student with email studentId@student.theacademiccare (demo)
-  const email = `${reg.studentId}@student.theacademiccare`;
-  try{
-    await createUserWithEmailAndPassword(auth, email, reg.password);
-    alert(`Approved and auth user created: ${email}`);
-  }catch(e){
-    // creation may fail if you prefer to create via admin SDK; still registration approved in DB
-    console.warn('Could not create auth user (create via Admin SDK if needed):', e.message);
-    alert(`Approved. (Note: create student auth user via Admin SDK or adjust flow.)`);
+      const action = prompt(`Tuition for ${name} (${studentId})\n\n${table}\n\nActions:\n1 = Mark Paid\n2 = Mark Break\n3 = Undo\n\nEnter: action,monthIndex(1-12),e.g. "1,4" to mark April paid`, '');
+      if(!action) return;
+      const parts = action.split(',').map(s=>s.trim());
+      const act = parts[0];
+      const mnum = parseInt(parts[1]);
+      if(!mnum || mnum<1 || mnum>12){ alert('Invalid month'); return; }
+      if(act === '1'){
+        const method = prompt('Payment method (e.g. Cash, bKash tx id):','Cash');
+        await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${mnum}`), { status:'Paid', date: nowDate(), method, actionBy:'admin' });
+        alert('Marked Paid');
+      } else if(act === '2'){
+        await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${mnum}`), { status:'Break', date: nowDate(), method:'-', actionBy:'admin' });
+        alert('Marked Break');
+      } else if(act === '3'){
+        await remove(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${mnum}`));
+        alert('Undo performed');
+      } else {
+        alert('Unknown action');
+      }
+    })();
   }
 }
 
-async function denyRegistration(studentId){
-  await update(ref(db, `registrations/${studentId}`), { status:'denied', deniedAt:Date.now() });
-  alert('Registration denied.');
-}
+/* ---------------- STUDENT PAGE LOGIC ---------------- */
+if(isStudentPage){
+  const sidInput = $('student-id');
+  const spassInput = $('student-pass');
+  const sSignIn = $('student-signin');
+  const sSignOut = $('student-signout');
+  const sAreas = $('student-areas');
 
-/* Admin break requests */
-function renderAdminBreakRequests(data){
-  adminBreakRequests.innerHTML = '';
-  // data is expected shape: { studentId: { requestId: { months: [..], status: 'pending', createdAt:... } } }
-  const list = [];
-  for(const sid in data){
-    const reqs = data[sid];
-    for(const rid in reqs){
-      const r = reqs[rid];
-      r.studentId = sid;
-      r.requestId = rid;
-      list.push(r);
+  const tabs = document.querySelectorAll('.tab');
+  const profileArea = $('profile-area');
+  const tuitionArea = $('tuition-area');
+  const breakArea = $('break-area');
+  const sendBreakBtn = $('send-break');
+  const breakResult = $('break-result');
+
+  function showTab(target){
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.student-content').forEach(c=>c.classList.add('hidden'));
+    const btn = Array.from(tabs).find(t=>t.dataset.target === target);
+    if(btn) btn.classList.add('active');
+    $(target).classList.remove('hidden');
+  }
+  tabs.forEach(b=> b.addEventListener('click', ()=> showTab(b.dataset.target)) );
+
+  sSignIn.addEventListener('click', async ()=>{
+    const sid = sidInput.value.trim().toUpperCase();
+    const pass = spassInput.value;
+    if(!sid || !pass){ alert('Provide Student ID and password'); return; }
+    const email = `${sid}@student.theacademiccare`;
+    try{
+      await signInWithEmailAndPassword(auth, email, pass);
+      localStorage.setItem('studentId', sid);
+      sSignOut.classList.remove('hidden'); sSignIn.classList.add('hidden'); sAreas.classList.remove('hidden');
+      loadStudentArea(sid);
+    }catch(err){
+      alert('Student sign-in failed: '+err.message);
     }
-  }
-  if(list.length === 0){ adminBreakRequests.innerHTML = `<div class="small-muted">No break requests.</div>`; return; }
-  adminBreakRequests.innerHTML = '';
-  list.forEach(r=>{
-    const el = document.createElement('div');
-    el.className = 'student-row';
-    el.innerHTML = `<div><strong>${r.studentId}</strong><div class="small-muted">${r.months.map(m=>months[m]).join(', ')}</div></div>
-      <div style="display:flex;gap:8px">
-        <button class="btn small" data-act="approve" data-s="${r.studentId}" data-r="${r.requestId}">Approve</button>
-        <button class="btn small ghost" data-act="deny" data-s="${r.studentId}" data-r="${r.requestId}">Deny</button>
-      </div>`;
-    adminBreakRequests.appendChild(el);
-    el.querySelector('[data-act="approve"]').addEventListener('click', ()=> adminApproveBreak(r.studentId, r.requestId, r.months));
-    el.querySelector('[data-act="deny"]').addEventListener('click', ()=> adminDenyBreak(r.studentId, r.requestId));
-  });
-}
-
-async function adminApproveBreak(studentId, requestId, monthsArr){
-  // mark those months as Break in tuition
-  for(const m of monthsArr){
-    await set(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}/m${m+1}`), { status:'Break', date:Date.now(), method:'-', actionBy:'admin' });
-  }
-  await update(ref(db, `breakRequests/${studentId}/${requestId}`), { status:'approved', actionAt:Date.now() });
-  alert('Break approved & applied.');
-}
-
-async function adminDenyBreak(studentId, requestId){
-  await update(ref(db, `breakRequests/${studentId}/${requestId}`), { status:'denied', actionAt:Date.now() });
-  alert('Break request denied.');
-}
-
-/* ------------------ STUDENT panel ------------------ */
-async function loadStudentPanel(studentId){
-  // fetch profile
-  const profSnap = await get(ref(db, `students/${studentId}`));
-  if(!profSnap.exists()){ profileInfo.innerHTML = `<div class="small-muted">Profile not found or not approved yet.</div>`; return; }
-  const prof = profSnap.val();
-  profileInfo.innerHTML = `<p><strong>${prof.name}</strong></p>
-    <p>Student ID: ${prof.studentId}</p>
-    <p>Class: ${prof.class}</p>
-    <p>Roll: ${prof.roll}</p>
-    <p>WhatsApp: ${prof.whatsapp}</p>`;
-
-  // student tabs behavior
-  document.querySelectorAll('.student-tab').forEach(b=>{
-    b.addEventListener('click',(ev)=>{
-      document.querySelectorAll('.student-content').forEach(c=>c.classList.add('hidden'));
-      const target = ev.currentTarget.dataset.studentTarget;
-      $(target).classList.remove('hidden');
-    });
   });
 
-  // default student-home
-  document.querySelector('[data-student-target="student-home"]').click();
+  sSignOut.addEventListener('click', async ()=>{
+    try{ await signOut(auth); sSignOut.classList.add('hidden'); sSignIn.classList.remove('hidden'); sAreas.classList.add('hidden'); }catch(e){console.error(e);}
+  });
 
-  // build tuition status table (up to current month)
-  renderStudentTuition(studentId);
+  async function loadStudentArea(studentId){
+    // profile
+    const snap = await get(ref(db, `students/${studentId}`));
+    if(!snap.exists()){ profileArea.innerHTML = `<div class="small-muted">Profile not found or not yet approved.</div>`; return; }
+    const p = snap.val();
+    profileArea.innerHTML = `<p><strong>${p.name}</strong></p>
+      <p>Student ID: ${p.studentId}</p>
+      <p>Class: ${p.class}</p>
+      <p>Roll: ${p.roll}</p>
+      <p>WhatsApp: ${p.whatsapp}</p>`;
 
-  // build break request UI (upcoming months)
-  renderStudentBreakUI(studentId);
-}
-
-/* Render student's tuition up to current month */
-async function renderStudentTuition(studentId){
-  const upto = currentMonthIndex();
-  const tSnap = await get(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}`));
-  const data = tSnap.exists() ? tSnap.val() : {};
-
-  const table = document.createElement('table');
-  table.className = 'table';
-  table.innerHTML = `<thead><tr><th>Month</th><th>Status</th><th>Date & Method</th></tr></thead>`;
-  const tbody = document.createElement('tbody');
-  for(let m=0;m<=upto;m++){
-    const monthKey = `m${m+1}`;
-    const d = data && data[monthKey] ? data[monthKey] : null;
-    let status = `<span class="status-pill unpaid">Unpaid</span>`;
-    let dm = '-';
-    if(d){
-      if(d.status === 'Paid'){ status = `<span class="status-pill paid">Paid</span>`; dm = `${formatDate(d.date)} • ${d.method}`;}
-      else if(d.status === 'Break'){ status = `<span class="status-pill break">Break</span>`; dm = `${formatDate(d.date)} • ${d.method}`; }
+    // tuition (up to current month)
+    const upto = currentMonthIndex();
+    const tsnap = await get(ref(db, `tuition/${studentId}/${ACADEMIC_YEAR}`));
+    const tdata = tsnap.exists() ? tsnap.val() : {};
+    let html = `<table class="table"><thead><tr><th>Month</th><th>Status</th><th>Date & Method</th></tr></thead><tbody>`;
+    for(let m=0;m<=upto;m++){
+      const k = `m${m+1}`;
+      const d = tdata && tdata[k] ? tdata[k] : null;
+      let shtml = `<span class="status-pill unpaid">Unpaid</span>`, dm='-';
+      if(d){
+        if(d.status === 'Paid'){ shtml = `<span class="status-pill paid">Paid</span>`; dm = `${formatDate(d.date)} • ${d.method}`;}
+        else if(d.status === 'Break'){ shtml = `<span class="status-pill break">Break</span>`; dm = `${formatDate(d.date)} • ${d.method}`;}
+      }
+      html += `<tr><td>${months[m]}</td><td>${shtml}</td><td>${dm}</td></tr>`;
     }
-    const row = document.createElement('tr');
-    row.innerHTML = `<td>${months[m]}</td><td>${status}</td><td>${dm}</td>`;
-    tbody.appendChild(row);
-  }
-  table.appendChild(tbody);
-  studentTuitionTable.innerHTML = '';
-  studentTuitionTable.appendChild(table);
-}
+    html += `</tbody></table>`;
+    tuitionArea.innerHTML = html;
 
-/* Render student break UI for upcoming months (after current month) */
-async function renderStudentBreakUI(studentId){
-  studentBreakList.innerHTML = '';
-  const upto = currentMonthIndex();
-  const upcoming = [];
-  for(let m=upto+1; m<12; m++) upcoming.push(m);
-
-  if(upcoming.length === 0){
-    studentBreakList.innerHTML = `<div class="small-muted">No upcoming months available.</div>`;
-    return;
-  }
-
-  upcoming.forEach(m=>{
-    const cb = document.createElement('label');
-    cb.style.display='block';
-    cb.innerHTML = `<input type="checkbox" value="${m}" /> ${months[m]}`;
-    studentBreakList.appendChild(cb);
-  });
-
-  submitBreakRequestBtn.onclick = async ()=>{
-    const checked = Array.from(studentBreakList.querySelectorAll('input:checked')).map(i=>parseInt(i.value));
-    if(checked.length === 0){ breakResult.innerText = 'Select at least one month'; return; }
-    const brRef = ref(db, `breakRequests/${studentId}`);
-    const newReq = push(brRef);
-    await set(newReq, {
-      months: checked,
-      status: 'pending',
-      createdAt: Date.now()
+    // break request UI for upcoming months
+    const upcoming = [];
+    for(let m=upto+1;m<12;m++) upcoming.push(m);
+    if(upcoming.length === 0){ breakArea.innerHTML = `<div class="small-muted">No upcoming months.</div>`; sendBreakBtn.disabled = true; return; }
+    breakArea.innerHTML = '';
+    upcoming.forEach(m=>{
+      const lbl = document.createElement('label');
+      lbl.style.display = 'block';
+      lbl.innerHTML = `<input type="checkbox" value="${m}"> ${months[m]}`;
+      breakArea.appendChild(lbl);
     });
-    breakResult.innerText = 'Break request submitted.';
-    // clear boxes
-    studentBreakList.querySelectorAll('input:checked').forEach(i=>i.checked=false);
+    sendBreakBtn.disabled = false;
+    sendBreakBtn.onclick = async ()=>{
+      const checked = Array.from(breakArea.querySelectorAll('input:checked')).map(i=>parseInt(i.value));
+      if(checked.length === 0){ breakResult.innerText = 'Select at least one month'; return; }
+      // push to /breakRequests/{studentId}/{pushId}
+      const pushRef = push(ref(db, `breakRequests/${studentId}`));
+      await set(pushRef, { months: checked, status:'pending', createdAt: nowDate() });
+      breakResult.innerText = 'Break request submitted.';
+      breakArea.querySelectorAll('input:checked').forEach(i=>i.checked=false);
+    };
   }
+
+  // if studentId stored in localStorage try auto-load
+  const stored = localStorage.getItem('studentId');
+  if(stored){ sidInput.value = stored; }
 }
-
-/* ------------------ Listen for auth state changes (optional) ------------------ */
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
-onAuthStateChanged(auth, user=>{
-  // nothing needed automatically — this demo expects explicit login -> UI switch
-});
-
-/* ------------------ Load initial minimal data watchers for admin and student lists as needed  ------------------ */
-/* End of script.js */

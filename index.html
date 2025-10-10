@@ -3,12 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>The Academic Care — Tuition Manager</title>
+  <title>The Academic Care — Login & Registration</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Firebase SDKs -->
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
-  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -17,143 +13,56 @@
   </header>
 
   <main class="container">
-    <section id="auth-section" class="card">
-      <h2 class="card-title">Login & Registration</h2>
+    <section class="card auth-card">
+      <h2>Login</h2>
 
-      <div class="auth-grid">
-        <div class="login-column">
-          <h3>Sign in</h3>
-          <label>Student ID or type <code>admin</code></label>
-          <input id="identifier" placeholder="e.g. S20251015 or admin" />
+      <label>Student ID or Admin Email</label>
+      <input id="login-identifier" placeholder="e.g. S20251015 or theacademiccare2025@gmail.com">
 
-          <div id="admin-email-row" class="hidden">
-            <label>Admin email</label>
-            <input id="admin-email" placeholder="admin@example.com" />
-          </div>
+      <label>Password</label>
+      <input id="login-password" type="password" placeholder="Password">
 
-          <label>Password</label>
-          <input id="password" type="password" placeholder="Password" />
-
-          <button id="login-btn" class="btn">Sign In</button>
-          <button id="reset-wa" class="btn ghost">Reset via WhatsApp</button>
-
-          <hr/>
-          <small>New student? Fill registration form to apply.</small>
-        </div>
-
-        <div class="register-column">
-          <h3>Registration</h3>
-          <label>Full name</label>
-          <input id="reg-name" placeholder="Student full name" />
-          <label>Class (6-12)</label>
-          <input id="reg-class" placeholder="e.g. 10" />
-          <label>Roll (numeric)</label>
-          <input id="reg-roll" placeholder="e.g. 15" />
-          <label>WhatsApp Number (with country code)</label>
-          <input id="reg-whatsapp" placeholder="+8801XXXXXXXXX" />
-          <label>Password</label>
-          <input id="reg-pass" type="password" />
-          <label>Confirm Password</label>
-          <input id="reg-pass-confirm" type="password" />
-          <button id="submit-registration" class="btn">Submit Registration</button>
-
-          <div id="reg-result" class="result"></div>
-        </div>
+      <div class="row" style="gap:8px;">
+        <button id="btn-login" class="btn">Sign In</button>
+        <button id="btn-open-admin" class="btn ghost">Open Admin Panel (new tab)</button>
       </div>
+
+      <div class="muted small">If you forgot password, click Reset via WhatsApp below.</div>
+      <button id="btn-reset-wa" class="btn ghost">Reset Password via WhatsApp</button>
     </section>
 
-    <section id="app-section" class="hidden">
-      <!-- Navigation -->
-      <nav class="tabs">
-        <button class="tab-btn active" data-target="home">Home</button>
-        <button class="tab-btn" data-target="panel">Panel</button>
-        <button class="tab-btn" data-target="logout">Logout</button>
-      </nav>
+    <section class="card register-card">
+      <h2>New Student Registration</h2>
+      <label>Full name</label>
+      <input id="reg-name" placeholder="Full name">
 
-      <div id="home" class="tab-content">
-        <h3 id="welcome-text">Welcome</h3>
-        <p>Use the panel to manage students, tuition, and break requests.</p>
-      </div>
+      <label>Class (6–12)</label>
+      <input id="reg-class" placeholder="10">
 
-      <!-- Admin / Student Panel container -->
-      <div id="panel" class="tab-content hidden">
+      <label>Roll (numeric)</label>
+      <input id="reg-roll" placeholder="15">
 
-        <!-- Admin panels -->
-        <div id="admin-panel" class="panel hidden">
-          <h3>Welcome to Admin Panel</h3>
-          <div class="admin-tabs">
-            <button class="admin-tab" data-admin-target="admin-home">Home</button>
-            <button class="admin-tab" data-admin-target="admin-class">Class</button>
-            <button class="admin-tab" data-admin-target="admin-registration">Registration</button>
-            <button class="admin-tab" data-admin-target="admin-breaks">Break Request</button>
-          </div>
+      <label>WhatsApp Number (with country code)</label>
+      <input id="reg-wa" placeholder="+8801XXXXXXXXX">
 
-          <div id="admin-home" class="admin-content">Click tabs above to manage.</div>
+      <label>Password</label>
+      <input id="reg-pass" type="password">
 
-          <!-- Class Tab -->
-          <div id="admin-class" class="admin-content hidden">
-            <div class="class-subtabs" id="class-subtabs"></div>
-            <div id="class-list" class="class-list"></div>
-            <div id="tuition-modal" class="modal hidden">
-              <div class="modal-content">
-                <h4 id="tuition-modal-title"></h4>
-                <div id="tuition-table-wrap"></div>
-                <button class="btn ghost" id="close-tuition">Close</button>
-              </div>
-            </div>
-          </div>
+      <label>Confirm Password</label>
+      <input id="reg-passc" type="password">
 
-          <!-- Registration tab -->
-          <div id="admin-registration" class="admin-content hidden">
-            <h4>Registration Requests</h4>
-            <div id="registration-requests"></div>
-          </div>
+      <button id="btn-register" class="btn">Submit Registration</button>
 
-          <!-- Break requests -->
-          <div id="admin-breaks" class="admin-content hidden">
-            <h4>Break Requests</h4>
-            <div id="admin-break-requests"></div>
-          </div>
-        </div>
-
-        <!-- Student panels -->
-        <div id="student-panel" class="panel hidden">
-          <h3>Welcome to Student Panel</h3>
-          <div class="student-tabs">
-            <button class="student-tab" data-student-target="student-home">Home</button>
-            <button class="student-tab" data-student-target="student-profile">My Profile</button>
-            <button class="student-tab" data-student-target="student-tuition">Tuition Fee Status</button>
-            <button class="student-tab" data-student-target="student-break">Break Request</button>
-          </div>
-
-          <div id="student-home" class="student-content">Click tabs above.</div>
-
-          <div id="student-profile" class="student-content hidden">
-            <h4>My Profile</h4>
-            <div id="profile-info"></div>
-          </div>
-
-          <div id="student-tuition" class="student-content hidden">
-            <h4>Tuition Fee Status</h4>
-            <div id="student-tuition-table"></div>
-          </div>
-
-          <div id="student-break" class="student-content hidden">
-            <h4>Break Request (upcoming months)</h4>
-            <div id="student-break-list"></div>
-            <button id="submit-break-request" class="btn">Submit Break Request</button>
-            <div id="break-result" class="result"></div>
-          </div>
-        </div>
-
-      </div>
+      <div id="reg-result" class="result"></div>
+      <div class="small muted">After submission, admin will review & approve. Approved students will be able to login.</div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <small>Powered by The Academic Care</small>
+    <small>© The Academic Care</small>
   </footer>
 
+  <!-- Firebase + App script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>

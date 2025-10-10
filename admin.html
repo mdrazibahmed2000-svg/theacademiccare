@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Academic Care — Admin Panel</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="title-line">The Academic Care</div>
+    <div class="year-line">Academic Year 2025</div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Admin Panel</h2>
+      <div class="admin-top row">
+        <div>
+          <label>Admin Email</label>
+          <input id="admin-email" placeholder="theacademiccare2025@gmail.com" value="theacademiccare2025@gmail.com">
+        </div>
+        <div>
+          <label>Password</label>
+          <input id="admin-pass" type="password" placeholder="Password">
+        </div>
+        <div style="align-self:end;">
+          <button id="admin-signin" class="btn">Sign In</button>
+          <button id="admin-signout" class="btn ghost hidden">Sign Out</button>
+        </div>
+      </div>
+
+      <div id="admin-areas" class="hidden">
+        <nav class="tabs admin-nav">
+          <button class="tab active" data-target="admin-home">Home</button>
+          <button class="tab" data-target="admin-class">Class</button>
+          <button class="tab" data-target="admin-registration">Registration</button>
+          <button class="tab" data-target="admin-breaks">Break Request</button>
+        </nav>
+
+        <div id="admin-home" class="admin-content">Welcome admin. Use tabs to manage data.</div>
+
+        <div id="admin-class" class="admin-content hidden">
+          <div id="class-subtabs" class="class-subtabs"></div>
+          <div id="class-students"></div>
+        </div>
+
+        <div id="admin-registration" class="admin-content hidden">
+          <h4>Pending Registrations</h4>
+          <div id="registration-list"></div>
+        </div>
+
+        <div id="admin-breaks" class="admin-content hidden">
+          <h4>Break Requests</h4>
+          <div id="break-request-list"></div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer class="site-footer"><small>Admin — The Academic Care</small></footer>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
