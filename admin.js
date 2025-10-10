@@ -220,3 +220,13 @@ window.denyBreak = async (studentId) => {
   await set(ref(db, `breakRequests/${studentId}`), null);
   loadBreakRequests();
 }
+// 🔹 Admin Logout
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    alert("✅ Admin logged out successfully!");
+    window.location.href = "index.html"; // Redirect to login page
+  } catch (error) {
+    alert("❌ Logout failed: " + error.message);
+  }
+});
