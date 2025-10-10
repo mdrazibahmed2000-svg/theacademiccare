@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -16,181 +16,147 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-document.getElementById("logoutBtn").addEventListener("click", ()=>{
-  signOut(auth).then(()=>window.location.href="index.html");
-});
+// ---------------- Tabs ----------------
+const sections = {
+  home: document.getElementById("homeSection"),
+  class: document.getElementById("classSection"),
+  registration: document.getElementById("registrationSection"),
+  break: document.getElementById("breakSection")
+};
 
-const studentList = document.getElementById("studentList");
-const tuitionPanel = document.getElementById("tuitionPanel");
-const classTabsContainer = document.getElementById("classTabs");
-const registrationSection = document.getElementById("registrationSection");
-const breakRequestSection = document.getElementById("breakRequestSection");
+function hideAll(){ Object.values(sections).forEach(s=>s.style.display="none"); }
 
-function hideAll(){ studentList.style.display="none"; tuitionPanel.style.display="none"; registrationSection.style.display="none"; breakRequestSection.style.display="none"; classTabsContainer.style.display="none"; }
+document.getElementById("homeTab").addEventListener("click", ()=>{ hideAll(); sections.home.style.display="block"; });
+document.getElementById("classTab").addEventListener("click", ()=>{ hideAll(); sections.class.style.display="block"; loadClasses(); });
+document.getElementById("registrationTab").addEventListener("click", ()=>{ hideAll(); sections.registration.style.display="block"; loadRegistrations(); });
+document.getElementById("breakTab").addEventListener("click", ()=>{ hideAll(); sections.break.style.display="block"; loadBreakRequests(); });
+document.getElementById("logoutBtn").addEventListener("click", ()=>{ signOut(auth).then(()=>window.location.href="index.html"); });
 
-document.getElementById("homeTab").addEventListener("click", hideAll);
-document.getElementById("classTab").addEventListener("click", ()=>{
-  hideAll();
-  studentList.style.display="block";
-  classTabsContainer.style.display="flex";
-});
-document.getElementById("registrationTab").addEventListener("click", ()=>{
-  hideAll();
-  registrationSection.style.display="block";
-  loadRegistrationRequests();
-});
-document.getElementById("breakRequestTab").addEventListener("click", ()=>{
-  hideAll();
-  breakRequestSection.style.display="block";
-  loadBreakRequests();
-});
-
-// Class sub-tabs 6-12
-for(let i=6;i<=12;i++){
-  const btn=document.createElement("button");
-  btn.textContent=`Class ${i}`;
-  btn.addEventListener("click",()=>loadClassStudents(i));
-  classTabsContainer.appendChild(btn);
+// ---------------- Load Classes ----------------
+function loadClasses(){
+  const classSubTabs = document.getElementById("classSubTabs");
+  classSubTabs.innerHTML="";
+  for(let i=6;i<=12;i++){
+    const btn = document.createElement("button");
+    btn.textContent = `Class ${i}`;
+    btn.dataset.cls = i;
+    btn.addEventListener("click", ()=> loadClassContent(i));
+    classSubTabs.appendChild(btn);
+  }
 }
 
-function loadClassStudents(classNumber){
-  studentList.innerHTML=`<h3>Class ${classNumber}</h3>`;
-  const studentRef=ref(db,"students");
-  onValue(studentRef,(snapshot)=>{
-    studentList.innerHTML=`<h3>Class ${classNumber}</h3>`;
-    snapshot.forEach(child=>{
-      const student=child.val();
-      if(student.class==classNumber && student.status==="approved"){
-        const div=document.createElement("div");
-        div.className="student-card";
-        div.innerHTML=`<p><strong>${student.name}</strong> (${student.studentId})</p>
-                         <p>WhatsApp: ${student.whatsapp}</p>
-                         <button class="tuition-btn" data-id="${student.studentId}">📘 Tuition Status</button>`;
-        studentList.appendChild(div);
+// ---------------- Load Students in Class ----------------
+function loadClassContent(cls){
+  const content = document.getElementById("classContent");
+  content.innerHTML=`<h4>Class ${cls}</h4>`;
+  const table = document.createElement("table");
+  table.innerHTML="<tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition</th></tr>";
+  content.appendChild(table);
+
+  const studentsRef = ref(db,"students");
+  onValue(studentsRef,snap=>{
+    table.innerHTML="<tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition</th></tr>";
+    snap.forEach(child=>{
+      const s = child.val();
+      if(s.class==cls && s.status==="approved"){
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${s.name}</td><td>${s.studentId}</td><td>${s.whatsapp}</td>
+        <td><button class="tuitionBtn" data-id="${s.studentId}">Manage</button></td>`;
+        table.appendChild(tr);
       }
     });
-    document.querySelectorAll(".tuition-btn").forEach(btn=>{
-      btn.addEventListener("click", e=> loadTuitionPanel(e.target.dataset.id));
+    // Tuition button click
+    document.querySelectorAll(".tuitionBtn").forEach(btn=>{
+      btn.addEventListener("click", ()=> manageTuition(btn.dataset.id));
     });
-  },{onlyOnce:true});
+  });
 }
 
-function loadTuitionPanel(studentId){
-  hideAll();
-  tuitionPanel.style.display="block";
-  tuitionPanel.innerHTML=`<h3>Tuition - ${studentId}</h3>`;
+// ---------------- Tuition Management ----------------
+function manageTuition(studentId){
+  const content = document.getElementById("classContent");
+  content.innerHTML=`<h4>Tuition Management: ${studentId}</h4>`;
   const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const table=document.createElement("table");
-  table.className="tuition-table";
-  table.innerHTML=`<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>`;
-  const tRef=ref(db,`tuition/${studentId}`);
-  onValue(tRef,(snap)=>{
-    table.innerHTML=`<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>`;
+  const table = document.createElement("table");
+  table.innerHTML="<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>";
+  content.appendChild(table);
+
+  const tRef = ref(db,`tuition/${studentId}`);
+  onValue(tRef, snap=>{
+    table.innerHTML="<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>";
     const todayMonth=new Date().getMonth();
     for(let i=0;i<=todayMonth;i++){
       const m=months[i];
-      const mData=snap.exists() && snap.val()[m]?snap.val()[m]:{status:"Unpaid", date:"", method:""};
+      const mData=snap.exists()&&snap.val()[m]?snap.val()[m]:{status:"Unpaid",date:"",method:""};
       const tr=document.createElement("tr");
       tr.innerHTML=`<td>${m}</td><td class="status">${mData.status}</td><td>${mData.date} ${mData.method}</td>
-                      <td>
-                        <button class="markPaid">Mark Paid</button>
-                        <button class="markBreak">Mark Break</button>
-                        <button class="undo" style="display:none;">Undo</button>
-                      </td>`;
+      <td>
+        <button class="markPaid">Mark Paid</button>
+        <button class="markBreak">Mark Break</button>
+        <button class="undo" style="display:none;">Undo</button>
+      </td>`;
       table.appendChild(tr);
 
-      const markPaidBtn=tr.querySelector(".markPaid");
-      const markBreakBtn=tr.querySelector(".markBreak");
-      const undoBtn=tr.querySelector(".undo");
-
-      markPaidBtn.addEventListener("click", ()=>{
-        const date=new Date().toLocaleDateString();
-        const method=prompt("Enter payment method");
+      tr.querySelector(".markPaid").addEventListener("click", ()=>{
+        const date = new Date().toLocaleDateString();
+        const method = prompt("Payment method?");
         update(ref(db,`tuition/${studentId}/${m}`),{status:"Paid",date,method});
-        tr.querySelector(".status").textContent="Paid";
-        markPaidBtn.style.display="none"; markBreakBtn.style.display="none"; undoBtn.style.display="inline";
       });
-      markBreakBtn.addEventListener("click", ()=>{
-        update(ref(db,`tuition/${studentId}/${m}`),{status:"Break"});
-        tr.querySelector(".status").textContent="Break";
-        markPaidBtn.style.display="none"; markBreakBtn.style.display="none"; undoBtn.style.display="inline";
+      tr.querySelector(".markBreak").addEventListener("click", ()=>{
+        update(ref(db,`tuition/${studentId}/${m}`),{status:"Break",date:"",method:""});
       });
-      undoBtn.addEventListener("click", ()=>{
+      tr.querySelector(".undo").addEventListener("click", ()=>{
         update(ref(db,`tuition/${studentId}/${m}`),{status:"Unpaid",date:"",method:""});
-        tr.querySelector(".status").textContent="Unpaid";
-        markPaidBtn.style.display="inline"; markBreakBtn.style.display="inline"; undoBtn.style.display="none";
       });
     }
-  },{onlyOnce:true});
+  });
 }
 
-// Registration Requests
-function loadRegistrationRequests(){
-  const container=document.getElementById("registrationList");
-  const regRef=ref(db,"students");
-  onValue(regRef,(snap)=>{
+// ---------------- Registration Requests ----------------
+function loadRegistrations(){
+  const container=document.getElementById("registrationRequests");
+  container.innerHTML="";
+  const studentsRef=ref(db,"students");
+  onValue(studentsRef,snap=>{
     container.innerHTML="";
     snap.forEach(child=>{
       const s=child.val();
       if(s.status==="pending"){
         const div=document.createElement("div");
-        div.className="reg-card";
-        div.innerHTML=`<p>${s.name} (${s.studentId}) - Class ${s.class}</p>
-                        <p>WhatsApp: ${s.whatsapp}</p>
-                        <button class="approveBtn" data-id="${s.studentId}">Approve</button>
-                        <button class="denyBtn" data-id="${s.studentId}">Deny</button>`;
+        div.innerHTML=`${s.name} (${s.studentId}) - <button class="approve">Approve</button> <button class="deny">Deny</button>`;
         container.appendChild(div);
-      }
-    });
 
-    document.querySelectorAll(".approveBtn").forEach(btn=>{
-      btn.addEventListener("click", e=>{
-        const id=e.target.dataset.id;
-        update(ref(db,`students/${id}`),{status:"approved"});
-      });
-    });
-    document.querySelectorAll(".denyBtn").forEach(btn=>{
-      btn.addEventListener("click", e=>{
-        const id=e.target.dataset.id;
-        remove(ref(db,`students/${id}`));
-      });
+        div.querySelector(".approve").addEventListener("click", ()=> update(ref(db,`students/${s.studentId}`),{status:"approved"}));
+        div.querySelector(".deny").addEventListener("click", ()=> remove(ref(db,`students/${s.studentId}`)));
+      }
     });
   });
 }
 
-// Break Requests
+// ---------------- Break Requests ----------------
 function loadBreakRequests(){
-  const container=document.getElementById("breakList");
-  const brRef=ref(db,"breakRequests");
-  onValue(brRef,(snap)=>{
+  const container=document.getElementById("breakRequests");
+  container.innerHTML="";
+  const brRef = ref(db,"breakRequests");
+  onValue(brRef,snap=>{
     container.innerHTML="";
-    snap.forEach(child=>{
-      const studentId=child.key;
-      child.forEach(req=>{
-        const r=req.val();
-        if(r.status==="pending"){
+    snap.forEach(studentSnap=>{
+      const studentId = studentSnap.key;
+      studentSnap.forEach(monthSnap=>{
+        const monthData = monthSnap.val();
+        if(monthData.status==="pending"){
           const div=document.createElement("div");
-          div.innerHTML=`<p>${studentId} requested break for ${r.month}</p>
-                         <button class="approveBreakBtn" data-student="${studentId}" data-key="${req.key}">Approve</button>
-                         <button class="denyBreakBtn" data-student="${studentId}" data-key="${req.key}">Deny</button>`;
+          div.innerHTML=`${studentId} - ${monthData.month} <button class="approve">Approve</button> <button class="deny">Deny</button>`;
           container.appendChild(div);
+
+          div.querySelector(".approve").addEventListener("click", ()=>{
+            update(ref(db,`tuition/${studentId}/${monthData.month}`),{status:"Break"});
+            update(ref(db,`breakRequests/${studentId}/${monthSnap.key}`),{status:"approved"});
+          });
+          div.querySelector(".deny").addEventListener("click", ()=>{
+            update(ref(db,`breakRequests/${studentId}/${monthSnap.key}`),{status:"denied"});
+          });
         }
-      });
-    });
-
-    document.querySelectorAll(".approveBreakBtn").forEach(btn=>{
-      btn.addEventListener("click", e=>{
-        const studentId=e.target.dataset.student;
-        const key=e.target.dataset.key;
-        update(ref(db,`breakRequests/${studentId}/${key}`),{status:"approved"});
-      });
-    });
-
-    document.querySelectorAll(".denyBreakBtn").forEach(btn=>{
-      btn.addEventListener("click", e=>{
-        const studentId=e.target.dataset.student;
-        const key=e.target.dataset.key;
-        remove(ref(db,`breakRequests/${studentId}/${key}`));
       });
     });
   });

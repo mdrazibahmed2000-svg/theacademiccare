@@ -3,35 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Academic Care - Admin Panel</title>
+<title>The Academic Care - Student Panel</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <h1>The Academic Care</h1>
-  <h2>Academic Year 2025</h2>
-</header>
+  <div class="container">
+    <h1>The Academic Care</h1>
+    <h2>Academic Year 2025</h2>
 
-<nav>
-  <button id="homeTab">Home</button>
-  <button id="classTab">Class</button>
-  <button id="registrationTab">Registration</button>
-  <button id="breakRequestTab">Break Request</button>
-  <button id="logoutBtn">Log Out</button>
-</nav>
+    <div id="tabs">
+      <button id="homeTab">Home</button>
+      <button id="profileTab">My Profile</button>
+      <button id="tuitionTab">Tuition Fee Status</button>
+      <button id="breakTab">Break Request</button>
+      <button id="logoutBtn">Logout</button>
+    </div>
 
-<div id="classTabs" style="display:none;"></div>
-<section id="studentList" style="display:none;"></section>
-<section id="tuitionPanel" style="display:none;"></section>
-<section id="registrationSection" style="display:none;">
-  <h3>Registration Requests</h3>
-  <div id="registrationList"></div>
-</section>
-<section id="breakRequestSection" style="display:none;">
-  <h3>Break Requests</h3>
-  <div id="breakList"></div>
-</section>
+    <div id="homeSection">Welcome to Student Panel</div>
+    <div id="profileSection" style="display:none;"></div>
+    <div id="tuitionSection" style="display:none;"></div>
+    <div id="breakSection" style="display:none;"></div>
+  </div>
 
-<script type="module" src="admin.js"></script>
+  <script type="module" src="student.js"></script>
 </body>
 </html>
