@@ -1,45 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - The Academic Care</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - The Academic Care</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>The Academic Care</h1>
-<h2>Academic Year 2025 - Admin Panel</h2>
+  <h1>The Academic Care</h1>
+  <h2>Academic Year 2025</h2>
 
-<button id="logoutBtn">Logout</button>
+  <div>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-<div class="tabs">
-  <button onclick="showTab('home')">Home</button>
-  <button onclick="showTab('classes')">Classes</button>
-  <button onclick="showTab('registrations')">Registration Requests</button>
-  <button onclick="showTab('breaks')">Break Requests</button>
-</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button onclick="showTab('home')">Home</button>
+    <button onclick="showTab('classes')">Classes</button>
+    <button onclick="showTab('registrations')">Registration</button>
+    <button onclick="showTab('breaks')">Break Request</button>
+  </div>
 
-<div id="tabContent">
-  <div id="home">Welcome to Admin Panel</div>
+  <!-- Home -->
+  <div id="home" style="display:block;">
+    <h3>Welcome to Admin Panel</h3>
+    <p>Use tabs to navigate.</p>
+  </div>
 
+  <!-- Classes -->
   <div id="classes" style="display:none;">
-    <h3>Classes</h3>
     <div id="classTabs"></div>
     <div id="classStudents"></div>
   </div>
 
+  <!-- Registration Requests -->
   <div id="registrations" style="display:none;">
-    <h3>Registration Requests</h3>
+    <h3>Pending Registration Requests</h3>
     <div id="registrationRequests"></div>
   </div>
 
+  <!-- Break Requests -->
   <div id="breaks" style="display:none;">
     <h3>Break Requests</h3>
     <div id="breakRequestsContainer"></div>
   </div>
-</div>
 
-<script type="module" src="admin.js"></script>
+  <script type="module" src="admin.js"></script>
 </body>
 </html>

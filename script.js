@@ -19,58 +19,63 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
 
-// Login button
-document.getElementById("loginBtn").addEventListener("click", async () => {
+// Wait for DOM to load
+window.addEventListener("DOMContentLoaded", () => {
+
+  const loginBtn = document.getElementById("loginBtn");
+  const registrationBtn = document.getElementById("registrationBtn");
+  const submitRegistration = document.getElementById("submitRegistration");
+  const registrationForm = document.getElementById("registrationForm");
+
+  // Login button
+  loginBtn.addEventListener("click", async () => {
     const userInput = document.getElementById("userId").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    // ---------------- Admin Login ----------------
     const adminEmail = "theacademiccare2025@gmail.com";
 
+    // Admin login
     if(userInput === adminEmail){
-        try{
-            const userCredential = await signInWithEmailAndPassword(auth, adminEmail, password);
-            localStorage.setItem("adminUid", userCredential.user.uid);
-            window.location.href = "adminPanel.html";
-        }catch(error){
-            alert("Admin login failed: " + error.message);
-        }
-        return;
+      try{
+        const userCredential = await signInWithEmailAndPassword(auth, adminEmail, password);
+        localStorage.setItem("adminUid", userCredential.user.uid);
+        window.location.href = "adminPanel.html";
+      }catch(error){
+        alert("Admin login failed: " + error.message);
+      }
+      return;
     }
 
-    // ---------------- Student Login ----------------
+    // Student login
     try{
-        const snapshot = await get(ref(db, `registrations/${userInput}`));
-        if(!snapshot.exists()){
-            alert("Student ID not found!");
-            return;
-        }
-        const studentData = snapshot.val();
-        if(!studentData.approved){
-            alert("Your registration is not approved yet.");
-            return;
-        }
-        // Verify password stored in database
-        if(studentData.password !== password){
-            alert("Password is incorrect!");
-            return;
-        }
-
-        localStorage.setItem("studentId", userInput);
-        window.location.href = "studentPanel.html";
-
+      const snapshot = await get(ref(db, `registrations/${userInput}`));
+      if(!snapshot.exists()){
+        alert("Student ID not found!");
+        return;
+      }
+      const studentData = snapshot.val();
+      if(!studentData.approved){
+        alert("Your registration is not approved yet.");
+        return;
+      }
+      if(studentData.password !== password){
+        alert("Password is incorrect!");
+        return;
+      }
+      localStorage.setItem("studentId", userInput);
+      window.location.href = "studentPanel.html";
     }catch(error){
-        alert("Student login failed: " + error.message);
+      alert("Student login failed: " + error.message);
     }
-});
+  });
 
-// Registration button
-document.getElementById("registrationBtn").addEventListener("click", () => {
-    document.getElementById("registrationForm").style.display = "block";
-});
+  // Toggle Registration Form
+  registrationBtn.addEventListener("click", () => {
+    registrationForm.style.display = registrationForm.style.display === "none" ? "block" : "none";
+  });
 
-// Submit Registration
-document.getElementById("submitRegistration").addEventListener("click", async () => {
+  // Submit Registration
+  submitRegistration.addEventListener("click", async () => {
     const name = document.getElementById("regName").value.trim();
     const classNum = document.getElementById("regClass").value.trim();
     const roll = document.getElementById("regRoll").value.trim();
@@ -79,17 +84,25 @@ document.getElementById("submitRegistration").addEventListener("click", async ()
     const confirmPassword = document.getElementById("regConfirmPassword").value.trim();
 
     if(password !== confirmPassword){
-        alert("Passwords do not match!");
-        return;
+      alert("Passwords do not match!");
+      return;
     }
 
     const year = new Date().getFullYear();
     const studentId = `S${year}${classNum}${roll}`;
 
     await set(ref(db, `registrations/${studentId}`), {
-        name, class: parseInt(classNum), roll, whatsapp, password, approved: false
+      name,
+      class: parseInt(classNum),
+      roll,
+      whatsapp,
+      password,
+      approved: false
     });
 
     alert("Registration submitted! Your Student ID is: " + studentId);
-    document.getElementById("registrationForm").reset();
+    registrationForm.reset();
+    registrationForm.style.display = "none";
+  });
+
 });

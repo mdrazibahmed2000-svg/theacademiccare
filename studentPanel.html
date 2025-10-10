@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Panel - The Academic Care</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Panel - The Academic Care</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>The Academic Care</h1>
-<h2>Academic Year 2025 - Student Panel</h2>
+  <h1>The Academic Care</h1>
+  <h2>Academic Year 2025</h2>
 
-<button id="logoutBtn">Logout</button>
+  <div>
+    <button id="logoutBtn">Logout</button>
+  </div>
 
-<div class="tabs">
-  <button onclick="showTab('home')">Home</button>
-  <button onclick="showTab('profile')">My Profile</button>
-  <button onclick="showTab('tuition')">Tuition Fee Status</button>
-  <button onclick="showTab('break')">Break Request</button>
-</div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <button onclick="showTab('home')">Home</button>
+    <button onclick="showTab('profile')">My Profile</button>
+    <button onclick="showTab('tuition')">Tuition Fee Status</button>
+    <button onclick="showTab('break')">Break Request</button>
+  </div>
 
-<div id="tabContent">
-  <div id="home">Welcome to Student Panel</div>
+  <!-- Home -->
+  <div id="home" style="display:block;">
+    <h3>Welcome to Student Panel</h3>
+    <p>Use tabs to navigate.</p>
+  </div>
 
+  <!-- Profile -->
   <div id="profile" style="display:none;">
     <h3>My Profile</h3>
     <p>Name: <span id="profileName"></span></p>
@@ -31,20 +38,19 @@
     <p>WhatsApp: <span id="profileWhatsApp"></span></p>
   </div>
 
+  <!-- Tuition -->
   <div id="tuition" style="display:none;">
     <h3>Tuition Fee Status</h3>
-    <table id="tuitionTable">
-      <tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>
-    </table>
+    <table id="tuitionTable"></table>
   </div>
 
+  <!-- Break Requests -->
   <div id="break" style="display:none;">
     <h3>Break Request</h3>
     <div id="breakRequestContainer"></div>
     <button id="submitBreakRequest">Submit Break Request</button>
   </div>
-</div>
 
-<script type="module" src="student.js"></script>
+  <script type="module" src="student.js"></script>
 </body>
 </html>
