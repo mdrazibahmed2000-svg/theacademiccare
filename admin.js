@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -14,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-Q7MCGKTYMX"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
@@ -31,7 +29,7 @@ window.showTab = (tabName) => {
   });
 };
 
-// ------------------ Registration Requests ------------------
+// Load registrations
 async function loadRegistrations() {
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("registrationRequests");
@@ -51,14 +49,12 @@ async function loadRegistrations() {
 }
 window.approveStudent = async (studentId) => {
   await update(ref(db, `registrations/${studentId}`), {approved:true});
-  loadRegistrations();
 };
 window.denyStudent = async (studentId) => {
   await update(ref(db, `registrations/${studentId}`), {approved:false});
-  loadRegistrations();
 };
 
-// ------------------ Break Requests ------------------
+// Break requests
 async function loadBreakRequests() {
   const snapshot = await get(ref(db, 'breakRequests'));
   const container = document.getElementById("breakRequestsContainer");
@@ -76,15 +72,13 @@ async function loadBreakRequests() {
 }
 window.resolveBreak = async (studentId) => {
   await update(ref(db, `breakRequests/${studentId}`), {});
-  loadBreakRequests();
 };
 
-// ------------------ Classes & Students ------------------
+// Classes
 function createClassTabs() {
   const classTabsContainer = document.getElementById("classTabs");
   classTabsContainer.innerHTML = "";
-  
-  for(let i = 6; i <= 12; i++){
+  for(let i=6; i<=12; i++){
     const btn = document.createElement("button");
     btn.innerText = `Class ${i}`;
     btn.addEventListener("click", () => loadClassStudents(i));
@@ -96,27 +90,64 @@ async function loadClassStudents(classNum){
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("classStudents");
   container.innerHTML = `<h4>Class ${classNum}</h4>`;
-  
   if(snapshot.exists()){
     Object.keys(snapshot.val()).forEach(studentId => {
       const student = snapshot.val()[studentId];
       if(student.approved && student.class == classNum){
         const div = document.createElement("div");
+        div.id = `student-${studentId}`;
         div.innerHTML = `${student.name} (ID: ${studentId}, WhatsApp: ${student.whatsapp}) 
-        <button onclick="manageTuition('${studentId}')">Tuition</button>`;
+        <button onclick="markPaid('${studentId}')">Mark Paid</button>
+        <button onclick="markBreak('${studentId}')">Mark Break</button>
+        <span id="status-${studentId}"></span>`;
         container.appendChild(div);
+
+        // Real-time status listener
+        const tuitionRef = ref(db, `tuition/${studentId}`);
+        onValue(tuitionRef, (snap)=>{
+          const data = snap.val();
+          if(data){
+            const months = Object.keys(data);
+            let statusHTML = "";
+            months.forEach(month=>{
+              statusHTML += `${month}: ${data[month].status} | `;
+            });
+            document.getElementById(`status-${studentId}`).innerText = statusHTML;
+          } else {
+            document.getElementById(`status-${studentId}`).innerText = "";
+          }
+        });
       }
     });
   }
 }
 
-// Navigate to tuition management
-window.manageTuition = (studentId) => {
-  localStorage.setItem("currentStudentId", studentId);
-  window.location.href = "tuitionPanel.html";
+// Mark Paid
+window.markPaid = async (studentId) => {
+  const month = prompt("Enter month to mark Paid:");
+  const method = prompt("Enter payment method:");
+  if(month && method){
+    await update(ref(db, `tuition/${studentId}/${month}`), {
+      status: "Paid",
+      date: new Date().toLocaleDateString(),
+      method
+    });
+  }
 };
 
-// ------------------ Initialize ------------------
+// Mark Break
+window.markBreak = async (studentId) => {
+  const month = prompt("Enter month to mark Break:");
+  if(month){
+    await update(ref(db, `tuition/${studentId}/${month}`), {
+      status: "Break",
+      date: "",
+      method: ""
+    });
+  }
+};
+
+// Initialize
 createClassTabs();
 loadRegistrations();
 loadBreakRequests();

@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -14,7 +13,6 @@ const firebaseConfig = {
   measurementId: "G-Q7MCGKTYMX"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
@@ -33,7 +31,7 @@ window.showTab = (tabName) => {
   });
 };
 
-// Load profile
+// Load Profile
 async function loadProfile(){
   const snapshot = await get(ref(db, `registrations/${studentId}`));
   if(snapshot.exists()){
@@ -45,22 +43,18 @@ async function loadProfile(){
   }
 }
 
-// Load tuition
-async function loadTuition(){
-  const snapshot = await get(ref(db, `tuition/${studentId}`));
+// Load Tuition - Real-time
+function loadTuition(){
   const table = document.getElementById("tuitionTable");
   table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
-
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const todayMonth = new Date().getMonth();
-
-  months.forEach((month,i)=>{
-    if(i <= todayMonth){
-      const status = snapshot.val()?.[month]?.status || "";
-      const date = snapshot.val()?.[month]?.date || "";
-      const method = snapshot.val()?.[month]?.method || "";
-      table.innerHTML += `<tr><td>${month}</td><td>${status}</td><td>${date} | ${method}</td></tr>`;
-    }
+  const tuitionRef = ref(db, `tuition/${studentId}`);
+  onValue(tuitionRef, (snapshot)=>{
+    const data = snapshot.val() || {};
+    table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
+    Object.keys(data).forEach(month=>{
+      const s = data[month];
+      table.innerHTML += `<tr><td>${month}</td><td>${s.status}</td><td>${s.date} | ${s.method}</td></tr>`;
+    });
   });
 }
 
