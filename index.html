@@ -5,30 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Academic Care</title>
 <link rel="stylesheet" href="style.css">
-<script type="module" src="script.js"></script>
 </head>
 <body>
-<div class="header">
-  <h1>The Academic Care</h1>
-  <h3>Academic Year 2025</h3>
-</div>
+  <div class="header">
+    <h1>The Academic Care</h1>
+    <h3>Academic Year 2025</h3>
+  </div>
 
-<div class="login-container">
-  <input type="text" id="userIdEmail" placeholder="Student ID or Admin Email">
-  <input type="password" id="password" placeholder="Password">
-  <button id="loginBtn">Login</button>
-  <button id="showRegBtn">Register</button>
-</div>
+  <div id="loginForm" class="form-container">
+    <input type="text" id="userId" placeholder="Student ID or Admin Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <button id="registerBtn">Register</button>
+    <p id="loginError" class="error-msg"></p>
+  </div>
 
-<div class="register-container" style="display:none;">
-  <input type="text" id="regName" placeholder="Full Name">
-  <input type="number" id="regClass" placeholder="Class (6-12)">
-  <input type="number" id="regRoll" placeholder="Roll">
-  <input type="text" id="regWhatsApp" placeholder="WhatsApp Number">
-  <input type="password" id="regPassword" placeholder="Password">
-  <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
-  <button id="submitRegBtn">Submit Registration</button>
-</div>
-<div id="message"></div>
+  <div id="registrationForm" class="form-container" style="display:none;">
+    <input type="text" id="regName" placeholder="Full Name">
+    <input type="number" id="regClass" placeholder="Class (6-12)">
+    <input type="number" id="regRoll" placeholder="Roll">
+    <input type="text" id="regWhatsapp" placeholder="WhatsApp Number">
+    <input type="password" id="regPassword" placeholder="Password">
+    <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+    <button id="submitRegistration">Submit Registration</button>
+    <button id="backLogin">Back to Login</button>
+    <p id="regError" class="error-msg"></p>
+  </div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
