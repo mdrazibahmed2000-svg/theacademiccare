@@ -21,16 +21,23 @@ const db = getDatabase();
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(() => window.location.href="index.html");
+  signOut(auth).then(() => window.location.href = "index.html");
 });
 
-// Load registration requests
-export async function loadRegistrations(){
+// Tab switching
+window.showTab = (tabName) => {
+  ["home","classes","registrations","breaks"].forEach(t=>{
+    document.getElementById(t).style.display = (t===tabName)?"block":"none";
+  });
+};
+
+// ------------------ Registration Requests ------------------
+async function loadRegistrations() {
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("registrationRequests");
   container.innerHTML = "";
   if(snapshot.exists()){
-    Object.keys(snapshot.val()).forEach(studentId=>{
+    Object.keys(snapshot.val()).forEach(studentId => {
       const student = snapshot.val()[studentId];
       if(!student.approved){
         const div = document.createElement("div");
@@ -42,49 +49,75 @@ export async function loadRegistrations(){
     });
   }
 }
-
-// Approve / Deny
 window.approveStudent = async (studentId) => {
   await update(ref(db, `registrations/${studentId}`), {approved:true});
   loadRegistrations();
 };
-
 window.denyStudent = async (studentId) => {
   await update(ref(db, `registrations/${studentId}`), {approved:false});
   alert("Student denied.");
   loadRegistrations();
 };
 
-// Load students per class
-export async function loadClassStudents(classNum){
+// ------------------ Break Requests ------------------
+async function loadBreakRequests() {
+  const snapshot = await get(ref(db, 'breakRequests'));
+  const container = document.getElementById("breakRequestsContainer");
+  container.innerHTML = "";
+  if(snapshot.exists()){
+    Object.keys(snapshot.val()).forEach(studentId => {
+      const months = Object.keys(snapshot.val()[studentId]);
+      if(months.length > 0){
+        const div = document.createElement("div");
+        div.innerHTML = `${studentId}: ${months.join(", ")} <button onclick="resolveBreak('${studentId}')">Resolve</button>`;
+        container.appendChild(div);
+      }
+    });
+  }
+}
+window.resolveBreak = async (studentId) => {
+  await update(ref(db, `breakRequests/${studentId}`), {});
+  loadBreakRequests();
+};
+
+// ------------------ Classes & Students ------------------
+function createClassTabs() {
+  const classTabsContainer = document.getElementById("classTabs");
+  classTabsContainer.innerHTML = "";
+  
+  for(let i = 6; i <= 12; i++){
+    const btn = document.createElement("button");
+    btn.innerText = `Class ${i}`;
+    btn.addEventListener("click", () => loadClassStudents(i));
+    classTabsContainer.appendChild(btn);
+  }
+}
+
+async function loadClassStudents(classNum){
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("classStudents");
   container.innerHTML = `<h4>Class ${classNum}</h4>`;
+  
   if(snapshot.exists()){
-    Object.keys(snapshot.val()).forEach(studentId=>{
+    Object.keys(snapshot.val()).forEach(studentId => {
       const student = snapshot.val()[studentId];
-      if(student.approved && student.class==classNum){
+      if(student.approved && student.class == classNum){
         const div = document.createElement("div");
-        div.innerHTML = `${student.name} (${studentId}) - ${student.whatsapp} 
+        div.innerHTML = `${student.name} (ID: ${studentId}, WhatsApp: ${student.whatsapp}) 
         <button onclick="manageTuition('${studentId}')">Tuition</button>`;
         container.appendChild(div);
       }
     });
   }
-};
+}
 
-// Navigate tuition
+// Navigate to tuition management
 window.manageTuition = (studentId) => {
   localStorage.setItem("currentStudentId", studentId);
   window.location.href = "tuitionPanel.html";
 };
 
-// Tab switching
-window.showTab = (tabName) => {
-  ["home","classes","registrations","breaks"].forEach(t=>{
-    document.getElementById(t).style.display = (t===tabName)?"block":"none";
-  });
-};
-
-// Initial load
+// ------------------ Initialize ------------------
+createClassTabs();
 loadRegistrations();
+loadBreakRequests();

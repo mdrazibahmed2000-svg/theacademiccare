@@ -1,79 +1,115 @@
+/* ---------- General ---------- */
 body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(180deg, #e6f0ff, #ffffff);
-  margin: 0;
-  padding: 0;
-  text-align: center;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 10px;
+    background: #f9f9f9;
 }
 
-header {
-  background-color: #004aad;
-  color: white;
-  padding: 15px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+h1 {
+    text-align: center;
+    color: #2c3e50;
 }
 
-header h1 {
-  font-size: 22px;
-  margin: 0;
+h2 {
+    text-align: center;
+    color: #34495e;
+    font-weight: normal;
+    margin-bottom: 20px;
 }
 
-header h2 {
-  font-size: 16px;
-  font-weight: normal;
-  margin-top: 5px;
+/* ---------- Forms ---------- */
+form {
+    max-width: 400px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.container {
-  background: white;
-  width: 90%;
-  max-width: 380px;
-  margin: 30px auto;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+form input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
 }
 
-.container h3 {
-  color: #004aad;
-  margin-bottom: 15px;
+form button {
+    width: 48%;
+    padding: 10px;
+    margin: 5px 1%;
+    border: none;
+    border-radius: 5px;
+    background: #3498db;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
 }
 
-input {
-  width: 90%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 14px;
+form button:hover {
+    background: #2980b9;
 }
 
+/* ---------- Tabs ---------- */
+.tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.tabs button {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background: #1abc9c;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.tabs button:hover {
+    background: #16a085;
+}
+
+/* ---------- Tables ---------- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+table th {
+    background: #2c3e50;
+    color: #fff;
+}
+
+/* ---------- Buttons ---------- */
 button {
-  width: 95%;
-  padding: 10px;
-  margin-top: 10px;
-  background-color: #004aad;
-  color: white;
-  font-size: 15px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.3s;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
 button:hover {
-  background-color: #00307a;
+    opacity: 0.8;
 }
 
-.secondary-btn {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.secondary-btn:hover {
-  background-color: #c9c9c9;
-}
-.logout-container {
-  text-align: right;
-  margin: 10px 20px;
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    form, table {
+        width: 95%;
+        font-size: 14px;
+    }
+    .tabs {
+        flex-direction: column;
+    }
 }
