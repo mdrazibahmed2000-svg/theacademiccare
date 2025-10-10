@@ -1,85 +1,95 @@
-// Firebase initialization
-const firebaseConfig = {
-    apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-    authDomain: "the-academic-care-de611.firebaseapp.com",
-    databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "the-academic-care-de611",
-    storageBucket: "the-academic-care-de611.firebasedatabase.app",
-    messagingSenderId: "142271027321",
-    appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-    measurementId: "G-Q7MCGKTYMX"
-};
-firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-const studentId = localStorage.getItem('studentId');
-if (!studentId) location.href = 'index.html';
-
-// Logout
-document.getElementById('logoutBtnStudent').addEventListener('click', () => {
-    localStorage.removeItem('studentId');
-    location.href = 'index.html';
+const logoutBtn = document.getElementById('logoutBtn');
+logoutBtn.addEventListener('click', () => {
+    auth.signOut().then(() => location.href = 'index.html');
 });
 
-// Tab navigation
-const tabs = document.querySelectorAll('.tabBtn');
-const contents = document.querySelectorAll('.tabContent');
+const tabs = document.querySelectorAll('.tab');
+const profileContainer = document.getElementById('profileContainer');
+const tuitionContainer = document.getElementById('tuitionContainer');
+const breakContainer = document.getElementById('breakContainer');
+
+const studentId = localStorage.getItem('studentId');
+
+// Tab click events
 tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-        contents.forEach(c => c.style.display = 'none');
-        document.getElementById(tab.dataset.target).style.display = 'block';
+        profileContainer.style.display = 'none';
+        tuitionContainer.style.display = 'none';
+        breakContainer.style.display = 'none';
+
+        if (tab.id === 'homeTab') return;
+        if (tab.id === 'profileTab') loadProfile();
+        if (tab.id === 'tuitionTab') loadTuition();
+        if (tab.id === 'breakTab') loadBreakRequests();
     });
 });
 
-// Load Profile
-db.ref(`students/${studentId}`).once('value').then(snap => {
-    const student = snap.val();
-    document.getElementById('profileInfo').innerHTML = `
-        Name: ${student.name}<br>
-        Class: ${student.class}<br>
-        Roll: ${student.roll}<br>
-        WhatsApp: ${student.whatsapp}<br>
-        Student ID: ${studentId}
-    `;
-});
+// Load profile
+function loadProfile() {
+    profileContainer.style.display = 'block';
+    db.ref(`students/${studentId}`).once('value').then(snap => {
+        const student = snap.val();
+        profileContainer.innerHTML = `
+            <p>Name: ${student.name}</p>
+            <p>Class: ${student.class}</p>
+            <p>Roll: ${student.roll}</p>
+            <p>WhatsApp: ${student.whatsapp}</p>
+        `;
+    });
+}
 
-// Load Tuition Table
+// Load tuition
 function loadTuition() {
-    db.ref(`tuition/${studentId}`).once('value').then(snap => {
-        const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-        const today = new Date();
-        const table = document.createElement('table');
-        table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date</th><th>Method</th></tr>`;
-        for (let i = 0; i <= today.getMonth(); i++) {
-            const month = monthNames[i];
-            const data = snap.val()?.[month] || {status:'Unpaid', date:'', method:''};
-            const row = document.createElement('tr');
-            row.innerHTML = `<td>${month}</td><td>${data.status}</td><td>${data.date}</td><td>${data.method}</td>`;
-            table.appendChild(row);
-        }
-        const div = document.getElementById('tuitionTable');
-        div.innerHTML = '';
-        div.appendChild(table);
-    });
-}
-loadTuition();
+    tuitionContainer.style.display = 'block';
+    tuitionContainer.innerHTML = '';
+    const table = document.createElement('table');
+    table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date & Method</th></tr>`;
 
-// Break Request for upcoming months
-function loadBreakRequest() {
-    const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const today = new Date();
-    const div = document.getElementById('breakRequestDiv');
-    div.innerHTML = '';
-    for (let i = today.getMonth()+1; i < 12; i++) {
-        const month = monthNames[i];
-        const btn = document.createElement('button');
-        btn.textContent = `Request Break: ${month}`;
-        btn.addEventListener('click', () => {
-            db.ref(`breakRequests/${studentId}/${month}`).set({requested:true})
-            .then(() => alert(`${month} break requested!`));
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    db.ref(`tuition/${studentId}`).once('value').then(snapshot => {
+        const data = snapshot.val() || {};
+        const currentMonthIndex = new Date().getMonth();
+        months.forEach((month, idx) => {
+            if (idx > currentMonthIndex) return; // Only up to current month
+            const row = document.createElement('tr');
+            const status = data[month]?.status || "Unpaid";
+            const date = data[month]?.date || "";
+            const method = data[month]?.method || "";
+            row.innerHTML = `<td>${month}</td><td>${status}</td><td>${date} ${method}</td>`;
+            table.appendChild(row);
         });
-        div.appendChild(btn);
-    }
+    });
+
+    tuitionContainer.appendChild(table);
 }
-loadBreakRequest();
+
+// Load break requests
+function loadBreakRequests() {
+    breakContainer.style.display = 'block';
+    breakContainer.innerHTML = '';
+    const table = document.createElement('table');
+    table.innerHTML = `<tr><th>Month</th><th>Request Break</th></tr>`;
+
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    const currentMonthIndex = new Date().getMonth();
+
+    months.forEach((month, idx) => {
+        if (idx <= currentMonthIndex) return; // Only upcoming months
+        const row = document.createElement('tr');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.addEventListener('change', () => {
+            db.ref(`breakRequests/${studentId}/${month}`).set({requested: checkbox.checked});
+        });
+        row.innerHTML = `<td>${month}</td>`;
+        const td = document.createElement('td');
+        td.appendChild(checkbox);
+        row.appendChild(td);
+        table.appendChild(row);
+    });
+
+    breakContainer.appendChild(table);
+}

@@ -13,56 +13,85 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
 
-// Show/Hide Registration Panel
-document.getElementById('showRegisterBtn').addEventListener('click', () => {
-    document.getElementById('loginPanel').style.display = 'none';
-    document.getElementById('registerPanel').style.display = 'block';
-});
-document.getElementById('cancelRegisterBtn').addEventListener('click', () => {
-    document.getElementById('loginPanel').style.display = 'block';
-    document.getElementById('registerPanel').style.display = 'none';
-});
+// Elements
+const loginBtn = document.getElementById('loginBtn');
+const registrationBtn = document.getElementById('registrationBtn');
+const userInput = document.getElementById('userInput');
+const passwordInput = document.getElementById('passwordInput');
 
-// Login
-document.getElementById('loginBtn').addEventListener('click', () => {
-    const uidEmail = document.getElementById('userIdEmail').value.trim();
-    const password = document.getElementById('password').value;
+// Login button
+loginBtn.addEventListener('click', () => {
+    const inputValue = userInput.value.trim();
+    const password = passwordInput.value.trim();
 
-    // Admin login
-    if (uidEmail === 'theacademiccare2025@gmail.com') {
-        auth.signInWithEmailAndPassword(uidEmail, password)
-        .then(() => { location.href = 'adminPanel.html'; })
-        .catch(err => alert(err.message));
-        return;
-    }
+    if (!inputValue || !password) return alert("Please fill all fields.");
 
-    // Student login
-    db.ref(`students/${uidEmail}`).once('value').then(snap => {
-        const student = snap.val();
-        if (!student) return alert('Student not found.');
-        if (!student.approved) return alert('Registration pending approval.');
-        if (student.password !== password) return alert('Incorrect password.');
-        localStorage.setItem('studentId', uidEmail);
-        location.href = 'studentPanel.html';
+    // Check if admin
+    db.ref(`users/${firebase.auth().currentUser?.uid || ''}`).once('value').then(snap => {
+        const val = snap.val();
+        if (val?.isAdmin && val.email === inputValue) {
+            // Admin login
+            auth.signInWithEmailAndPassword(inputValue, password)
+            .then(() => {
+                localStorage.setItem('adminId', firebase.auth().currentUser.uid);
+                location.href = 'adminPanel.html';
+            })
+            .catch(err => alert(err.message));
+        } else {
+            // Student login
+            auth.signInWithEmailAndPassword(inputValue, password)
+            .then(userCredential => {
+                const uid = userCredential.user.uid;
+                db.ref(`students/${uid}`).once('value').then(snapshot => {
+                    const student = snapshot.val();
+                    if (student?.approved) {
+                        localStorage.setItem('studentId', uid);
+                        location.href = 'studentPanel.html';
+                    } else {
+                        alert("Your registration is pending approval.");
+                        auth.signOut();
+                    }
+                });
+            })
+            .catch(err => alert(err.message));
+        }
     });
 });
 
-// Registration
-document.getElementById('registerBtn').addEventListener('click', () => {
+// Registration button
+registrationBtn.addEventListener('click', () => {
+    document.getElementById('registrationForm').style.display = 'block';
+});
+
+// Registration form submission
+const regForm = document.getElementById('registrationForm');
+regForm.addEventListener('submit', (e) => {
+    e.preventDefault();
     const name = document.getElementById('regName').value.trim();
-    const cls = document.getElementById('regClass').value.trim();
+    const className = document.getElementById('regClass').value.trim();
     const roll = document.getElementById('regRoll').value.trim();
     const whatsapp = document.getElementById('regWhatsapp').value.trim();
-    const pass = document.getElementById('regPassword').value;
-    const confirmPass = document.getElementById('regConfirmPassword').value;
+    const password = document.getElementById('regPassword').value.trim();
+    const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
 
-    if (pass !== confirmPass) return alert("Passwords don't match!");
+    if (password !== confirmPassword) return alert("Passwords do not match");
 
-    const year = new Date().getFullYear();
-    const studentId = `S${year}${cls}${roll}`;
+    const studentId = `S2025${className}${roll}`;
 
-    db.ref(`students/${studentId}`).set({
-        name, class: cls, roll, whatsapp, password: pass, approved: false
-    }).then(() => alert(`Registration submitted! Your Student ID: ${studentId}`))
-      .catch(err => alert(err.message));
+    // Create student auth
+    auth.createUserWithEmailAndPassword(`${studentId}@theacademiccare.com`, password)
+    .then(userCredential => {
+        const uid = userCredential.user.uid;
+        db.ref(`students/${uid}`).set({
+            name,
+            class: className,
+            roll,
+            whatsapp,
+            approved: false
+        });
+        alert(`Registration submitted! Your student ID is ${studentId}`);
+        regForm.reset();
+        regForm.style.display = 'none';
+    })
+    .catch(err => alert(err.message));
 });
