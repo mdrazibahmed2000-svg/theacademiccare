@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, update, onChildChanged, onChildAdded, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, update, onChildChanged, onChildAdded, push, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
@@ -120,7 +120,7 @@ window.openTuition = async (studentId)=>{
   }
   tuitionDiv.appendChild(table);
 
-  // Real-time updates
+  // ------------------ Real-time Updates ------------------
   onChildChanged(tuitionRef, snap=>{
     const month=snap.key, data=snap.val();
     const row=table.querySelector(`tr[data-month="${month}"]`);
@@ -176,8 +176,8 @@ async function loadRegistrations(){
     });
   }
 }
-window.approveStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:true}); };
-window.denyStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:false}); };
+window.approveStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:true}); loadClassStudents(parseInt(await get(ref(db, `registrations/${studentId}/class`)).then(s=>s.val()))); loadRegistrations(); };
+window.denyStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:false}); loadRegistrations(); };
 
 // ------------------ Break Requests ------------------
 async function loadBreakRequests(){
@@ -185,7 +185,7 @@ async function loadBreakRequests(){
   const container=document.getElementById("breakRequestsContainer"); container.innerHTML="";
   if(snapshot.exists()){
     Object.keys(snapshot.val()).forEach(studentId=>{
-      const months=Object.keys(snapshot.val()[studentId]);
+      const months=Object.values(snapshot.val()[studentId]);
       if(months.length>0){
         const div=document.createElement("div");
         div.innerHTML=`${studentId}: ${months.join(", ")} 
@@ -195,7 +195,7 @@ async function loadBreakRequests(){
     });
   }
 }
-window.resolveBreak=async (studentId)=>{ await update(ref(db, `breakRequests/${studentId}`), {}); };
+window.resolveBreak=async (studentId)=>{ await remove(ref(db, `breakRequests/${studentId}`)); loadBreakRequests(); };
 
 // ------------------ Initialize ------------------
 loadRegistrations(); loadBreakRequests();
