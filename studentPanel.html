@@ -1,56 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Student Panel - The Academic Care</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Academic Care - Student Panel</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="student.js" defer></script>
 </head>
 <body>
+  <header>
+    <h1>The Academic Care</h1>
+    <h2>Academic Year 2025</h2>
+  </header>
 
-  <h1>The Academic Care</h1>
-  <h2>Academic Year 2025</h2>
-
-  <div>
-    <button id="logoutBtn">Logout</button>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
+  <nav>
     <button onclick="showTab('home')">Home</button>
     <button onclick="showTab('profile')">My Profile</button>
     <button onclick="showTab('tuition')">Tuition Fee Status</button>
-    <button onclick="showTab('break')">Break Request</button>
-  </div>
+    <button onclick="showTab('breaks')">Break Request</button>
+    <button id="logoutBtn" style="float:right;">Logout</button>
+  </nav>
 
-  <!-- Home -->
-  <div id="home" style="display:block;">
+  <!-- Home Tab -->
+  <section id="home">
     <h3>Welcome to Student Panel</h3>
-    <p>Use tabs to navigate.</p>
-  </div>
+    <p>Select a tab to manage your profile, tuition, and breaks.</p>
+  </section>
 
-  <!-- Profile -->
-  <div id="profile" style="display:none;">
-    <h3>My Profile</h3>
-    <p>Name: <span id="profileName"></span></p>
-    <p>Class: <span id="profileClass"></span></p>
-    <p>Roll: <span id="profileRoll"></span></p>
-    <p>WhatsApp: <span id="profileWhatsApp"></span></p>
-  </div>
+  <!-- Profile Tab -->
+  <section id="profile" style="display:none;">
+    <h3>My Information</h3>
+    <div id="studentInfo"></div>
+  </section>
 
-  <!-- Tuition -->
-  <div id="tuition" style="display:none;">
+  <!-- Tuition Tab -->
+  <section id="tuition" style="display:none;">
     <h3>Tuition Fee Status</h3>
-    <table id="tuitionTable"></table>
-  </div>
+    <div id="tuitionContainer"></div>
+  </section>
 
-  <!-- Break Requests -->
-  <div id="break" style="display:none;">
+  <!-- Break Requests Tab -->
+  <section id="breaks" style="display:none;">
     <h3>Break Request</h3>
-    <div id="breakRequestContainer"></div>
-    <button id="submitBreakRequest">Submit Break Request</button>
-  </div>
+    <div id="breakContainer"></div>
+  </section>
 
-  <script type="module" src="student.js"></script>
 </body>
 </html>

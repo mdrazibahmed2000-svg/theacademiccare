@@ -1,201 +1,180 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, update, onChildChanged, onChildAdded, push, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+// ================================
+// ADMIN PANEL SCRIPT
+// ================================
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  update,
+  remove,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import {
+  getAuth,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
   databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.appspot.com",
+  storageBucket: "the-academic-care-de611.firebasestorage.app",
   messagingSenderId: "142271027321",
   appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-  measurementId: "G-Q7MCGKTYMX"
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth();
-const db = getDatabase();
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-// ------------------ Logout ------------------
+// ================================
+// LOG OUT
+// ================================
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(()=> window.location.href="index.html");
+  signOut(auth).then(() => {
+    alert("Logged out successfully!");
+    window.location.href = "index.html";
+  });
 });
 
-// ------------------ Tab Switching ------------------
-window.showTab = (tabName) => {
-  ["home","classes","registrations","breaks"].forEach(t=>{
-    document.getElementById(t).style.display = (t===tabName)?"block":"none";
-  });
-};
-
-// ------------------ Create Class Sub-tabs ------------------
-function createClassTabs() {
-  const classTabsContainer = document.getElementById("classTabs");
-  classTabsContainer.innerHTML = "";
-  for(let i=6;i<=12;i++){
-    const btn = document.createElement("button");
-    btn.innerText = `Class ${i}`;
-    btn.addEventListener("click", ()=> loadClassStudents(i));
-    classTabsContainer.appendChild(btn);
-  }
+// ================================
+// LOAD CLASSES
+// ================================
+const classTabsContainer = document.getElementById("classTabs");
+for (let i = 6; i <= 12; i++) {
+  const tab = document.createElement("button");
+  tab.className = "class-tab";
+  tab.textContent = `Class ${i}`;
+  tab.addEventListener("click", () => loadStudents(i));
+  classTabsContainer.appendChild(tab);
 }
-createClassTabs();
 
-// ------------------ Load Students by Class ------------------
-async function loadClassStudents(classNum){
-  const container = document.getElementById("classStudents");
-  container.innerHTML = "";
-  const snapshot = await get(ref(db,'registrations'));
-  if(snapshot.exists()){
-    Object.keys(snapshot.val()).forEach(studentId=>{
-      const student = snapshot.val()[studentId];
-      if(student.approved && parseInt(student.class) === classNum){
-        createStudentRow(studentId, student);
+// ================================
+// LOAD STUDENTS BY CLASS
+// ================================
+function loadStudents(classNumber) {
+  const classRef = ref(db, "students");
+  const studentList = document.getElementById("studentList");
+  studentList.innerHTML = `<h3>Class ${classNumber}</h3>`;
+
+  onValue(classRef, (snapshot) => {
+    studentList.innerHTML = `<h3>Class ${classNumber}</h3>`;
+    snapshot.forEach((childSnapshot) => {
+      const student = childSnapshot.val();
+      if (student.class == classNumber && student.status === "approved") {
+        const div = document.createElement("div");
+        div.className = "student-card";
+        div.innerHTML = `
+          <p><strong>${student.name}</strong> (ID: ${student.studentId})</p>
+          <p>WhatsApp: ${student.whatsapp}</p>
+          <button class="tuition-btn" data-id="${student.studentId}">📘 Tuition Fee Status</button>
+        `;
+        studentList.appendChild(div);
       }
     });
-  }
-}
 
-// ------------------ Create Student Row ------------------
-function createStudentRow(studentId, student){
-  const container = document.getElementById("classStudents");
-  const div = document.createElement("div");
-  div.id = `student-${studentId}`;
-  div.style.marginBottom="10px";
-  div.innerHTML = `
-    <strong>${student.name}</strong> (ID: ${studentId}, WhatsApp: ${student.whatsapp})
-    <button onclick="openTuition('${studentId}')">Tuition Status</button>
-    <div id="tuitionTable-${studentId}" style="margin-top:10px;"></div>
-  `;
-  container.appendChild(div);
-}
-
-// ------------------ Tuition Table ------------------
-window.openTuition = async (studentId)=>{
-  const tuitionDiv = document.getElementById(`tuitionTable-${studentId}`);
-  tuitionDiv.innerHTML="";
-  const table = document.createElement("table");
-  table.border="1"; table.style.width="100%";
-  const header = table.insertRow();
-  ["Month","Status","Date & Method","Action"].forEach(h=>{
-    const th = document.createElement("th");
-    th.innerText=h;
-    header.appendChild(th);
+    document.querySelectorAll(".tuition-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const studentId = e.target.getAttribute("data-id");
+        openTuitionPanel(studentId);
+      });
+    });
   });
+}
 
-  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const currentMonth = new Date().getMonth();
+// ================================
+// OPEN TUITION PANEL
+// ================================
+function openTuitionPanel(studentId) {
   const tuitionRef = ref(db, `tuition/${studentId}`);
-  const snapshot = await get(tuitionRef);
-  const tuitionData = snapshot.exists()? snapshot.val() : {};
+  const panel = document.getElementById("tuitionPanel");
+  panel.innerHTML = `<h3>Tuition Fee Status for ${studentId}</h3>`;
+  onValue(tuitionRef, (snapshot) => {
+    panel.innerHTML = `<h3>Tuition Fee Status for ${studentId}</h3>
+    <table class="tuition-table">
+      <tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>
+    </table>`;
+    const table = panel.querySelector(".tuition-table");
 
-  for(let i=0;i<=currentMonth;i++){
-    const month = months[i];
-    const row = table.insertRow(); row.setAttribute("data-month", month);
-    row.insertCell().innerText = month;
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
 
-    let status="Unpaid", color="red", dateMethod="";
-    if(tuitionData[month]){
-      status = tuitionData[month].status;
-      dateMethod = tuitionData[month].date ? `${tuitionData[month].date} | ${tuitionData[month].method}` : "";
-      if(status==="Paid") color="green"; if(status==="Break") color="purple";
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    for (let i = 0; i <= currentMonth; i++) {
+      const month = months[i];
+      const record = snapshot.child(month).val() || { status: "Unpaid" };
+      const row = document.createElement("tr");
+      let color =
+        record.status === "Paid"
+          ? "green"
+          : record.status === "Break"
+          ? "purple"
+          : "red";
+
+      row.innerHTML = `
+        <td>${month}</td>
+        <td style="color:${color}; font-weight:bold;">${record.status}</td>
+        <td>${record.date || ""} ${record.method ? " | " + record.method : ""}</td>
+        <td>
+          ${
+            record.status === "Paid" || record.status === "Break"
+              ? `<button class="undoBtn" data-month="${month}" data-id="${studentId}">Undo</button>`
+              : `
+                <button class="paidBtn" data-month="${month}" data-id="${studentId}">Mark Paid</button>
+                <button class="breakBtn" data-month="${month}" data-id="${studentId}">Mark Break</button>
+              `
+          }
+        </td>
+      `;
+      table.appendChild(row);
     }
 
-    row.insertCell().innerHTML=`<span style="color:${color}">${status}</span>`;
-    row.insertCell().innerText=dateMethod;
-
-    const actionCell = row.insertCell();
-    if(!tuitionData[month] || tuitionData[month].status==="Unpaid"){
-      const btnPaid=document.createElement("button");
-      btnPaid.innerText="Mark Paid"; btnPaid.onclick=()=>markPaid(studentId, month);
-      const btnBreak=document.createElement("button");
-      btnBreak.innerText="Mark Break"; btnBreak.onclick=()=>markBreak(studentId, month);
-      actionCell.appendChild(btnPaid); actionCell.appendChild(btnBreak);
-    } else {
-      const undoBtn=document.createElement("button");
-      undoBtn.innerText="Undo"; undoBtn.onclick=()=>undoPayment(studentId, month);
-      actionCell.appendChild(undoBtn);
-    }
-  }
-  tuitionDiv.appendChild(table);
-
-  // ------------------ Real-time Updates ------------------
-  onChildChanged(tuitionRef, snap=>{
-    const month=snap.key, data=snap.val();
-    const row=table.querySelector(`tr[data-month="${month}"]`);
-    if(row){
-      row.cells[1].innerHTML=`<span style="color:${data.status==="Paid"?"green":data.status==="Break"?"purple":"red"}">${data.status}</span>`;
-      row.cells[2].innerText=data.date ? `${data.date} | ${data.method}`:"";
-      row.cells[3].innerHTML="";
-      if(data.status==="Unpaid"){
-        const btnPaid=document.createElement("button");
-        btnPaid.innerText="Mark Paid"; btnPaid.onclick=()=>markPaid(studentId, month);
-        const btnBreak=document.createElement("button");
-        btnBreak.innerText="Mark Break"; btnBreak.onclick=()=>markBreak(studentId, month);
-        row.cells[3].appendChild(btnPaid); row.cells[3].appendChild(btnBreak);
-      } else {
-        const undoBtn=document.createElement("button");
-        undoBtn.innerText="Undo"; undoBtn.onclick=()=>undoPayment(studentId, month);
-        row.cells[3].appendChild(undoBtn);
-      }
-    }
+    addActionListeners();
   });
 }
 
-// ------------------ Tuition Actions ------------------
-async function markPaid(studentId, month){
-  const method = prompt("Enter payment method:");
-  if(method){
-    await update(ref(db, `tuition/${studentId}/${month}`), {
-      status:"Paid", date: new Date().toLocaleDateString(), method
-    });
-  }
-}
-async function markBreak(studentId, month){
-  await update(ref(db, `tuition/${studentId}/${month}`), {status:"Break", date:"", method:""});
-}
-async function undoPayment(studentId, month){
-  await update(ref(db, `tuition/${studentId}/${month}`), {status:"Unpaid", date:"", method:""});
-}
-
-// ------------------ Registration Requests ------------------
-async function loadRegistrations(){
-  const snapshot=await get(ref(db,'registrations'));
-  const container=document.getElementById("registrationRequests"); container.innerHTML="";
-  if(snapshot.exists()){
-    Object.keys(snapshot.val()).forEach(studentId=>{
-      const student=snapshot.val()[studentId];
-      if(!student.approved){
-        const div=document.createElement("div");
-        div.innerHTML=`${student.name} (Class ${student.class}, Roll ${student.roll}) 
-          <button onclick="approveStudent('${studentId}')">Approve</button>
-          <button onclick="denyStudent('${studentId}')">Deny</button>`;
-        container.appendChild(div);
+// ================================
+// ACTION BUTTONS
+// ================================
+function addActionListeners() {
+  document.querySelectorAll(".paidBtn").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const month = e.target.getAttribute("data-month");
+      const studentId = e.target.getAttribute("data-id");
+      const method = prompt("Enter payment method:");
+      if (method) {
+        const date = new Date().toLocaleDateString();
+        update(ref(db, `tuition/${studentId}/${month}`), {
+          status: "Paid",
+          date,
+          method,
+        });
       }
-    });
-  }
-}
-window.approveStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:true}); loadClassStudents(parseInt(await get(ref(db, `registrations/${studentId}/class`)).then(s=>s.val()))); loadRegistrations(); };
-window.denyStudent=async (studentId)=>{ await update(ref(db, `registrations/${studentId}`), {approved:false}); loadRegistrations(); };
+    })
+  );
 
-// ------------------ Break Requests ------------------
-async function loadBreakRequests(){
-  const snapshot=await get(ref(db,'breakRequests'));
-  const container=document.getElementById("breakRequestsContainer"); container.innerHTML="";
-  if(snapshot.exists()){
-    Object.keys(snapshot.val()).forEach(studentId=>{
-      const months=Object.values(snapshot.val()[studentId]);
-      if(months.length>0){
-        const div=document.createElement("div");
-        div.innerHTML=`${studentId}: ${months.join(", ")} 
-          <button onclick="resolveBreak('${studentId}')">Resolve</button>`;
-        container.appendChild(div);
-      }
-    });
-  }
-}
-window.resolveBreak=async (studentId)=>{ await remove(ref(db, `breakRequests/${studentId}`)); loadBreakRequests(); };
+  document.querySelectorAll(".breakBtn").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const month = e.target.getAttribute("data-month");
+      const studentId = e.target.getAttribute("data-id");
+      update(ref(db, `tuition/${studentId}/${month}`), {
+        status: "Break",
+      });
+    })
+  );
 
-// ------------------ Initialize ------------------
-loadRegistrations(); loadBreakRequests();
+  document.querySelectorAll(".undoBtn").forEach((btn) =>
+    btn.addEventListener("click", (e) => {
+      const month = e.target.getAttribute("data-month");
+      const studentId = e.target.getAttribute("data-id");
+      remove(ref(db, `tuition/${studentId}/${month}`));
+    })
+  );
+}

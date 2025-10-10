@@ -1,44 +1,136 @@
+/* ============================= */
+/* GLOBAL STYLES */
+/* ============================= */
 body {
   font-family: Arial, sans-serif;
-  margin: 0; padding: 0;
-  background: #f4f4f4;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #333;
 }
+
 header {
-  background: #1a73e8;
-  color: white;
+  background-color: #004aad;
+  color: #fff;
   text-align: center;
-  padding: 15px;
+  padding: 10px 0;
 }
-header h1 { margin: 0; font-size: 1.8em; }
-header h2 { margin: 0; font-size: 1.2em; font-weight: normal; }
-main, section {
-  max-width: 600px;
-  margin: 20px auto;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
 }
-input[type=text], input[type=password], input[type=number] {
-  width: 100%;
-  padding: 8px 10px;
-  margin: 6px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+
+header h2 {
+  margin: 2px 0 0 0;
+  font-size: 16px;
 }
-button {
-  padding: 8px 15px;
-  margin: 5px 5px 0 0;
+
+/* ============================= */
+/* NAVIGATION TABS */
+/* ============================= */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: #eee;
+  padding: 5px;
+}
+
+nav button {
+  background: #004aad;
+  color: #fff;
   border: none;
-  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 2px;
   cursor: pointer;
+  border-radius: 4px;
+  transition: 0.2s;
 }
-button:hover { opacity: 0.9; }
-.buttons { display: flex; justify-content: space-between; }
-table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-@media screen and (max-width: 600px) {
-  table, th, td { font-size: 12px; }
-  header h1 { font-size: 1.5em; }
-  header h2 { font-size: 1em; }
+
+nav button:hover {
+  background: #0066ff;
+}
+
+/* ============================= */
+/* SECTIONS */
+/* ============================= */
+section {
+  padding: 15px;
+}
+
+h3 {
+  color: #004aad;
+}
+
+/* ============================= */
+/* TABLES */
+/* ============================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th, table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+table th {
+  background-color: #004aad;
+  color: white;
+}
+
+/* ============================= */
+/* BUTTONS IN TABLES */
+/* ============================= */
+button.tuition-btn,
+button.paidBtn,
+button.breakBtn,
+button.undoBtn,
+button.approveBtn,
+button.denyBtn {
+  padding: 4px 8px;
+  margin: 2px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+  color: white;
+}
+
+button.tuition-btn { background: #007bff; }
+button.paidBtn { background: green; }
+button.breakBtn { background: purple; }
+button.undoBtn { background: #ff6600; }
+button.approveBtn { background: #28a745; }
+button.denyBtn { background: #dc3545; }
+
+/* ============================= */
+/* STUDENT CARD (ADMIN PANEL) */
+/* ============================= */
+.student-card {
+  background: #fff;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* ============================= */
+/* RESPONSIVE DESIGN */
+/* ============================= */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+  table th, table td {
+    font-size: 12px;
+    padding: 6px;
+  }
+  button {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
 }
