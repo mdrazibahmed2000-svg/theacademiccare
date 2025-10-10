@@ -1,40 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Academic Care - Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Academic Care - Admin Panel</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>
-    <h1>The Academic Care</h1>
-    <h2>Academic Year 2025</h2>
-  </header>
+<header>
+  <h1>The Academic Care</h1>
+  <h2>Academic Year 2025</h2>
+</header>
 
-  <nav id="adminNav">
-    <button id="homeTab">Home</button>
-    <button id="classTab">Class</button>
-    <button id="registrationTab">Registration</button>
-    <button id="breakRequestTab">Break Request</button>
-    <button id="logoutBtn">Log Out</button>
-  </nav>
+<nav>
+  <button id="homeTab">Home</button>
+  <button id="classTab">Class</button>
+  <button id="registrationTab">Registration</button>
+  <button id="breakRequestTab">Break Request</button>
+  <button id="logoutBtn">Log Out</button>
+</nav>
 
-  <!-- Class Sub-tabs -->
-  <div id="classTabs" style="display:none;"></div>
+<div id="classTabs" style="display:none;"></div>
+<section id="studentList" style="display:none;"></section>
+<section id="tuitionPanel" style="display:none;"></section>
+<section id="registrationSection" style="display:none;">
+  <h3>Registration Requests</h3>
+  <div id="registrationList"></div>
+</section>
+<section id="breakRequestSection" style="display:none;">
+  <h3>Break Requests</h3>
+  <div id="breakList"></div>
+</section>
 
-  <!-- Main Sections -->
-  <section id="studentList" style="display:none;"></section>
-  <section id="tuitionPanel" style="display:none;"></section>
-  <section id="registrationSection" style="display:none;">
-    <h3>Registration Requests</h3>
-    <div id="registrationList"></div>
-  </section>
-  <section id="breakRequestSection" style="display:none;">
-    <h3>Break Requests</h3>
-    <div id="breakList"></div>
-  </section>
-
-  <script type="module" src="admin.js"></script>
+<script type="module" src="admin.js"></script>
 </body>
 </html>
