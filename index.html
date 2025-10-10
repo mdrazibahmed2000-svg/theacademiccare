@@ -1,51 +1,41 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>The Academic Care — Login & Registration</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Academic Care</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="title-line">The Academic Care</div>
-    <div class="year-line">Academic Year 2025</div>
+  <!-- Header -->
+  <header>
+    <h1>The Academic Care</h1>
+    <h2>Academic Year 2025</h2>
   </header>
 
-
-      <div class="login-container">
-  <h2>Login</h2>
-  <input type="text" id="userInput" placeholder="Student ID or Admin Email">
-  <input type="password" id="passwordInput" placeholder="Password">
-  
-  <div class="button-group">
+  <!-- Login Panel -->
+  <div class="container login-container">
+    <h3>Login Panel</h3>
+    <input type="text" id="userInput" placeholder="Student ID or admin email" />
+    <input type="password" id="passwordInput" placeholder="Password" />
     <button id="loginBtn">Login</button>
-    <button id="showRegisterBtn">Register</button>
+    <button id="showRegisterBtn" class="secondary-btn">Registration</button>
   </div>
-</div>
 
-<div class="register-container" style="display:none;">
-  <h2>Student Registration</h2>
-  <input type="text" id="regName" placeholder="Full Name">
-  <input type="text" id="regClass" placeholder="Class (e.g. 8)">
-  <input type="text" id="regRoll" placeholder="Roll Number">
-  <input type="text" id="regWhatsapp" placeholder="WhatsApp Number">
-  <input type="password" id="regPassword" placeholder="Set Password">
-  <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+  <!-- Registration Panel -->
+  <div class="container register-container" style="display: none;">
+    <h3>Student Registration</h3>
+    <input type="text" id="regName" placeholder="Full Name" />
+    <input type="text" id="regClass" placeholder="Class (e.g. 10)" />
+    <input type="text" id="regRoll" placeholder="Roll" />
+    <input type="text" id="regWhatsapp" placeholder="WhatsApp Number" />
+    <input type="password" id="regPassword" placeholder="Set Password" />
+    <input type="password" id="regConfirmPassword" placeholder="Confirm Password" />
+    <button id="submitRegistration">Submit Registration</button>
+    <button id="backToLoginBtn" class="secondary-btn">Back to Login</button>
+  </div>
 
-  <button id="submitRegistration">Submit Registration</button>
-  <button id="backToLoginBtn">Back to Login</button>
-</div>
-
-      <div class="small muted">After submission, admin will review & approve. Approved students will be able to login.</div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <small>© The Academic Care</small>
-  </footer>
-
-  <!-- Firebase + App script -->
+  <!-- Firebase & App Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
