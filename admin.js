@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/fireba
 import { getDatabase, ref, onValue, off, update, remove, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -17,10 +18,9 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  // --------------------------
+  // -----------------------------
   // LOGOUT
-  // --------------------------
+  // -----------------------------
   document.getElementById("logoutBtn").addEventListener("click", () => {
     signOut(auth).then(() => {
       alert("Logged out!");
@@ -28,9 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // --------------------------
+  // -----------------------------
   // MAIN TABS
-  // --------------------------
+  // -----------------------------
   const studentList = document.getElementById("studentList");
   const tuitionPanel = document.getElementById("tuitionPanel");
   const classTabsContainer = document.getElementById("classTabs");
@@ -65,9 +65,9 @@ document.addEventListener("DOMContentLoaded", () => {
     loadBreakRequests();
   });
 
-  // --------------------------
+  // -----------------------------
   // CLASS SUB-TABS 6-12
-  // --------------------------
+  // -----------------------------
   let activeListener = null;
   for (let i = 6; i <= 12; i++) {
     const tab = document.createElement("button");
@@ -104,9 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --------------------------
+  // -----------------------------
   // TUITION PANEL
-  // --------------------------
+  // -----------------------------
   function openTuitionPanel(studentId) {
     const tuitionRef = ref(db, `tuition/${studentId}`);
     tuitionPanel.style.display = "block";
@@ -174,48 +174,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // -----------------------------
+  // REGISTRATION REQUESTS
+  // -----------------------------
   function loadRegistrationRequests() {
-  const regRef = ref(db, "students");
-  const container = document.getElementById("Registration");
-  
-  onValue(regRef, (snapshot) => {
-    container.innerHTML = ""; // clear previous
+    const regRef = ref(db, "students");
+    const container = document.getElementById("registrationList");
+    onValue(regRef, (snapshot) => {
+      container.innerHTML = "";
+      snapshot.forEach((child) => {
+        const student = child.val();
+        if (student.status === "pending") {
+          const div = document.createElement("div");
+          div.className = "reg-card";
+          div.innerHTML = `
+            <p>${student.name} (ID: ${student.studentId}) - Class ${student.class}</p>
+            <p>WhatsApp: ${student.whatsapp}</p>
+            <button class="approveBtn" data-id="${student.studentId}">Approve</button>
+            <button class="denyBtn" data-id="${student.studentId}">Deny</button>
+          `;
+          container.appendChild(div);
+        }
+      });
 
-    snapshot.forEach((child) => {
-      const student = child.val();
-      // Only show pending registrations
-      if (student.status === "pending") {
-        const div = document.createElement("div");
-        div.className = "reg-card";
-        div.innerHTML = `
-          <p><strong>${student.name}</strong> (ID: ${student.studentId}) - Class ${student.class}</p>
-          <p>WhatsApp: ${student.whatsapp}</p>
-          <button class="approveBtn" data-id="${student.studentId}">Approve</button>
-          <button class="denyBtn" data-id="${student.studentId}">Deny</button>
-        `;
-        container.appendChild(div);
-      }
-    });
+      document.querySelectorAll(".approveBtn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const id = e.target.getAttribute("data-id");
+          update(ref(db, `students/${id}`), { status: "approved" });
+        });
+      });
 
-    // Approve buttons
-    document.querySelectorAll(".approveBtn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const id = e.target.getAttribute("data-id");
-        update(ref(db, `students/${id}`), { status: "approved" });
+      document.querySelectorAll(".denyBtn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          const id = e.target.getAttribute("data-id");
+          remove(ref(db, `students/${id}`));
+        });
       });
     });
+  }
 
-    // Deny buttons
-    document.querySelectorAll(".denyBtn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        const id = e.target.getAttribute("data-id");
-        remove(ref(db, `students/${id}`));
-      });
-    });
-  });
-}
-
-
+  // -----------------------------
+  // BREAK REQUESTS
+  // -----------------------------
   function loadBreakRequests() {
     const breakRef = ref(db, "breakRequests");
     const container = document.getElementById("breakList");
