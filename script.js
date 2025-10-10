@@ -24,6 +24,20 @@ const ACADEMIC_YEAR = 2025;
 const ADMIN_EMAIL = "theacademiccare2025@gmail.com";
 const WA_ADMIN_NUMBER = ""; // set +8801... if you want direct WA to admin
 
+// Toggle between login and registration forms
+const loginContainer = document.querySelector('.login-container');
+const registerContainer = document.querySelector('.register-container');
+
+document.getElementById('showRegisterBtn').addEventListener('click', () => {
+  loginContainer.style.display = 'none';
+  registerContainer.style.display = 'block';
+});
+
+document.getElementById('backToLoginBtn').addEventListener('click', () => {
+  registerContainer.style.display = 'none';
+  loginContainer.style.display = 'block';
+});
+
 /* ---------------- INIT ---------------- */
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
