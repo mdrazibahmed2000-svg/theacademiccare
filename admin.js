@@ -1,126 +1,90 @@
-// admin.js
-import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-import { logout } from "./script.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
+  authDomain: "the-academic-care-de611.firebaseapp.com",
+  databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "the-academic-care-de611",
+  storageBucket: "the-academic-care-de611.appspot.com",
+  messagingSenderId: "142271027321",
+  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+  measurementId: "G-Q7MCGKTYMX"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
 const db = getDatabase();
 
-// Load all registration requests
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  signOut(auth).then(() => window.location.href="index.html");
+});
+
+// Load registration requests
 export async function loadRegistrations(){
-  const snapshot = await get(ref(db, "registrations"));
-  const registrations = snapshot.val();
+  const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("registrationRequests");
   container.innerHTML = "";
-
-  for(let studentId in registrations){
-    const student = registrations[studentId];
-    if(!student.approved){
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <strong>${student.name}</strong> | Class: ${student.class} | Roll: ${student.roll} 
-        <button onclick="approve('${studentId}')">Approve</button>
-        <button onclick="deny('${studentId}')">Deny</button>
-      `;
-      container.appendChild(div);
-    }
+  if(snapshot.exists()){
+    Object.keys(snapshot.val()).forEach(studentId=>{
+      const student = snapshot.val()[studentId];
+      if(!student.approved){
+        const div = document.createElement("div");
+        div.innerHTML = `${student.name} (Class ${student.class}, Roll ${student.roll}) 
+        <button onclick="approveStudent('${studentId}')">Approve</button>
+        <button onclick="denyStudent('${studentId}')">Deny</button>`;
+        container.appendChild(div);
+      }
+    });
   }
 }
 
-// Approve student
-window.approve = async (studentId) => {
-  await update(ref(db, `registrations/${studentId}`), {approved: true});
-  alert(`${studentId} approved.`);
+// Approve / Deny
+window.approveStudent = async (studentId) => {
+  await update(ref(db, `registrations/${studentId}`), {approved:true});
   loadRegistrations();
 };
 
-// Deny student
-window.deny = async (studentId) => {
-  await update(ref(db, `registrations/${studentId}`), {approved: false});
-  alert(`${studentId} denied.`);
+window.denyStudent = async (studentId) => {
+  await update(ref(db, `registrations/${studentId}`), {approved:false});
+  alert("Student denied.");
   loadRegistrations();
 };
 
-// Load approved students per class
+// Load students per class
 export async function loadClassStudents(classNum){
-  const snapshot = await get(ref(db, "registrations"));
-  const students = snapshot.val();
-  const container = document.getElementById(`class${classNum}`);
-  container.innerHTML = "";
-
-  for(let studentId in students){
-    const student = students[studentId];
-    if(student.approved && student.class === classNum.toString()){
-      const div = document.createElement("div");
-      div.innerHTML = `
-        ${student.name} | ${studentId} | WhatsApp: ${student.whatsapp}
-        <button onclick="openTuition('${studentId}')">Manage Tuition</button>
-      `;
-      container.appendChild(div);
-    }
+  const snapshot = await get(ref(db, 'registrations'));
+  const container = document.getElementById("classStudents");
+  container.innerHTML = `<h4>Class ${classNum}</h4>`;
+  if(snapshot.exists()){
+    Object.keys(snapshot.val()).forEach(studentId=>{
+      const student = snapshot.val()[studentId];
+      if(student.approved && student.class==classNum){
+        const div = document.createElement("div");
+        div.innerHTML = `${student.name} (${studentId}) - ${student.whatsapp} 
+        <button onclick="manageTuition('${studentId}')">Tuition</button>`;
+        container.appendChild(div);
+      }
+    });
   }
-}
+};
 
-// Open tuition management panel for a student
-window.openTuition = async (studentId) => {
+// Navigate tuition
+window.manageTuition = (studentId) => {
   localStorage.setItem("currentStudentId", studentId);
-  window.location.href = "tuitionPanel.html"; // Load tuition panel page
-}
+  window.location.href = "tuitionPanel.html";
+};
 
-// Mark Paid / Break in tuitionPanel.html
-export async function loadTuitionAdmin(studentId){
-  const snapshot = await get(ref(db, `tuition/${studentId}`));
-  const tuition = snapshot.val() || {};
-  const container = document.getElementById("tuitionTable");
-  container.innerHTML = "";
-
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const todayMonth = new Date().getMonth();
-
-  monthNames.forEach((month,i) => {
-    const status = tuition[month]?.status || "";
-    const date = tuition[month]?.date || "";
-    const method = tuition[month]?.method || "";
-
-    let actionButtons = "";
-    if(!status && i <= todayMonth){
-      actionButtons = `<button onclick="markPaid('${studentId}','${month}')">Mark Paid</button>
-                       <button onclick="markBreak('${studentId}','${month}')">Mark Break</button>`;
-    } else if(status){
-      actionButtons = `<button onclick="undoStatus('${studentId}','${month}')">Undo</button>`;
-    }
-
-    container.innerHTML += `<tr>
-      <td>${month}</td>
-      <td>${status}</td>
-      <td>${date} | ${method}</td>
-      <td>${actionButtons}</td>
-    </tr>`;
+// Tab switching
+window.showTab = (tabName) => {
+  ["home","classes","registrations","breaks"].forEach(t=>{
+    document.getElementById(t).style.display = (t===tabName)?"block":"none";
   });
-}
-
-// Functions for marking tuition
-window.markPaid = async (studentId, month) => {
-  const method = prompt("Enter Payment Method:");
-  if(!method) return;
-  const date = new Date().toLocaleDateString();
-  await update(ref(db, `tuition/${studentId}/${month}`), {status:"Paid", date:date, method:method});
-  loadTuitionAdmin(studentId);
-}
-
-window.markBreak = async (studentId, month) => {
-  await update(ref(db, `tuition/${studentId}/${month}`), {status:"Break", date:"", method:""});
-  loadTuitionAdmin(studentId);
-}
-
-window.undoStatus = async (studentId, month) => {
-  await update(ref(db, `tuition/${studentId}/${month}`), {status:"", date:"", method:""});
-  loadTuitionAdmin(studentId);
-}
-
-// Logout
-document.getElementById("logoutBtn")?.addEventListener("click", logout);
+};
 
 // Initial load
 loadRegistrations();
-for(let i=6;i<=12;i++){
-  loadClassStudents(i);
-}

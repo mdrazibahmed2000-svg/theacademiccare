@@ -19,10 +19,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
 
-// Ensure DOM is ready
 window.addEventListener("DOMContentLoaded", () => {
 
-  // Toggle Registration Form
+  // Toggle registration form
   document.getElementById("showRegistration").addEventListener("click", () => {
     document.getElementById("loginForm").style.display = "none";
     document.getElementById("registrationForm").style.display = "block";
@@ -31,12 +30,13 @@ window.addEventListener("DOMContentLoaded", () => {
   // Registration
   document.getElementById("registrationForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const name = document.getElementById("name").value;
-    const studentClass = document.getElementById("class").value;
-    const roll = document.getElementById("roll").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    const name = document.getElementById("regName").value.trim();
+    const studentClass = document.getElementById("regClass").value.trim();
+    const roll = document.getElementById("regRoll").value.trim();
+    const whatsapp = document.getElementById("regWhatsApp").value.trim();
+    const password = document.getElementById("regPassword").value.trim();
+    const confirmPassword = document.getElementById("regConfirmPassword").value.trim();
 
     if(password !== confirmPassword){
       alert("Passwords do not match!");
@@ -74,23 +74,33 @@ window.addEventListener("DOMContentLoaded", () => {
   // Login
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const userId = document.getElementById("studentId").value;
-    const password = document.getElementById("password").value;
 
-    let email = (userId === "admin") ? "theacademiccare2025@gmail.com" : `${userId}@student.theacademiccare.com`;
+    const input = document.getElementById("loginUserId").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+    let email;
+
+    // Admin alias
+    if(input.toLowerCase() === "admin"){
+        email = "theacademiccare2025@gmail.com";
+    } else if(input.includes("@")) {
+        email = input; // admin enters email
+    } else {
+        email = `${input}@student.theacademiccare.com`; // student
+    }
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const uid = userCredential.user.uid;
 
-      if(userId === "admin"){
+      if(email === "theacademiccare2025@gmail.com"){
         localStorage.setItem("adminLoggedIn", "true");
         window.location.href = "adminPanel.html";
         return;
       }
 
-      const snapshot = await get(ref(db, `registrations/${userId}`));
+      const snapshot = await get(ref(db, `registrations/${input}`));
       if(snapshot.exists() && snapshot.val().approved){
-        localStorage.setItem("studentId", userId);
+        localStorage.setItem("studentId", input);
         window.location.href = "studentPanel.html";
       } else {
         alert("Your registration is not approved yet.");
