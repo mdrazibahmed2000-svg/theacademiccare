@@ -16,12 +16,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
-
 const studentId = localStorage.getItem("studentId");
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(() => window.location.href="index.html");
+  signOut(auth).then(()=>window.location.href="index.html");
 });
 
 // Tab switching
@@ -31,7 +30,7 @@ window.showTab = (tabName) => {
   });
 };
 
-// Load Profile
+// Load profile
 async function loadProfile(){
   const snapshot = await get(ref(db, `registrations/${studentId}`));
   if(snapshot.exists()){
@@ -43,28 +42,41 @@ async function loadProfile(){
   }
 }
 
-// Load Tuition - Real-time
+// Load tuition table
 function loadTuition(){
   const table = document.getElementById("tuitionTable");
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const currentMonth = new Date().getMonth();
   table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
+
   const tuitionRef = ref(db, `tuition/${studentId}`);
-  onValue(tuitionRef, (snapshot)=>{
+  onValue(tuitionRef, snapshot=>{
     const data = snapshot.val() || {};
     table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date | Method</th></tr>`;
-    Object.keys(data).forEach(month=>{
-      const s = data[month];
-      table.innerHTML += `<tr><td>${month}</td><td>${s.status}</td><td>${s.date} | ${s.method}</td></tr>`;
-    });
+    for(let i=0;i<=currentMonth;i++){
+      const month = months[i];
+      const row = table.insertRow();
+      row.insertCell().innerText = month;
+      let status = "Unpaid", color="red", dateMethod="";
+      if(data[month]){
+        status = data[month].status;
+        dateMethod = data[month].date ? `${data[month].date} | ${data[month].method}` : "";
+        if(status==="Paid") color="green";
+        if(status==="Break") color="purple";
+      }
+      row.insertCell().innerHTML = `<span style="color:${color}">${status}</span>`;
+      row.insertCell().innerText = dateMethod;
+    }
   });
 }
 
-// Break Requests
+// Break requests
 const breakContainer = document.getElementById("breakRequestContainer");
 const submitBreakBtn = document.getElementById("submitBreakRequest");
 const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const todayMonth = new Date().getMonth();
 
-for(let i=todayMonth+1; i<12; i++){
+for(let i=todayMonth+1;i<12;i++){
   const month = months[i];
   const checkbox = document.createElement("input");
   checkbox.type="checkbox";

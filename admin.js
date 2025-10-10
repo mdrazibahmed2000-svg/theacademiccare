@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, update, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, update, set, onValue } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
@@ -29,7 +29,7 @@ window.showTab = (tabName) => {
   });
 };
 
-// Load registrations
+// Load registration requests
 async function loadRegistrations() {
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("registrationRequests");
@@ -64,7 +64,8 @@ async function loadBreakRequests() {
       const months = Object.keys(snapshot.val()[studentId]);
       if(months.length > 0){
         const div = document.createElement("div");
-        div.innerHTML = `${studentId}: ${months.join(", ")} <button onclick="resolveBreak('${studentId}')">Resolve</button>`;
+        div.innerHTML = `${studentId}: ${months.join(", ")} 
+        <button onclick="resolveBreak('${studentId}')">Resolve</button>`;
         container.appendChild(div);
       }
     });
@@ -74,7 +75,7 @@ window.resolveBreak = async (studentId) => {
   await update(ref(db, `breakRequests/${studentId}`), {});
 };
 
-// Classes
+// Classes tab & students
 function createClassTabs() {
   const classTabsContainer = document.getElementById("classTabs");
   classTabsContainer.innerHTML = "";
@@ -86,6 +87,7 @@ function createClassTabs() {
   }
 }
 
+// Load students and tuition table
 async function loadClassStudents(classNum){
   const snapshot = await get(ref(db, 'registrations'));
   const container = document.getElementById("classStudents");
@@ -94,57 +96,91 @@ async function loadClassStudents(classNum){
     Object.keys(snapshot.val()).forEach(studentId => {
       const student = snapshot.val()[studentId];
       if(student.approved && student.class == classNum){
-        const div = document.createElement("div");
-        div.id = `student-${studentId}`;
-        div.innerHTML = `${student.name} (ID: ${studentId}, WhatsApp: ${student.whatsapp}) 
-        <button onclick="markPaid('${studentId}')">Mark Paid</button>
-        <button onclick="markBreak('${studentId}')">Mark Break</button>
-        <span id="status-${studentId}"></span>`;
-        container.appendChild(div);
-
-        // Real-time status listener
-        const tuitionRef = ref(db, `tuition/${studentId}`);
-        onValue(tuitionRef, (snap)=>{
-          const data = snap.val();
-          if(data){
-            const months = Object.keys(data);
-            let statusHTML = "";
-            months.forEach(month=>{
-              statusHTML += `${month}: ${data[month].status} | `;
-            });
-            document.getElementById(`status-${studentId}`).innerText = statusHTML;
-          } else {
-            document.getElementById(`status-${studentId}`).innerText = "";
-          }
-        });
+        const studentDiv = document.createElement("div");
+        studentDiv.id = `student-${studentId}`;
+        studentDiv.innerHTML = `
+          <strong>${student.name}</strong> (ID: ${studentId}, WhatsApp: ${student.whatsapp})
+          <button onclick="openTuition('${studentId}')">Tuition Status</button>
+          <div id="tuitionTable-${studentId}" style="margin-top:10px;"></div>
+        `;
+        container.appendChild(studentDiv);
       }
     });
   }
 }
 
-// Mark Paid
-window.markPaid = async (studentId) => {
-  const month = prompt("Enter month to mark Paid:");
-  const method = prompt("Enter payment method:");
-  if(month && method){
-    await update(ref(db, `tuition/${studentId}/${month}`), {
-      status: "Paid",
-      date: new Date().toLocaleDateString(),
-      method
-    });
-  }
-};
+// Tuition Table
+window.openTuition = async (studentId) => {
+  const tuitionDiv = document.getElementById(`tuitionTable-${studentId}`);
+  tuitionDiv.innerHTML = "";
+  const table = document.createElement("table");
+  table.border = "1";
+  const header = table.insertRow();
+  ["Month","Status","Date & Method","Action"].forEach(text=>{
+    const th = document.createElement("th");
+    th.innerText = text;
+    header.appendChild(th);
+  });
 
-// Mark Break
-window.markBreak = async (studentId) => {
-  const month = prompt("Enter month to mark Break:");
-  if(month){
-    await update(ref(db, `tuition/${studentId}/${month}`), {
-      status: "Break",
-      date: "",
-      method: ""
-    });
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const currentMonth = new Date().getMonth(); // 0-11
+
+  const tuitionRef = ref(db, `tuition/${studentId}`);
+  const snapshot = await get(tuitionRef);
+  const tuitionData = snapshot.exists() ? snapshot.val() : {};
+
+  for(let i=0;i<=currentMonth;i++){
+    const month = months[i];
+    const row = table.insertRow();
+    row.insertCell().innerText = month;
+
+    let status="Unpaid", color="red", dateMethod="";
+    if(tuitionData[month]){
+      status = tuitionData[month].status;
+      dateMethod = tuitionData[month].date ? `${tuitionData[month].date} | ${tuitionData[month].method}` : "";
+      if(status==="Paid") color="green";
+      if(status==="Break") color="purple";
+    }
+    row.insertCell().innerHTML = `<span style="color:${color}">${status}</span>`;
+    row.insertCell().innerText = dateMethod;
+
+    const actionCell = row.insertCell();
+    if(!tuitionData[month] || tuitionData[month].status==="Unpaid"){
+      const btnPaid = document.createElement("button");
+      btnPaid.innerText = "Mark Paid";
+      btnPaid.onclick = async ()=>{
+        const method = prompt("Enter payment method:");
+        if(method){
+          await update(ref(db, `tuition/${studentId}/${month}`), {
+            status:"Paid",
+            date: new Date().toLocaleDateString(),
+            method
+          });
+        }
+      };
+      const btnBreak = document.createElement("button");
+      btnBreak.innerText = "Mark Break";
+      btnBreak.onclick = async ()=>{
+        await update(ref(db, `tuition/${studentId}/${month}`), {status:"Break", date:"", method:""});
+      };
+      actionCell.appendChild(btnPaid);
+      actionCell.appendChild(btnBreak);
+    } else {
+      const undoBtn = document.createElement("button");
+      undoBtn.innerText = "Undo";
+      undoBtn.onclick = async ()=>{
+        await update(ref(db, `tuition/${studentId}/${month}`), {status:"Unpaid", date:"", method:""});
+      };
+      actionCell.appendChild(undoBtn);
+    }
   }
+
+  tuitionDiv.appendChild(table);
+
+  // Real-time refresh
+  onValue(tuitionRef, snap=>{
+    openTuition(studentId);
+  });
 };
 
 // Initialize
