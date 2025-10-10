@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebas
 import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -23,19 +24,48 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   window.location.href = 'index.html';
 });
 
-// Load Registration Requests
+// ------------------ TAB FUNCTIONS ------------------
+function hideAllTabs() {
+  document.querySelectorAll('.tabContent').forEach(tab => tab.style.display='none');
+}
+
+window.showTab = (tabId) => {
+  hideAllTabs();
+  document.getElementById(tabId).style.display = 'block';
+  if(tabId==='classTab') loadClassStudents();
+  if(tabId==='registrationTab') loadRegistrationRequests();
+  if(tabId==='breakTab') loadBreakRequests();
+}
+
+// ------------------ SUB-TAB FUNCTIONS ------------------
+function hideAllClassContent() {
+  document.querySelectorAll('.classContent').forEach(div => div.style.display='none');
+}
+
+window.showClassSubTab = (cls) => {
+  hideAllClassContent();
+  document.getElementById('class'+cls).style.display='block';
+}
+
+// ------------------ REGISTRATION TAB ------------------
 function loadRegistrationRequests() {
   const regDiv = document.getElementById('registrationList');
+  regDiv.innerHTML = '';
   onValue(ref(db, 'students'), snapshot => {
     regDiv.innerHTML = '';
     snapshot.forEach(snap => {
       const student = snap.val();
       const id = snap.key;
-      if(!student.approved){
+
+      // Ensure missing fields are initialized
+      if(student.approved===undefined) student.approved=false;
+      if(student.denied===undefined) student.denied=false;
+
+      if(!student.approved && !student.denied){
         const li = document.createElement('li');
         li.innerHTML = `
-          ${student.name} (ID: ${id}, Class: ${student.class})
-          <button onclick="approveStudent('${id}',${student.class})">Approve</button>
+          ${student.name} (Class: ${student.class}, Roll: ${student.roll})
+          <button onclick="approveStudent('${id}')">Approve</button>
           <button onclick="denyStudent('${id}')">Deny</button>
         `;
         regDiv.appendChild(li);
@@ -44,54 +74,81 @@ function loadRegistrationRequests() {
   });
 }
 
-// Approve / Deny
-window.approveStudent = (id, studentClass) => {
-  update(ref(db, 'students/' + id), { approved: true });
-  alert('Student approved');
-};
+window.approveStudent = (id) => {
+  update(ref(db, 'students/' + id), { approved: true, denied:false });
+  alert('Student approved!');
+}
 
 window.denyStudent = (id) => {
-  update(ref(db, 'students/' + id), { denied: true });
-  alert('Student denied');
-};
+  update(ref(db, 'students/' + id), { denied: true, approved:false });
+  alert('Student denied!');
+}
 
-// Load Class Students
+// ------------------ CLASS TAB ------------------
 function loadClassStudents() {
   for(let cls=6; cls<=12; cls++){
     const div = document.getElementById('class'+cls);
+    div.innerHTML='Loading...';
     onValue(ref(db, 'students'), snapshot => {
       div.innerHTML = '';
       snapshot.forEach(snap => {
         const student = snap.val();
         const id = snap.key;
-        if(student.approved && student.class==cls){
-          const tuitionIcon = `<button onclick="viewTuition('${id}')">Tuition Status</button>`;
-          div.innerHTML += `<div>${student.name} (ID: ${id}, WhatsApp: ${student.whatsapp}) ${tuitionIcon}</div>`;
+
+        // Initialize missing fields
+        if(student.approved===undefined) student.approved=false;
+        if(student.denied===undefined) student.denied=false;
+
+        if(student.approved && !student.denied && student.class==cls){
+          div.innerHTML += `
+            <div>
+              ${student.name} (ID: ${id}, WhatsApp: ${student.whatsapp})
+              <button onclick="viewTuition('${id}')">Tuition Status</button>
+            </div>
+          `;
         }
       });
     });
   }
 }
 
-// Tuition Actions
+// ------------------ TUITION PANEL (OPEN FROM CLASS TAB) ------------------
 window.viewTuition = (studentId) => {
-  window.location.href = `tuitionPanel.html?studentId=${studentId}`;
-};
+  window.open(`tuitionPanel.html?studentId=${studentId}`, '_blank');
+}
 
-window.markPaid = (studentId, month) => {
-  const date = new Date().toLocaleDateString();
-  const method = prompt('Enter payment method:');
-  update(ref(db, `tuition/${studentId}/${month}`), { status:'Paid', date, method });
-};
+// ------------------ BREAK REQUESTS ------------------
+function loadBreakRequests() {
+  const breakDiv = document.getElementById('breakList');
+  breakDiv.innerHTML = '';
+  onValue(ref(db, 'tuition'), snapshot => {
+    snapshot.forEach(studentSnap => {
+      const studentId = studentSnap.key;
+      const months = studentSnap.val();
+      for(let m in months){
+        if(months[m].status === 'Break' && !months[m].approved){
+          const li = document.createElement('li');
+          li.innerHTML = `
+            Student: ${studentId}, Month: ${m}
+            <button onclick="approveBreak('${studentId}','${m}')">Approve</button>
+            <button onclick="denyBreak('${studentId}','${m}')">Deny</button>
+          `;
+          breakDiv.appendChild(li);
+        }
+      }
+    });
+  });
+}
 
-window.markBreak = (studentId, month) => {
-  update(ref(db, `tuition/${studentId}/${month}`), { status:'Break' });
-};
+window.approveBreak = (studentId, month) => {
+  update(ref(db, `tuition/${studentId}/${month}`), { approved:true });
+  alert('Break approved!');
+}
 
-window.undoTuition = (studentId, month) => {
-  update(ref(db, `tuition/${studentId}/${month}`), { status:'Unpaid', date:'', method:'' });
-};
+window.denyBreak = (studentId, month) => {
+  update(ref(db, `tuition/${studentId}/${month}`), { approved:false, status:'Unpaid' });
+  alert('Break denied!');
+}
 
-// Initialize
-loadRegistrationRequests();
-loadClassStudents();
+// ------------------ INITIALIZE ------------------
+showTab('homeTab');
