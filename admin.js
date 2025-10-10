@@ -21,7 +21,7 @@ const db = getDatabase();
 
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  signOut(auth).then(() => window.location.href = "index.html");
+  signOut(auth).then(() => window.location.href="index.html");
 });
 
 // Tab switching
@@ -55,7 +55,6 @@ window.approveStudent = async (studentId) => {
 };
 window.denyStudent = async (studentId) => {
   await update(ref(db, `registrations/${studentId}`), {approved:false});
-  alert("Student denied.");
   loadRegistrations();
 };
 

@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, get, update, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -19,12 +19,12 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
 
+const studentId = localStorage.getItem("studentId");
+
 // Logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
   signOut(auth).then(() => window.location.href="index.html");
 });
-
-const studentId = localStorage.getItem("studentId");
 
 // Tab switching
 window.showTab = (tabName) => {
