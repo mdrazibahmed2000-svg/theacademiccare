@@ -1,1070 +1,159 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Academic Care - Tuition Management</title>
-    <!-- Load Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f4f7f9;
-        }
-        .app-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            padding: 24px;
-        }
-        .active-tab {
-            background-color: #1e40af; /* Blue-800 */
-            color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(30, 64, 175, 0.4);
-        }
-        .admin-sub-tab.active-tab {
-            background-color: #dbeafe; /* Blue-100 */
-            color: #1e40af; /* Blue-800 */
-            border-bottom: 2px solid #3b82f6;
-            border-radius: 0;
-        }
-        input:focus {
-            ring: 2px;
-            ring-opacity: 0.5;
-            outline: none;
-            border-color: #3b82f6;
-        }
-        .fee-table th, .fee-table td {
-            padding: 8px 12px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Academic Care — Tuition Manager</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDKs -->
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+  <script type="module" src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
 </head>
 <body>
+  <header class="site-header">
+    <div class="title-line">The Academic Care</div>
+    <div class="year-line">Academic Year 2025</div>
+  </header>
 
-    <!-- Global Message Box -->
-    <div id="message-box" class="fixed top-4 left-1/2 -translate-x-1/2 opacity-0 transition-opacity duration-500 z-50 p-3 rounded-lg text-white text-center text-sm min-w-[300px]"></div>
+  <main class="container">
+    <section id="auth-section" class="card">
+      <h2 class="card-title">Login & Registration</h2>
 
-    <div class="app-container">
-        
-        <!-- Header -->
-        <header class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-blue-800">The Academic Care</h1>
-            <h2 id="academic-year" class="text-lg font-medium text-gray-600 mt-1">Academic Year 2025</h2>
-        </header>
+      <div class="auth-grid">
+        <div class="login-column">
+          <h3>Sign in</h3>
+          <label>Student ID or type <code>admin</code></label>
+          <input id="identifier" placeholder="e.g. S20251015 or admin" />
 
-        <!-- Login Panel (Default View) -->
-        <div id="login-panel" class="app-panel card max-w-sm mx-auto hidden">
-            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">Sign In</h3>
-            <div class="space-y-4">
-                <div>
-                    <label for="login-identifier" class="block text-sm font-medium text-gray-700 mb-1">Student ID (e.g., S20261001) / Admin Email</label>
-                    <input type="text" id="login-identifier" placeholder="ID or Email" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                    <input type="password" id="login-password" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                <button onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
-                    Login
-                </button>
-            </div>
-            <p class="text-center mt-6 text-sm text-gray-600">
-                New Student? <a href="#" id="register-link" class="text-blue-600 font-semibold hover:text-blue-800 transition duration-150">Register Here</a>
-            </p>
+          <div id="admin-email-row" class="hidden">
+            <label>Admin email</label>
+            <input id="admin-email" placeholder="admin@example.com" />
+          </div>
+
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Password" />
+
+          <button id="login-btn" class="btn">Sign In</button>
+          <button id="reset-wa" class="btn ghost">Reset via WhatsApp</button>
+
+          <hr/>
+          <small>New student? Fill registration form to apply.</small>
         </div>
 
-        <!-- Registration Panel -->
-        <div id="registration-panel" class="app-panel card max-w-md mx-auto hidden">
-            <h3 class="text-2xl font-bold mb-6 text-center text-gray-800">New Student Registration</h3>
-            <form id="registration-form" class="space-y-4">
-                <input type="text" id="reg-name" placeholder="Full Name" required class="w-full p-3 border border-gray-300 rounded-lg">
-                <div class="grid grid-cols-2 gap-4">
-                    <select id="reg-class" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        <option value="">Select Class</option>
-                        <option value="6">Class 6</option>
-                        <option value="7">Class 7</option>
-                        <option value="8">Class 8</option>
-                        <option value="9">Class 9</option>
-                        <option value="10">Class 10</option>
-                        <option value="11">Class 11</option>
-                        <option value="12">Class 12</option>
-                    </select>
-                    <input type="number" id="reg-roll" placeholder="Roll Number" required min="1" class="w-full p-3 border border-gray-300 rounded-lg">
-                </div>
-                <input type="text" id="reg-whatsapp" placeholder="WhatsApp Number" required class="w-full p-3 border border-gray-300 rounded-lg">
-                <input type="password" id="reg-password" placeholder="Set Password (min 6 chars)" required class="w-full p-3 border border-gray-300 rounded-lg">
-                <input type="password" id="reg-confirm-password" placeholder="Confirm Password" required class="w-full p-3 border border-gray-300 rounded-lg">
-                <button type="button" onclick="handleSubmitRegistration()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
-                    Submit Registration
-                </button>
-            </form>
-            <button id="back-to-login-reg" class="mt-4 w-full text-blue-600 hover:text-blue-800 text-sm">Back to Login</button>
+        <div class="register-column">
+          <h3>Registration</h3>
+          <label>Full name</label>
+          <input id="reg-name" placeholder="Student full name" />
+          <label>Class (6-12)</label>
+          <input id="reg-class" placeholder="e.g. 10" />
+          <label>Roll (numeric)</label>
+          <input id="reg-roll" placeholder="e.g. 15" />
+          <label>WhatsApp Number (with country code)</label>
+          <input id="reg-whatsapp" placeholder="+8801XXXXXXXXX" />
+          <label>Password</label>
+          <input id="reg-pass" type="password" />
+          <label>Confirm Password</label>
+          <input id="reg-pass-confirm" type="password" />
+          <button id="submit-registration" class="btn">Submit Registration</button>
+
+          <div id="reg-result" class="result"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="app-section" class="hidden">
+      <!-- Navigation -->
+      <nav class="tabs">
+        <button class="tab-btn active" data-target="home">Home</button>
+        <button class="tab-btn" data-target="panel">Panel</button>
+        <button class="tab-btn" data-target="logout">Logout</button>
+      </nav>
+
+      <div id="home" class="tab-content">
+        <h3 id="welcome-text">Welcome</h3>
+        <p>Use the panel to manage students, tuition, and break requests.</p>
+      </div>
+
+      <!-- Admin / Student Panel container -->
+      <div id="panel" class="tab-content hidden">
+
+        <!-- Admin panels -->
+        <div id="admin-panel" class="panel hidden">
+          <h3>Welcome to Admin Panel</h3>
+          <div class="admin-tabs">
+            <button class="admin-tab" data-admin-target="admin-home">Home</button>
+            <button class="admin-tab" data-admin-target="admin-class">Class</button>
+            <button class="admin-tab" data-admin-target="admin-registration">Registration</button>
+            <button class="admin-tab" data-admin-target="admin-breaks">Break Request</button>
+          </div>
+
+          <div id="admin-home" class="admin-content">Click tabs above to manage.</div>
+
+          <!-- Class Tab -->
+          <div id="admin-class" class="admin-content hidden">
+            <div class="class-subtabs" id="class-subtabs"></div>
+            <div id="class-list" class="class-list"></div>
+            <div id="tuition-modal" class="modal hidden">
+              <div class="modal-content">
+                <h4 id="tuition-modal-title"></h4>
+                <div id="tuition-table-wrap"></div>
+                <button class="btn ghost" id="close-tuition">Close</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Registration tab -->
+          <div id="admin-registration" class="admin-content hidden">
+            <h4>Registration Requests</h4>
+            <div id="registration-requests"></div>
+          </div>
+
+          <!-- Break requests -->
+          <div id="admin-breaks" class="admin-content hidden">
+            <h4>Break Requests</h4>
+            <div id="admin-break-requests"></div>
+          </div>
         </div>
 
-        <!-- Admin Panel -->
-        <div id="admin-panel" class="app-panel hidden">
-            <header class="mb-6">
-                <h3 id="admin-header-title" class="text-2xl font-semibold text-gray-800 mb-4">Welcome to Admin Panel</h3>
-                <!-- Main Tabs -->
-                <div class="flex flex-wrap gap-2 md:gap-4 p-1 bg-white rounded-xl shadow-md" id="admin-tabs">
-                    <button id="admin-home-tab" class="admin-main-tab px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200 active-tab">Home</button>
-                    <button id="admin-class-tab" class="admin-main-tab px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200">Class</button>
-                    <button id="admin-registration-tab" class="admin-main-tab px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200">Registration</button>
-                    <button id="admin-break-tab" class="admin-main-tab px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200">Break Request</button>
-                    <button onclick="handleLogout()" class="ml-auto bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm md:text-base font-medium rounded-lg transition duration-200">Logout</button>
-                </div>
-            </header>
+        <!-- Student panels -->
+        <div id="student-panel" class="panel hidden">
+          <h3>Welcome to Student Panel</h3>
+          <div class="student-tabs">
+            <button class="student-tab" data-student-target="student-home">Home</button>
+            <button class="student-tab" data-student-target="student-profile">My Profile</button>
+            <button class="student-tab" data-student-target="student-tuition">Tuition Fee Status</button>
+            <button class="student-tab" data-student-target="student-break">Break Request</button>
+          </div>
 
-            <!-- Admin Tab Content -->
-            <div id="admin-home-content" class="admin-tab-content card">
-                <h4 class="text-xl font-bold mb-4 text-blue-700">Admin Dashboard Home</h4>
-                <p class="text-gray-600">Use the tabs above to manage student records, registration requests, and tuition fee breaks.</p>
-                <div class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-                    <h5 class="font-bold text-green-700">Admin Setup Complete:</h5>
-                    <p class="text-sm text-green-600">The application is now connected using your Admin UID: <span class="font-mono">xg4XNMsSJqbXMZ57qicrpgfM6Yn1</span>.</p>
-                </div>
-            </div>
+          <div id="student-home" class="student-content">Click tabs above.</div>
 
-            <div id="admin-class-content" class="admin-tab-content card hidden">
-                <!-- Class Sub-Tabs -->
-                <div class="flex flex-wrap justify-start border-b border-gray-200 mb-4 -mx-4 px-4 overflow-x-auto" id="admin-class-subtabs">
-                    <!-- Class buttons generated by JS -->
-                </div>
-                
-                <h4 class="text-xl font-bold mb-4 text-blue-700">Student List by Class</h4>
-                <div id="admin-class-student-list" class="space-y-3">
-                    <!-- Student list loaded by JS -->
-                </div>
-            </div>
+          <div id="student-profile" class="student-content hidden">
+            <h4>My Profile</h4>
+            <div id="profile-info"></div>
+          </div>
 
-            <div id="admin-registration-content" class="admin-tab-content card hidden">
-                <h4 class="text-xl font-bold mb-4 text-blue-700">Pending Registration Requests</h4>
-                <div id="admin-registration-requests" class="space-y-3">
-                    <!-- Registration requests loaded by JS -->
-                </div>
-            </div>
+          <div id="student-tuition" class="student-content hidden">
+            <h4>Tuition Fee Status</h4>
+            <div id="student-tuition-table"></div>
+          </div>
 
-            <div id="admin-break-content" class="admin-tab-content card hidden">
-                <h4 class="text-xl font-bold mb-4 text-blue-700">Pending Break Requests</h4>
-                <div id="admin-break-requests" class="space-y-3">
-                    <!-- Break requests loaded by JS -->
-                </div>
-            </div>
+          <div id="student-break" class="student-content hidden">
+            <h4>Break Request (upcoming months)</h4>
+            <div id="student-break-list"></div>
+            <button id="submit-break-request" class="btn">Submit Break Request</button>
+            <div id="break-result" class="result"></div>
+          </div>
         </div>
 
-        <!-- Student Panel -->
-        <div id="student-panel" class="app-panel hidden">
-            <header class="mb-6">
-                <h3 id="student-header-title" class="text-2xl font-semibold text-gray-800 mb-4">Welcome to Student Panel</h3>
-                <!-- Main Tabs -->
-                <div class="flex flex-wrap gap-2 md:gap-4 p-1 bg-white rounded-xl shadow-md" id="student-tabs">
-                    <button onclick="handleStudentTabClick('my-profile')" class="px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200 active-tab">My Profile</button>
-                    <button onclick="handleStudentTabClick('tuition-fee-status')" class="px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200">Tuition Fee Status</button>
-                    <button onclick="handleStudentTabClick('break-request')" class="px-4 py-2 text-sm md:text-base font-medium transition-colors duration-200">Break Request</button>
-                    <button onclick="handleLogout()" class="ml-auto bg-red-500 hover:bg-red-600 text-white px-4 py-2 text-sm md:text-base font-medium rounded-lg transition duration-200">Logout</button>
-                </div>
-            </header>
-
-            <!-- Student Tab Content -->
-            <div id="student-my-profile-content" class="student-content card">
-                <!-- Profile data loaded by JS -->
-            </div>
-
-            <div id="student-tuition-fee-status-content" class="student-content card hidden">
-                <!-- Fee status table loaded by JS -->
-            </div>
-
-            <div id="student-break-request-content" class="student-content card hidden">
-                <!-- Break request form loaded by JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Fee Management Modal (Admin) -->
-    <div id="fee-management-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex justify-center items-center p-4">
-        <div class="bg-white rounded-xl max-w-3xl w-full p-6 shadow-2xl relative">
-            <button onclick="closeFeeManagementModal()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-800 transition">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <h3 id="fee-modal-title" class="text-2xl font-bold mb-6 text-blue-700">Fee Status</h3>
-            <div id="fee-modal-body" class="max-h-96 overflow-y-auto">
-                <!-- Fee table and actions loaded by JS -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Firebase SDK Initialization -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getDatabase, ref, set, get, update, remove, onValue, child } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
-        
-        // --- GLOBAL FIREBASE OBJECT ---
-        window.FB = {};
-        
-        // 1. Initialization
-        try {
-            // Retrieve configuration from the environment
-            const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-            const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            
-            // Initialize the Firebase app and services
-            const app = initializeApp(firebaseConfig);
-            window.FB.db = getDatabase(app);
-            window.FB.auth = getAuth(app);
-            
-            // CRITICAL: Set the Admin UID based on the user's provided UID
-            window.FB.ADMIN_UID = 'xg4XNMsSJqbXMZ57qicrpgfM6Yn1'; 
-
-            // Expose Realtime Database methods
-            window.FB.ref = ref;
-            window.FB.set = set;
-            window.FB.get = get;
-            window.FB.update = update;
-            window.FB.remove = remove;
-            window.FB.onValue = onValue;
-            window.FB.child = child;
-
-            // Expose Auth methods
-            window.FB.onAuthStateChanged = onAuthStateChanged;
-            window.FB.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-            window.FB.signInWithEmailAndPassword = signInWithEmailAndPassword;
-            window.FB.signOut = signOut;
-
-            // 2. Initial Authentication
-            if (initialAuthToken) {
-                // Sign in with the custom token provided by the environment
-                signInWithCustomToken(window.FB.auth, initialAuthToken)
-                    .catch(error => {
-                        console.error("Custom token sign-in failed. Falling back to anonymous.", error);
-                        signInAnonymously(window.FB.auth).catch(e => console.error("Anonymous sign-in failed.", e));
-                    });
-            } else {
-                // If no token, sign in anonymously (required for access to Realtime DB rules)
-                signInAnonymously(window.FB.auth).catch(e => console.error("Anonymous sign-in failed.", e));
-            }
-
-        } catch (e) {
-            console.error("Firebase Initialization Failed:", e);
-            document.getElementById('login-panel').innerHTML = '<p class="text-center text-red-600 p-8">Error: Firebase SDK failed to initialize. Check console for details.</p>';
-        }
-    </script>
-
-    <!-- Application Logic (from script.js) -->
-    <script>
-        // Global variables will be available via the window.FB object initialized above
-        let currentUserData = {};
-
-        // --- CORE UI HELPERS ---
-
-        const showPanel = (panelId) => {
-            document.querySelectorAll('.app-panel').forEach(panel => {
-                panel.classList.add('hidden');
-            });
-            const panel = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.remove('hidden');
-            }
-        };
-
-        const showMessage = (message, type = 'success') => {
-            const messageBox = document.getElementById('message-box');
-            messageBox.textContent = message;
-            
-            // Set styles and make visible
-            messageBox.className = `fixed top-4 left-1/2 -translate-x-1/2 p-3 rounded-lg text-white text-center z-50 transition-all duration-500 min-w-[300px] ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
-            messageBox.style.opacity = 1;
-            
-            // Hide after 4 seconds
-            setTimeout(() => {
-                messageBox.style.opacity = 0;
-            }, 4000);
-        };
-
-        const updateHeader = (panelType) => {
-            const currentYear = new Date().getFullYear();
-            // Shows next year based on current system time, as per S20261001 ID format.
-            document.getElementById('academic-year').textContent = `Academic Year ${currentYear + 1}`; 
-            
-            const adminHeader = document.getElementById('admin-header-title');
-            const studentHeader = document.getElementById('student-header-title');
-
-            if (panelType === 'admin' && adminHeader) {
-                adminHeader.textContent = "Welcome to Admin Panel";
-            } else if (panelType === 'student' && studentHeader) {
-                studentHeader.textContent = "Welcome to Student Panel";
-            }
-        };
-
-        const initializeFeeStructure = () => {
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const fees = {};
-            months.forEach(month => {
-                fees[month] = {
-                    status: 'Unpaid', 
-                    date: null,
-                    method: null,
-                    isBreak: false
-                };
-            });
-            return fees;
-        };
-
-        // --- AUTHENTICATION & ROUTING ---
-
-        const setupAdminPanel = () => {
-            updateHeader('admin');
-            showPanel('admin-panel');
-            
-            // 1. Generate Class Sub-Tabs
-            const subtabsContainer = document.getElementById('admin-class-subtabs');
-            subtabsContainer.innerHTML = ''; 
-            for (let i = 6; i <= 12; i++) {
-                const classTab = document.createElement('button');
-                classTab.className = 'admin-sub-tab px-4 py-2 text-sm font-medium transition-colors duration-200';
-                classTab.textContent = `Class ${i}`;
-                classTab.setAttribute('data-class', i);
-                classTab.onclick = () => handleAdminClassSubTab(i);
-                subtabsContainer.appendChild(classTab);
-            }
-            
-            // 2. Default to show Home content
-            document.getElementById('admin-home-tab').click();
-            
-            // 3. Load requests (Admin will see live updates via onValue listeners)
-            displayRegistrationRequests();
-            displayBreakRequests(); 
-        };
-
-        const setupStudentPanel = (userData) => {
-            updateHeader('student');
-            showPanel('student-panel');
-            currentUserData = userData;
-            // Default to show profile content
-            handleStudentTabClick('my-profile');
-        };
-
-        window.handleLogin = async () => {
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!identifier || !password) {
-                showMessage("Please enter both ID/Email and password.", 'error');
-                return;
-            }
-
-            const isStudentId = identifier.toUpperCase().startsWith('S');
-            // Students use ID as email prefix for auth, Admin uses full email
-            const email = isStudentId ? `${identifier.toLowerCase()}@academic-care.com` : identifier; 
-
-            try {
-                const userCredential = await FB.signInWithEmailAndPassword(FB.auth, email, password);
-                const user = userCredential.user;
-
-                if (user.uid === FB.ADMIN_UID) {
-                    setupAdminPanel();
-                } else if (isStudentId) {
-                    // Check if the student ID exists and their authUid matches
-                    const studentRef = FB.ref(FB.db, `students/${identifier.toUpperCase()}`);
-                    const snapshot = await FB.get(studentRef);
-
-                    if (snapshot.exists()) {
-                        const studentData = snapshot.val();
-                        if (studentData.authUid === user.uid) {
-                            setupStudentPanel(studentData);
-                        } else {
-                            // Mismatch between logged-in user and student record. Log out.
-                            await FB.signOut(FB.auth);
-                            showMessage("Authentication error. Contact admin.", 'error');
-                        }
-                    } else {
-                        // Student ID not found in DB records. Log out.
-                        await FB.signOut(FB.auth);
-                        showMessage("Student ID not approved or does not exist.", 'error');
-                    }
-                } else {
-                    // Logged in user is not admin and not a recognized student ID format
-                    await FB.signOut(FB.auth);
-                    showMessage("Invalid credentials or user type.", 'error');
-                }
-
-            } catch (error) {
-                console.error("Login Error:", error);
-                showMessage("Login failed. Check your ID/Email and password.", 'error');
-            }
-        };
-
-        window.handleLogout = async () => {
-            try {
-                await FB.signOut(FB.auth);
-                // Auth state listener handles routing back to login
-            } catch (error) {
-                console.error("Logout Error:", error);
-                showMessage("Logout failed. Try again.", 'error');
-            }
-        };
-
-        // --- REGISTRATION LOGIC ---
-
-        const generateStudentId = (classValue, rollValue) => {
-            const year = new Date().getFullYear() + 1; // Example: 2026 for a student joining in 2025/2026 academic year
-            const paddedClass = String(classValue).padStart(2, '0');
-            const paddedRoll = String(rollValue).padStart(2, '0');
-            return `S${year}${paddedClass}${paddedRoll}`;
-        };
-
-        window.handleSubmitRegistration = async () => {
-            const name = document.getElementById('reg-name').value.trim();
-            const classValue = parseInt(document.getElementById('reg-class').value, 10);
-            const rollValue = parseInt(document.getElementById('reg-roll').value, 10);
-            const whatsapp = document.getElementById('reg-whatsapp').value.trim();
-            const password = document.getElementById('reg-password').value;
-            const confirmPassword = document.getElementById('reg-confirm-password').value;
-
-            if (!name || isNaN(classValue) || isNaN(rollValue) || !whatsapp || !password || !confirmPassword || password.length < 6 || password !== confirmPassword) {
-                showMessage(password.length < 6 ? "Password must be at least 6 characters." : (password !== confirmPassword ? "Passwords do not match." : "All fields are required."), 'error');
-                return;
-            }
-
-            const studentId = generateStudentId(classValue, rollValue);
-            // Using Realtime DB path: `registration_requests/${studentId}`
-            const requestRef = FB.ref(FB.db, `registration_requests/${studentId}`); 
-
-            try {
-                const snapshot = await FB.get(requestRef);
-                if (snapshot.exists()) {
-                    showMessage(`A request for ID ${studentId} already exists.`, 'error');
-                    return;
-                }
-
-                const registrationData = { studentId, name, class: classValue, roll: rollValue, whatsapp, password, timestamp: Date.now() };
-                await FB.set(requestRef, registrationData);
-                
-                showMessage(`Registration submitted! Your ID is: ${studentId}. Wait for admin approval.`);
-                document.getElementById('registration-form').reset();
-                showPanel('login-panel');
-
-            } catch (error) {
-                console.error("Registration Submission Error:", error);
-                showMessage("Failed to submit registration. Check console for details.", 'error');
-            }
-        };
-
-        // --- ADMIN PANEL LOGIC ---
-
-        // 1. REGISTRATION REQUESTS
-        window.displayRegistrationRequests = () => {
-            const requestsList = document.getElementById('admin-registration-requests');
-            const requestsRef = FB.ref(FB.db, 'registration_requests');
-
-            // Use onValue for real-time updates
-            FB.onValue(requestsRef, (snapshot) => {
-                requestsList.innerHTML = '';
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const request = childSnapshot.val();
-                        const listItem = document.createElement('div');
-                        listItem.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b bg-gray-50 rounded-lg shadow-sm mb-2';
-                        listItem.innerHTML = `
-                            <div class="text-sm mb-2 md:mb-0">
-                                <p class="font-bold text-gray-800">${request.name} <span class="text-blue-600">(${request.studentId})</span></p>
-                                <p class="text-gray-600">Class: ${request.class} | Roll: ${request.roll} | WhatsApp: ${request.whatsapp}</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button onclick="handleRegistrationApproval('${request.studentId}', '${request.password}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-sm rounded-full transition duration-150">Approve</button>
-                                <button onclick="handleRegistrationDenial('${request.studentId}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded-full transition duration-150">Deny</button>
-                            </div>
-                        `;
-                        requestsList.appendChild(listItem);
-                    });
-                } else {
-                    requestsList.innerHTML = '<p class="text-center text-gray-500 p-4">No pending registration requests found.</p>';
-                }
-            }, (error) => {
-                console.error("Error loading registration requests:", error);
-                requestsList.innerHTML = `<p class="text-center text-red-500 p-4">Error loading requests: ${error.message}</p>`;
-            });
-        };
-
-        window.handleRegistrationApproval = async (studentId, password) => {
-            const requestRef = FB.ref(FB.db, `registration_requests/${studentId}`);
-            try {
-                const snapshot = await FB.get(requestRef);
-                if (!snapshot.exists()) { showMessage("Error: Request not found.", 'error'); return; }
-
-                const requestData = snapshot.val();
-                const studentEmail = `${studentId.toLowerCase()}@academic-care.com`;
-
-                // 1. Create user in Firebase Authentication
-                const userCredential = await FB.createUserWithEmailAndPassword(FB.auth, studentEmail, password);
-                const authUid = userCredential.user.uid;
-
-                // 2. Move data to permanent 'students' path
-                const studentData = {
-                    ...requestData,
-                    authUid: authUid, // CRITICAL: Store the Auth UID for the security rules
-                    approvedBy: FB.auth.currentUser.uid,
-                    approvedAt: Date.now(),
-                    fees: initializeFeeStructure()
-                };
-                // Path: students/{studentId} (Realtime Database structure)
-                await FB.set(FB.ref(FB.db, `students/${studentId}`), studentData); 
-
-                // 3. Remove request
-                await FB.remove(requestRef);
-                showMessage(`Successfully approved ${requestData.name}.`);
-
-            } catch (error) {
-                console.error("Approval Error:", error);
-                showMessage(`Approval failed: ${error.message}`, 'error');
-            }
-        };
-
-        window.handleRegistrationDenial = async (studentId) => {
-            try {
-                await FB.remove(FB.ref(FB.db, `registration_requests/${studentId}`));
-                showMessage(`Registration request for ${studentId} denied.`);
-            } catch (error) {
-                console.error("Denial Error:", error);
-                showMessage("Failed to deny registration.", 'error');
-            }
-        };
-
-        // 2. CLASS MANAGEMENT
-        window.handleAdminClassSubTab = (classValue) => {
-            // Highlight the correct sub-tab
-            document.querySelectorAll('.admin-sub-tab').forEach(tab => {
-                tab.classList.remove('active-tab');
-                tab.classList.remove('border-blue-500');
-                if (parseInt(tab.getAttribute('data-class'), 10) === classValue) {
-                    tab.classList.add('active-tab');
-                    tab.classList.add('border-blue-500');
-                }
-            });
-
-            const studentListContainer = document.getElementById('admin-class-student-list');
-            studentListContainer.innerHTML = `<p class="text-center text-gray-500 p-4">Loading Class ${classValue} students...</p>`;
-
-            // Note: The Realtime DB structure is flat: 'students'. We filter by 'class' client-side.
-            const studentsRef = FB.ref(FB.db, 'students');
-
-            FB.onValue(studentsRef, (snapshot) => {
-                studentListContainer.innerHTML = '';
-                let foundStudents = false;
-                const currentMonth = new Date().getMonth(); 
-
-                snapshot.forEach((studentSnapshot) => {
-                    const student = studentSnapshot.val();
-
-                    if (student.class === classValue) {
-                        foundStudents = true;
-                        
-                        let statusColor = 'bg-green-100 text-green-700';
-                        let statusText = 'Paid Up';
-                        
-                        // Detailed check for a more accurate overall status icon display
-                        let overallStatus = 'Paid Up';
-                        let overallStatusColor = 'bg-green-100 text-green-700';
-                        const monthsToCheck = Object.keys(student.fees || initializeFeeStructure()).slice(0, currentMonth + 1);
-                        
-                        for (let i = 0; i < monthsToCheck.length; i++) {
-                            const fee = student.fees[monthsToCheck[i]] || { status: 'Unpaid', isBreak: false };
-                            if (fee.status === 'Unpaid' && !fee.isBreak) {
-                                overallStatus = 'Unpaid';
-                                overallStatusColor = 'bg-red-100 text-red-700';
-                                break;
-                            } else if (fee.isBreak) {
-                                overallStatus = 'Break Approved';
-                                overallStatusColor = 'bg-purple-100 text-purple-700';
-                            }
-                        }
-
-
-                        const listItem = document.createElement('div');
-                        listItem.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b bg-gray-50 rounded-lg shadow-sm mb-2';
-                        listItem.innerHTML = `
-                            <div class="text-sm md:text-base mb-2 md:mb-0">
-                                <p class="font-bold text-gray-800">${student.name} <span class="text-blue-600">(${student.studentId})</span></p>
-                                <p class="text-gray-600">WhatsApp: ${student.whatsapp}</p>
-                            </div>
-                            <div class="text-center mb-2 md:mb-0">
-                                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full ${overallStatusColor}">
-                                    ${overallStatus}
-                                </span>
-                            </div>
-                            <div>
-                                <button onclick="showFeeManagementModal('${student.studentId}', '${student.name}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 text-sm rounded-full shadow transition duration-150">
-                                    Tuition Fee Status
-                                </button>
-                            </div>
-                        `;
-                        studentListContainer.appendChild(listItem);
-                    }
-                });
-
-                if (!foundStudents) {
-                    studentListContainer.innerHTML = `<p class="text-center text-gray-500 p-4">No approved students found in Class ${classValue}.</p>`;
-                }
-
-            }, (error) => {
-                console.error("Error loading student data:", error);
-                studentListContainer.innerHTML = `<p class="text-center text-red-500 p-4">Error loading students: ${error.message}</p>`;
-            });
-        };
-
-        // 3. FEE MANAGEMENT MODAL
-        window.showFeeManagementModal = (studentId, studentName) => {
-            const modal = document.getElementById('fee-management-modal');
-            document.getElementById('fee-modal-title').textContent = `Fee Status for ${studentName} (${studentId})`;
-            modal.classList.remove('hidden');
-
-            const feesRef = FB.ref(FB.db, `students/${studentId}/fees`);
-            const modalBody = document.getElementById('fee-modal-body');
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const currentMonthIndex = new Date().getMonth();
-
-            FB.onValue(feesRef, (snapshot) => {
-                const feesData = snapshot.val() || initializeFeeStructure();
-                let tableHtml = `
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 fee-table">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Month's Name</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Method</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                `;
-
-                months.forEach((month, index) => {
-                    const fee = feesData[month] || { status: 'Unpaid', date: null, method: null, isBreak: false };
-                    let statusColor = 'bg-red-500';
-                    let statusText = 'Unpaid';
-                    let actionButtons = '';
-                    
-                    if (fee.status === 'Paid') {
-                        statusColor = 'bg-green-500';
-                        statusText = 'Paid';
-                        actionButtons = `<button onclick="handleFeeAction('${studentId}', '${month}', 'Undo')" class="bg-gray-400 hover:bg-gray-500 text-white px-2 py-1 text-xs rounded-full shadow">Undo</button>`;
-                    } else if (fee.isBreak) {
-                        statusColor = 'bg-purple-500';
-                        statusText = 'Break Approved';
-                        actionButtons = `<button onclick="handleFeeAction('${studentId}', '${month}', 'Undo')" class="bg-gray-400 hover:bg-gray-500 text-white px-2 py-1 text-xs rounded-full shadow">Undo</button>`;
-                    } else if (index <= currentMonthIndex) {
-                        // Current or Past month is unpaid/unmarked
-                        actionButtons = `
-                            <button onclick="handleFeeAction('${studentId}', '${month}', 'Mark Paid')" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 text-xs rounded-full mr-1 whitespace-nowrap shadow">Paid</button>
-                            <button onclick="handleFeeAction('${studentId}', '${month}', 'Mark Break')" class="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 text-xs rounded-full whitespace-nowrap shadow">Break</button>
-                        `;
-                    } else {
-                        // Upcoming Month
-                        statusText = 'Upcoming';
-                        statusColor = 'bg-gray-200 text-gray-700';
-                        actionButtons = '';
-                    }
-
-                    tableHtml += `
-                        <tr>
-                            <td class="px-3 py-2 whitespace-nowrap">${month}</td>
-                            <td class="px-3 py-2 whitespace-nowrap">
-                                <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full text-white ${statusColor} ${index > currentMonthIndex ? 'text-gray-700 !bg-gray-200' : ''}">
-                                    ${statusText}
-                                </span>
-                            </td>
-                            <td class="px-3 py-2 whitespace-nowrap">${fee.date ? `${fee.date} (${fee.method})` : '-'}</td>
-                            <td class="px-3 py-2 whitespace-nowrap">${actionButtons}</td>
-                        </tr>
-                    `;
-                });
-
-                tableHtml += '</tbody></table></div>';
-                modalBody.innerHTML = tableHtml;
-
-            }, (error) => {
-                console.error("Error fetching fee data:", error);
-                modalBody.innerHTML = `<p class="text-center text-red-500 p-4">Error fetching fee data: ${error.message}</p>`;
-            });
-        };
-
-        window.handleFeeAction = async (studentId, month, action) => {
-            const feeRef = FB.ref(FB.db, `students/${studentId}/fees/${month}`);
-            let updateData = {};
-            let paymentMethod = null;
-
-            if (action === 'Mark Paid') {
-                paymentMethod = window.prompt("Enter Payment Method (e.g., Cash, Bkash, Bank):");
-                if (!paymentMethod || paymentMethod.trim() === "") {
-                    showMessage("Payment method cannot be empty. Action cancelled.", 'error');
-                    return; 
-                }
-                updateData = { status: 'Paid', date: new Date().toLocaleDateString('en-GB'), method: paymentMethod.trim(), isBreak: false };
-                showMessage(`${month} marked Paid.`);
-            } else if (action === 'Mark Break') {
-                updateData = { status: 'Unpaid', date: 'Admin Mark', method: 'Admin', isBreak: true };
-                showMessage(`${month} manually marked as Break.`);
-            } else if (action === 'Undo') {
-                updateData = { status: 'Unpaid', date: null, method: null, isBreak: false };
-                showMessage(`Status for ${month} reverted to Unpaid.`);
-            }
-
-            try {
-                await FB.update(feeRef, updateData);
-            } catch (error) {
-                console.error("Fee action failed:", error);
-                showMessage("Failed to update fee status. Check console.", 'error');
-            }
-        };
-
-        window.closeFeeManagementModal = () => {
-            document.getElementById('fee-management-modal').classList.add('hidden');
-        };
-
-        // 4. BREAK REQUESTS (ADMIN VIEW)
-        window.handleBreakRequestApproval = async (requestKey, studentId, monthsJson) => {
-            try {
-                // monthsJson is a single-quoted stringified array, need to convert back
-                const months = JSON.parse(monthsJson.replace(/'/g, '"')); 
-                if (!months || months.length === 0) {
-                    showMessage("Error: No months specified in the request.", 'error');
-                    await FB.remove(FB.ref(FB.db, `break_requests/${requestKey}`));
-                    return;
-                }
-
-                const updates = {};
-                months.forEach(month => {
-                    // Update the student's fee record for each requested month
-                    updates[`students/${studentId}/fees/${month}`] = {
-                        status: 'Unpaid', date: 'Break Approved', method: 'Admin', isBreak: true
-                    };
-                });
-
-                // 1. Update student records using a multi-path update
-                await FB.update(FB.ref(FB.db), updates);
-
-                // 2. Remove the request
-                await FB.remove(FB.ref(FB.db, `break_requests/${requestKey}`));
-
-                showMessage(`Successfully approved break for ${studentId} for: ${months.join(', ')}.`);
-            } catch (error) {
-                console.error("Break Approval Error:", error);
-                showMessage(`Approval failed. ${error.message}`, 'error');
-            }
-        };
-
-        window.handleBreakRequestDenial = async (requestKey) => {
-            try {
-                await FB.remove(FB.ref(FB.db, `break_requests/${requestKey}`));
-                showMessage(`Break request ${requestKey} denied.`);
-            } catch (error) {
-                console.error("Denial Error:", error);
-                showMessage("Failed to deny break request.", 'error');
-            }
-        };
-
-        window.displayBreakRequests = () => {
-            const breakList = document.getElementById('admin-break-requests');
-            const requestsRef = FB.ref(FB.db, 'break_requests');
-
-            FB.onValue(requestsRef, (snapshot) => {
-                breakList.innerHTML = '';
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const requestKey = childSnapshot.key;
-                        const request = childSnapshot.val();
-                        
-                        // Safely stringify the array of months for passing to the onclick function
-                        const monthsJson = JSON.stringify(request.months).replace(/"/g, "'");
-
-                        const listItem = document.createElement('div');
-                        listItem.className = 'flex flex-col md:flex-row justify-between items-start md:items-center p-4 border-b bg-gray-50 rounded-lg shadow-sm mb-2';
-                        listItem.innerHTML = `
-                            <div class="text-sm mb-2 md:mb-0">
-                                <p class="font-bold text-gray-800">${request.name} <span class="text-blue-600">(${request.studentId})</span></p>
-                                <p class="text-gray-600">Class: ${request.class} | Months: <span class="font-semibold text-purple-600">${request.months.join(', ')}</span></p>
-                                <p class="text-xs text-gray-500 mt-1">Requested at: ${new Date(request.timestamp).toLocaleString()}</p>
-                            </div>
-                            <div class="flex space-x-2">
-                                <button onclick="handleBreakRequestApproval('${requestKey}', '${request.studentId}', '${monthsJson}')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 text-sm rounded-full transition duration-150 shadow">Approve</button>
-                                <button onclick="handleBreakRequestDenial('${requestKey}')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 text-sm rounded-full transition duration-150 shadow">Deny</button>
-                            </div>
-                        `;
-                        breakList.appendChild(listItem);
-                    });
-                } else {
-                    breakList.innerHTML = '<p class="text-center text-gray-500 p-4">No pending break requests found.</p>';
-                }
-            }, (error) => {
-                console.error("Error loading break requests:", error);
-                breakList.innerHTML = `<p class="text-center text-red-500 p-4">Error loading requests: ${error.message}</p>`;
-            });
-        };
-
-
-        // --- STUDENT PANEL LOGIC ---
-
-        window.handleStudentTabClick = (tabId) => {
-            // Logic to switch student tabs
-            document.querySelectorAll('#student-tabs button').forEach(tab => {
-                tab.classList.remove('active-tab');
-            });
-            document.querySelector(`#student-tabs button[onclick="handleStudentTabClick('${tabId}')"]`).classList.add('active-tab');
-
-            document.querySelectorAll('.student-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.getElementById(`student-${tabId}-content`).classList.remove('hidden');
-
-            if (tabId === 'my-profile') {
-                displayStudentProfile();
-            } else if (tabId === 'tuition-fee-status') {
-                displayStudentFeeStatus();
-            } else if (tabId === 'break-request') {
-                displayStudentBreakRequestForm();
-            }
-        };
-
-        const displayStudentProfile = () => {
-            const profileDiv = document.getElementById('student-my-profile-content');
-            if (!currentUserData.name) {
-                profileDiv.innerHTML = '<p class="text-center text-red-500">Error: Profile data not loaded.</p>';
-                return;
-            }
-            
-            profileDiv.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold mb-4 text-blue-700">My Profile</h3>
-                    <div class="space-y-3">
-                        <p class="text-gray-700"><span class="font-semibold">Name:</span> ${currentUserData.name}</p>
-                        <p class="text-gray-700"><span class="font-semibold">Student ID:</span> ${currentUserData.studentId}</p>
-                        <p class="text-gray-700"><span class="font-semibold">Class:</span> ${currentUserData.class}</p>
-                        <p class="text-gray-700"><span class="font-semibold">Roll:</span> ${currentUserData.roll}</p>
-                        <p class="text-gray-700"><span class="font-semibold">WhatsApp:</span> ${currentUserData.whatsapp}</p>
-                        <p class="text-xs text-gray-500 mt-4">Account approved by Admin on: ${new Date(currentUserData.approvedAt).toLocaleDateString()}</p>
-                    </div>
-                </div>
-            `;
-        };
-
-        const displayStudentFeeStatus = () => {
-            const feeDiv = document.getElementById('student-tuition-fee-status-content');
-            feeDiv.innerHTML = '<p class="text-center text-gray-500 p-4">Loading fee status...</p>';
-
-            const studentId = currentUserData.studentId;
-            const feesRef = FB.ref(FB.db, `students/${studentId}/fees`);
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const currentMonthIndex = new Date().getMonth();
-
-            FB.onValue(feesRef, (snapshot) => {
-                const feesData = snapshot.val() || initializeFeeStructure();
-                let tableHtml = `
-                    <div class="bg-white p-6 rounded-xl shadow-lg overflow-x-auto">
-                        <h3 class="text-xl font-bold mb-4 text-blue-700">My Tuition Fee Status</h3>
-                        <table class="min-w-full divide-y divide-gray-200 fee-table">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name of the Month</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Method</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200 text-sm">
-                `;
-
-                months.forEach((month, index) => {
-                    if (index <= currentMonthIndex) { // Only show months up to the current month
-                        const fee = feesData[month] || { status: 'Unpaid', date: null, method: null, isBreak: false };
-                        let statusColor = 'bg-red-500';
-                        let statusText = 'Unpaid';
-                        
-                        if (fee.status === 'Paid') {
-                            statusColor = 'bg-green-500';
-                            statusText = 'Paid';
-                        } else if (fee.isBreak) {
-                            statusColor = 'bg-purple-500';
-                            statusText = 'Break Approved';
-                        }
-
-                        tableHtml += `
-                            <tr>
-                                <td class="px-3 py-2 whitespace-nowrap">${month}</td>
-                                <td class="px-3 py-2 whitespace-nowrap">
-                                    <span class="inline-block px-3 py-1 text-xs font-semibold rounded-full text-white ${statusColor}">
-                                        ${statusText}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-2 whitespace-nowrap">${fee.date ? `${fee.date} (${fee.method})` : '-'}</td>
-                            </tr>
-                        `;
-                    }
-                });
-
-                tableHtml += '</tbody></table></div>';
-                feeDiv.innerHTML = tableHtml;
-
-            }, (error) => {
-                console.error("Error fetching student fee status:", error);
-                feeDiv.innerHTML = `<p class="text-center text-red-500 p-4">Error fetching status: ${error.message}</p>`;
-            });
-        };
-
-        const displayStudentBreakRequestForm = () => {
-            const breakDiv = document.getElementById('student-break-request-content');
-            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const currentMonthIndex = new Date().getMonth();
-
-            let formHtml = `
-                <div class="bg-white p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-bold mb-4 text-blue-700">Request a Break</h3>
-                    <p class="mb-4 text-gray-600">Select upcoming months for which you wish to request a tuition break. (This sends a request to the Admin.)</p>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="break-month-options">
-            `;
-
-            let upcomingMonthsFound = false;
-
-            months.forEach((month, index) => {
-                if (index > currentMonthIndex) { // Only show upcoming months
-                    upcomingMonthsFound = true;
-                    formHtml += `
-                        <label class="flex items-center space-x-2 bg-gray-50 p-3 rounded-lg shadow-sm hover:bg-gray-100 cursor-pointer">
-                            <input type="checkbox" name="break_month" value="${month}" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                            <span class="text-gray-800">${month}</span>
-                        </label>
-                    `;
-                }
-            });
-
-            if (!upcomingMonthsFound) {
-                formHtml = '<p class="text-center text-gray-500 p-4">No upcoming months available to request a break at this time.</p>';
-            } else {
-                formHtml += `
-                    </div>
-                    <button onclick="submitBreakRequest()" class="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 flex items-center justify-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM5.293 8.707a1 1 0 011.414-1.414L9 10.586V7a1 1 0 112 0v3.586l2.293-2.293a1 1 0 011.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4z" clip-rule="evenodd" /></svg>
-                        <span>Submit Break Request</span>
-                    </button>
-                </div>
-                `;
-            }
-
-            breakDiv.innerHTML = formHtml;
-        };
-
-        window.submitBreakRequest = async () => {
-            const selectedMonths = Array.from(document.querySelectorAll('#break-month-options input:checked')).map(cb => cb.value);
-
-            if (selectedMonths.length === 0) {
-                showMessage("Please select at least one month for a break request.", 'error');
-                return;
-            }
-
-            const studentId = currentUserData.studentId;
-            const requestKey = `${studentId}_${Date.now()}`; 
-            const requestRef = FB.ref(FB.db, `break_requests/${requestKey}`);
-
-            try {
-                const requestData = {
-                    studentId: studentId,
-                    name: currentUserData.name,
-                    class: currentUserData.class,
-                    months: selectedMonths,
-                    status: 'Pending',
-                    timestamp: Date.now()
-                };
-
-                await FB.set(requestRef, requestData);
-                showMessage(`Break request submitted for: ${selectedMonths.join(', ')}. Waiting for admin approval.`);
-
-                // Clear the form
-                document.querySelectorAll('#break-month-options input').forEach(cb => cb.checked = false);
-
-            } catch (error) {
-                console.error("Break Request Submission Error:", error);
-                showMessage("Failed to submit break request. Check console for details.", 'error');
-            }
-        };
-
-        // --- INITIALIZATION ---
-
-        document.addEventListener('DOMContentLoaded', () => {
-            updateHeader(); 
-
-            // Firebase Auth State Listener
-            FB.onAuthStateChanged(FB.auth, (user) => {
-                if (user) {
-                    if (user.uid === FB.ADMIN_UID) {
-                        setupAdminPanel();
-                    } else {
-                        const userEmailPrefix = user.email ? user.email.split('@')[0] : '';
-                        if (userEmailPrefix.toUpperCase().startsWith('S')) {
-                            const studentId = userEmailPrefix.toUpperCase();
-                            // Fetch student data on login
-                            FB.get(FB.child(FB.ref(FB.db), `students/${studentId}`))
-                                .then((snapshot) => {
-                                    if (snapshot.exists()) {
-                                        setupStudentPanel(snapshot.val());
-                                    } else {
-                                        console.error("Logged in user is not an approved student in DB. Logging out.");
-                                        FB.signOut(FB.auth);
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error("Error fetching student profile:", error);
-                                    FB.signOut(FB.auth);
-                                });
-                        } else {
-                            // Non-student, non-admin signed in (e.g., anonymous initial sign-in)
-                            // We wait for user-driven login/registration actions
-                        }
-                    }
-                } else {
-                    // No user is signed in.
-                    showPanel('login-panel');
-                }
-            });
-            
-            // --- EVENT LISTENERS FOR NAVIGATION BUTTONS ---
-            document.getElementById('register-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                showPanel('registration-panel');
-            });
-            document.getElementById('back-to-login-reg').addEventListener('click', () => showPanel('login-panel'));
-
-            // Admin Main Tabs Navigation
-            const setAdminTab = (tabId) => {
-                document.querySelectorAll('.admin-tab-content').forEach(c => c.classList.add('hidden'));
-                document.getElementById(`admin-${tabId}-content`).classList.remove('hidden');
-                document.querySelectorAll('.admin-main-tab').forEach(t => t.classList.remove('active-tab'));
-                document.getElementById(`admin-${tabId}-tab`).classList.add('active-tab');
-
-                // Special logic for class tab to ensure a class is selected
-                if (tabId === 'class') {
-                    const defaultClassTab = document.querySelector('.admin-sub-tab[data-class="6"]');
-                    if (defaultClassTab) {
-                        defaultClassTab.click(); 
-                    }
-                } else if (tabId === 'registration') {
-                    displayRegistrationRequests();
-                } else if (tabId === 'break') {
-                    displayBreakRequests();
-                }
-            };
-
-            document.getElementById('admin-home-tab').addEventListener('click', () => setAdminTab('home'));
-            document.getElementById('admin-class-tab').addEventListener('click', () => setAdminTab('class'));
-            document.getElementById('admin-registration-tab').addEventListener('click', () => setAdminTab('registration'));
-            document.getElementById('admin-break-tab').addEventListener('click', () => setAdminTab('break'));
-        });
-    </script>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Powered by The Academic Care</small>
+  </footer>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
