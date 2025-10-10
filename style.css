@@ -1,166 +1,158 @@
-/* ---------------- Global ---------------- */
-* {
-  box-sizing: border-box;
+/* ===== Global Styles ===== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f6fa;
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif;
-}
-
-body {
-  background-color: #f9f9f9;
-  color: #333;
-  line-height: 1.5;
 }
 
 .container {
-  max-width: 1200px;
-  margin: 20px auto;
-  padding: 15px;
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-/* ---------------- Header ---------------- */
 h1 {
-  font-size: 2rem;
   text-align: center;
-  color: #2c3e50;
+  color: #2f3640;
+  margin-bottom: 5px;
 }
 
 h2 {
   text-align: center;
+  color: #718093;
   margin-bottom: 20px;
-  color: #34495e;
 }
 
-/* ---------------- Tabs ---------------- */
-#tabs {
+/* ===== Tabs ===== */
+.tabs, .subTabs {
   display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 20px;
   flex-wrap: wrap;
+  margin-bottom: 10px;
 }
 
-#tabs button {
-  padding: 10px 15px;
+.tabBtn, .subTabBtn, .studentTabBtn {
+  background-color: #dcdde1;
   border: none;
-  background-color: #3498db;
-  color: #fff;
-  border-radius: 5px;
+  padding: 10px 15px;
+  margin-right: 5px;
   cursor: pointer;
-  transition: 0.3s;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: all 0.2s ease;
 }
 
-#tabs button:hover {
-  background-color: #2980b9;
+.tabBtn:hover, .subTabBtn:hover, .studentTabBtn:hover {
+  background-color: #718093;
+  color: #fff;
 }
 
-/* ---------------- Sections ---------------- */
-#homeSection, #profileSection, #tuitionSection, #breakSection, #classSection, #registrationSection, #breakSection {
-  padding: 10px;
+.tabBtn.right, #logoutBtnStudent {
+  margin-left: auto;
+  background-color: #e84118;
+  color: #fff;
 }
 
-/* ---------------- Tables ---------------- */
+.tabBtn.right:hover, #logoutBtnStudent:hover {
+  background-color: #c23616;
+}
+
+/* ===== Tab Content ===== */
+.tabContent {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 5px;
+  min-height: 100px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* ===== Buttons ===== */
+button {
+  cursor: pointer;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  transition: 0.2s;
+  margin-right: 5px;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+button.approve {
+  background-color: #44bd32;
+  color: white;
+}
+
+button.deny {
+  background-color: #e84118;
+  color: white;
+}
+
+button.markPaid {
+  background-color: #4cd137;
+  color: white;
+}
+
+button.markBreak {
+  background-color: #8c7ae6;
+  color: white;
+}
+
+button.undo {
+  background-color: #fbc531;
+  color: white;
+}
+
+/* ===== Tables ===== */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
 table th, table td {
-  border: 1px solid #ddd;
+  border: 1px solid #dcdde1;
   padding: 8px;
   text-align: center;
 }
 
 table th {
-  background-color: #3498db;
-  color: white;
+  background-color: #f5f6fa;
 }
 
-/* ---------------- Buttons inside tables ---------------- */
-button.markPaid {
-  background-color: #27ae60;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 2px;
-  border-radius: 4px;
-  cursor: pointer;
+table tr:nth-child(even) {
+  background-color: #f1f2f6;
 }
 
-button.markBreak {
-  background-color: #8e44ad;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 2px;
-  border-radius: 4px;
-  cursor: pointer;
+/* ===== Forms ===== */
+input[type=text], input[type=password], input[type=number] {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0 10px 0;
+  border: 1px solid #dcdde1;
+  border-radius: 5px;
+  box-sizing: border-box;
 }
 
-button.undo {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 2px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.approve {
-  background-color: #2ecc71;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 2px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button.deny {
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  margin: 2px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* ---------------- Status Colors ---------------- */
-td.status {
+.error {
+  color: #e84118;
   font-weight: bold;
 }
 
-td.status.Paid {
-  color: green;
+.success {
+  color: #44bd32;
+  font-weight: bold;
 }
 
-td.status.Break {
-  color: purple;
-}
-
-td.status.Unpaid {
-  color: red;
-}
-
-/* ---------------- Responsive ---------------- */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  #tabs {
+  .tabs, .subTabs {
     flex-direction: column;
   }
-  table th, table td {
-    font-size: 0.9rem;
-    padding: 6px;
+  button.tabBtn, button.subTabBtn, button.studentTabBtn {
+    margin-bottom: 5px;
   }
-}
-
-@media (max-width: 480px) {
-  h1 { font-size: 1.5rem; }
-  h2 { font-size: 1.2rem; }
-  #tabs button { width: 100%; }
 }

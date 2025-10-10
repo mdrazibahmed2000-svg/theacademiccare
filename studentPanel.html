@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Academic Care - Student Panel</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>The Academic Care - Student Panel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>The Academic Care</h1>
     <h2>Academic Year 2025</h2>
 
-    <div id="tabs">
-      <button id="homeTab">Home</button>
-      <button id="profileTab">My Profile</button>
-      <button id="tuitionTab">Tuition Fee Status</button>
-      <button id="breakTab">Break Request</button>
-      <button id="logoutBtn">Logout</button>
+    <div class="tabs">
+      <button class="studentTabBtn" data-tab="home">Home</button>
+      <button class="studentTabBtn" data-tab="myProfile">My Profile</button>
+      <button class="studentTabBtn" data-tab="tuitionFee">Tuition Fee Status</button>
+      <button class="studentTabBtn" data-tab="breakRequest">Break Request</button>
+      <button id="logoutBtnStudent" class="right">Logout</button>
     </div>
 
-    <div id="homeSection">Welcome to Student Panel</div>
-    <div id="profileSection" style="display:none;"></div>
-    <div id="tuitionSection" style="display:none;"></div>
-    <div id="breakSection" style="display:none;"></div>
+    <div id="studentTabContents">
+      <div id="home" class="tabContent">Welcome to Student Panel</div>
+      <div id="myProfile" class="tabContent" style="display:none;"></div>
+      <div id="tuitionFee" class="tabContent" style="display:none;"></div>
+      <div id="breakRequest" class="tabContent" style="display:none;"></div>
+    </div>
   </div>
 
   <script type="module" src="student.js"></script>

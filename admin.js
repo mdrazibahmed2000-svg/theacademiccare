@@ -1,163 +1,120 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, remove, push } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
   databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.firebasestorage.app",
+  storageBucket: "the-academic-care-de611.firebasedatabase.app",
   messagingSenderId: "142271027321",
-  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 const auth = getAuth(app);
+const db = getDatabase(app);
+
+// ---------------- Logout ----------------
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  signOut(auth).then(() => window.location.href="index.html");
+});
 
 // ---------------- Tabs ----------------
-const sections = {
-  home: document.getElementById("homeSection"),
-  class: document.getElementById("classSection"),
-  registration: document.getElementById("registrationSection"),
-  break: document.getElementById("breakSection")
-};
+const tabs = document.querySelectorAll(".tabBtn");
+tabs.forEach(tab => tab.addEventListener("click", () => {
+  document.querySelectorAll(".tabContent").forEach(tc => tc.style.display="none");
+  document.getElementById(tab.dataset.tab).style.display="block";
+}));
 
-function hideAll(){ Object.values(sections).forEach(s=>s.style.display="none"); }
+// ---------------- Load Registration Requests ----------------
+const registrationRef = ref(db, "students");
+const registrationDiv = document.getElementById("registrationRequests");
 
-document.getElementById("homeTab").addEventListener("click", ()=>{ hideAll(); sections.home.style.display="block"; });
-document.getElementById("classTab").addEventListener("click", ()=>{ hideAll(); sections.class.style.display="block"; loadClasses(); });
-document.getElementById("registrationTab").addEventListener("click", ()=>{ hideAll(); sections.registration.style.display="block"; loadRegistrations(); });
-document.getElementById("breakTab").addEventListener("click", ()=>{ hideAll(); sections.break.style.display="block"; loadBreakRequests(); });
-document.getElementById("logoutBtn").addEventListener("click", ()=>{ signOut(auth).then(()=>window.location.href="index.html"); });
+onValue(registrationRef, snapshot => {
+  registrationDiv.innerHTML = "";
+  snapshot.forEach(snap => {
+    const student = snap.val();
+    if(student.status === "pending") {
+      const div = document.createElement("div");
+      div.innerHTML = `${student.name} | ${student.class} | ${student.roll} 
+        <button onclick="approve('${student.studentId}')">Approve</button>
+        <button onclick="deny('${student.studentId}')">Deny</button>`;
+      registrationDiv.appendChild(div);
+    }
+  });
+});
 
-// ---------------- Load Classes ----------------
-function loadClasses(){
-  const classSubTabs = document.getElementById("classSubTabs");
-  classSubTabs.innerHTML="";
-  for(let i=6;i<=12;i++){
-    const btn = document.createElement("button");
-    btn.textContent = `Class ${i}`;
-    btn.dataset.cls = i;
-    btn.addEventListener("click", ()=> loadClassContent(i));
-    classSubTabs.appendChild(btn);
-  }
+// ---------------- Approve / Deny ----------------
+window.approve = function(id){
+  update(ref(db, `students/${id}`), {status:"approved"});
 }
 
-// ---------------- Load Students in Class ----------------
-function loadClassContent(cls){
-  const content = document.getElementById("classContent");
-  content.innerHTML=`<h4>Class ${cls}</h4>`;
-  const table = document.createElement("table");
-  table.innerHTML="<tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition</th></tr>";
-  content.appendChild(table);
+window.deny = function(id){
+  update(ref(db, `students/${id}`), {status:"denied"});
+}
 
-  const studentsRef = ref(db,"students");
-  onValue(studentsRef,snap=>{
-    table.innerHTML="<tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition</th></tr>";
-    snap.forEach(child=>{
-      const s = child.val();
-      if(s.class==cls && s.status==="approved"){
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${s.name}</td><td>${s.studentId}</td><td>${s.whatsapp}</td>
-        <td><button class="tuitionBtn" data-id="${s.studentId}">Manage</button></td>`;
-        table.appendChild(tr);
+// ---------------- Load Classes ----------------
+const classContent = document.getElementById("classContent");
+const subTabs = document.querySelectorAll(".subTabBtn");
+subTabs.forEach(btn => btn.addEventListener("click", () => loadClass(btn.dataset.class)));
+
+function loadClass(cls){
+  classContent.innerHTML = `<h4>Class ${cls}</h4>`;
+  onValue(ref(db, "students"), snapshot => {
+    classContent.innerHTML = `<h4>Class ${cls}</h4>`;
+    snapshot.forEach(snap => {
+      const student = snap.val();
+      if(student.status === "approved" && student.class == cls){
+        const div = document.createElement("div");
+        div.innerHTML = `${student.name} | ${student.studentId} | ${student.whatsapp} 
+          <button onclick="manageTuition('${student.studentId}')">Tuition</button>`;
+        classContent.appendChild(div);
       }
-    });
-    // Tuition button click
-    document.querySelectorAll(".tuitionBtn").forEach(btn=>{
-      btn.addEventListener("click", ()=> manageTuition(btn.dataset.id));
     });
   });
 }
 
 // ---------------- Tuition Management ----------------
-function manageTuition(studentId){
-  const content = document.getElementById("classContent");
-  content.innerHTML=`<h4>Tuition Management: ${studentId}</h4>`;
-  const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  const table = document.createElement("table");
-  table.innerHTML="<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>";
-  content.appendChild(table);
-
-  const tRef = ref(db,`tuition/${studentId}`);
+window.manageTuition = function(studentId){
+  const tuitionDiv = document.createElement("div");
+  tuitionDiv.innerHTML = `<h5>Tuition for ${studentId}</h5>`;
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  let table = "<table border='1'><tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>";
+  const tRef = ref(db, `tuition/${studentId}`);
   onValue(tRef, snap=>{
-    table.innerHTML="<tr><th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th></tr>";
-    const todayMonth=new Date().getMonth();
-    for(let i=0;i<=todayMonth;i++){
-      const m=months[i];
-      const mData=snap.exists()&&snap.val()[m]?snap.val()[m]:{status:"Unpaid",date:"",method:""};
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${m}</td><td class="status">${mData.status}</td><td>${mData.date} ${mData.method}</td>
-      <td>
-        <button class="markPaid">Mark Paid</button>
-        <button class="markBreak">Mark Break</button>
-        <button class="undo" style="display:none;">Undo</button>
-      </td>`;
-      table.appendChild(tr);
-
-      tr.querySelector(".markPaid").addEventListener("click", ()=>{
-        const date = new Date().toLocaleDateString();
-        const method = prompt("Payment method?");
-        update(ref(db,`tuition/${studentId}/${m}`),{status:"Paid",date,method});
-      });
-      tr.querySelector(".markBreak").addEventListener("click", ()=>{
-        update(ref(db,`tuition/${studentId}/${m}`),{status:"Break",date:"",method:""});
-      });
-      tr.querySelector(".undo").addEventListener("click", ()=>{
-        update(ref(db,`tuition/${studentId}/${m}`),{status:"Unpaid",date:"",method:""});
-      });
-    }
+    months.forEach(m=>{
+      const monthData = snap.val() && snap.val()[m] ? snap.val()[m] : {status:"Unpaid", date:"", method:""};
+      table += `<tr>
+        <td>${m}</td>
+        <td id="${studentId}_${m}_status">${monthData.status}</td>
+        <td id="${studentId}_${m}_info">${monthData.date} ${monthData.method}</td>
+        <td>
+          <button onclick="markPaid('${studentId}','${m}')">Mark Paid</button>
+          <button onclick="markBreak('${studentId}','${m}')">Mark Break</button>
+          <button onclick="undo('${studentId}','${m}')">Undo</button>
+        </td>
+      </tr>`;
+    });
+    tuitionDiv.innerHTML = table + "</table>";
+    classContent.appendChild(tuitionDiv);
   });
 }
 
-// ---------------- Registration Requests ----------------
-function loadRegistrations(){
-  const container=document.getElementById("registrationRequests");
-  container.innerHTML="";
-  const studentsRef=ref(db,"students");
-  onValue(studentsRef,snap=>{
-    container.innerHTML="";
-    snap.forEach(child=>{
-      const s=child.val();
-      if(s.status==="pending"){
-        const div=document.createElement("div");
-        div.innerHTML=`${s.name} (${s.studentId}) - <button class="approve">Approve</button> <button class="deny">Deny</button>`;
-        container.appendChild(div);
-
-        div.querySelector(".approve").addEventListener("click", ()=> update(ref(db,`students/${s.studentId}`),{status:"approved"}));
-        div.querySelector(".deny").addEventListener("click", ()=> remove(ref(db,`students/${s.studentId}`)));
-      }
-    });
-  });
+// ---------------- Tuition Actions ----------------
+window.markPaid = (studentId, month) => {
+  const date = new Date().toLocaleDateString();
+  const method = prompt("Enter payment method:");
+  if(!method) return;
+  set(ref(db, `tuition/${studentId}/${month}`), {status:"Paid", date, method});
 }
 
-// ---------------- Break Requests ----------------
-function loadBreakRequests(){
-  const container=document.getElementById("breakRequests");
-  container.innerHTML="";
-  const brRef = ref(db,"breakRequests");
-  onValue(brRef,snap=>{
-    container.innerHTML="";
-    snap.forEach(studentSnap=>{
-      const studentId = studentSnap.key;
-      studentSnap.forEach(monthSnap=>{
-        const monthData = monthSnap.val();
-        if(monthData.status==="pending"){
-          const div=document.createElement("div");
-          div.innerHTML=`${studentId} - ${monthData.month} <button class="approve">Approve</button> <button class="deny">Deny</button>`;
-          container.appendChild(div);
+window.markBreak = (studentId, month) => {
+  set(ref(db, `tuition/${studentId}/${month}`), {status:"Break", date:"", method:""});
+}
 
-          div.querySelector(".approve").addEventListener("click", ()=>{
-            update(ref(db,`tuition/${studentId}/${monthData.month}`),{status:"Break"});
-            update(ref(db,`breakRequests/${studentId}/${monthSnap.key}`),{status:"approved"});
-          });
-          div.querySelector(".deny").addEventListener("click", ()=>{
-            update(ref(db,`breakRequests/${studentId}/${monthSnap.key}`),{status:"denied"});
-          });
-        }
-      });
-    });
-  });
+window.undo = (studentId, month) => {
+  set(ref(db, `tuition/${studentId}/${month}`), {status:"Unpaid", date:"", method:""});
 }

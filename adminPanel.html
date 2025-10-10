@@ -1,40 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Academic Care - Admin Panel</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>The Academic Care - Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>The Academic Care</h1>
     <h2>Academic Year 2025</h2>
 
-    <div id="tabs">
-      <button id="homeTab">Home</button>
-      <button id="classTab">Class</button>
-      <button id="registrationTab">Registration</button>
-      <button id="breakTab">Break Request</button>
-      <button id="logoutBtn">Logout</button>
+    <div class="tabs">
+      <button class="tabBtn" data-tab="home">Home</button>
+      <button class="tabBtn" data-tab="class">Class</button>
+      <button class="tabBtn" data-tab="registration">Registration</button>
+      <button class="tabBtn" data-tab="breakRequests">Break Requests</button>
+      <button id="logoutBtn" class="right">Logout</button>
     </div>
 
-    <div id="homeSection">Welcome to Admin Panel</div>
-    <div id="classSection" style="display:none;">
-      <h3>Classes</h3>
-      <div id="classSubTabs"></div>
-      <div id="classContent"></div>
-    </div>
-    <div id="registrationSection" style="display:none;">
-      <h3>Registration Requests</h3>
-      <div id="registrationRequests"></div>
-    </div>
-    <div id="breakSection" style="display:none;">
-      <h3>Break Requests</h3>
-      <div id="breakRequests"></div>
-    </div>
+    <div id="tabContents">
+      <div id="home" class="tabContent">Welcome to Admin Panel</div>
 
+      <div id="class" class="tabContent" style="display:none;">
+        <div class="subTabs">
+          <button class="subTabBtn" data-class="6">Class 6</button>
+          <button class="subTabBtn" data-class="7">Class 7</button>
+          <button class="subTabBtn" data-class="8">Class 8</button>
+          <button class="subTabBtn" data-class="9">Class 9</button>
+          <button class="subTabBtn" data-class="10">Class 10</button>
+          <button class="subTabBtn" data-class="11">Class 11</button>
+          <button class="subTabBtn" data-class="12">Class 12</button>
+        </div>
+        <div id="classContent"></div>
+      </div>
+
+      <div id="registration" class="tabContent" style="display:none;">
+        <h3>Pending Registrations</h3>
+        <div id="registrationRequests"></div>
+      </div>
+
+      <div id="breakRequests" class="tabContent" style="display:none;">
+        <h3>Break Requests</h3>
+        <div id="breakRequestsList"></div>
+      </div>
+    </div>
   </div>
+
   <script type="module" src="admin.js"></script>
 </body>
 </html>
