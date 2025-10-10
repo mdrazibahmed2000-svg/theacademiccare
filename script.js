@@ -20,9 +20,16 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getDatabase();
 
-// Student Registration
+// --- Toggle Registration Form ---
+document.getElementById("showRegistration")?.addEventListener("click", () => {
+  document.getElementById("loginForm").style.display = "none";
+  document.getElementById("registrationForm").style.display = "block";
+});
+
+// --- Registration Form Submit ---
 document.getElementById("registrationForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const name = document.getElementById("name").value;
   const studentClass = document.getElementById("class").value;
   const roll = document.getElementById("roll").value;
@@ -40,9 +47,11 @@ document.getElementById("registrationForm")?.addEventListener("submit", async (e
   const email = `${studentId}@student.theacademiccare.com`;
 
   try {
+    // Create Firebase Authentication user
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
+    // Save registration data
     await set(ref(db, `registrations/${studentId}`), {
       uid: uid,
       name: name,
@@ -54,15 +63,19 @@ document.getElementById("registrationForm")?.addEventListener("submit", async (e
 
     alert(`Registration submitted! Your student ID: ${studentId}`);
     document.getElementById("registrationForm").reset();
+    document.getElementById("registrationForm").style.display = "none";
+    document.getElementById("loginForm").style.display = "block";
+
   } catch(error){
     console.error(error);
     alert("Error: " + error.message);
   }
 });
 
-// Login
+// --- Login Form Submit ---
 document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const userId = document.getElementById("studentId").value;
   const password = document.getElementById("password").value;
 
@@ -83,6 +96,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       return;
     }
 
+    // Check if student is approved
     const snapshot = await get(ref(db, `registrations/${userId}`));
     if(snapshot.exists() && snapshot.val().approved){
       localStorage.setItem("studentId", userId);
@@ -98,7 +112,7 @@ document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
   }
 });
 
-// Logout (used in both panels)
+// --- Logout Function ---
 export async function logout(){
   await signOut(auth);
   localStorage.clear();
