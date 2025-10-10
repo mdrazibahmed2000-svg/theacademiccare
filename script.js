@@ -1,148 +1,106 @@
-// -----------------------------
-// 🔹 Firebase Configuration
-// -----------------------------
+// script.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
   databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.firebasestorage.app",
+  storageBucket: "the-academic-care-de611.appspot.com",
   messagingSenderId: "142271027321",
   appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
   measurementId: "G-Q7MCGKTYMX"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+const auth = getAuth();
+const db = getDatabase();
 
+// Student Registration
+document.getElementById("registrationForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value;
+  const studentClass = document.getElementById("class").value;
+  const roll = document.getElementById("roll").value;
+  const whatsapp = document.getElementById("whatsapp").value;
+  const password = document.getElementById("password").value;
+  const confirmPassword = document.getElementById("confirmPassword").value;
 
-// -----------------------------
-// 🔹 LOGIN + REGISTRATION Toggle
-// -----------------------------
-const loginContainer = document.querySelector('.login-container');
-const registerContainer = document.querySelector('.register-container');
-
-document.getElementById('showRegisterBtn').addEventListener('click', () => {
-  loginContainer.style.display = 'none';
-  registerContainer.style.display = 'block';
-});
-
-document.getElementById('backToLoginBtn').addEventListener('click', () => {
-  registerContainer.style.display = 'none';
-  loginContainer.style.display = 'block';
-});
-
-
-// -----------------------------
-// 🔹 STUDENT REGISTRATION
-// -----------------------------
-document.getElementById("submitRegistration").addEventListener("click", async () => {
-  const name = document.getElementById("regName").value.trim();
-  const studentClass = document.getElementById("regClass").value.trim();
-  const roll = document.getElementById("regRoll").value.trim();
-  const whatsapp = document.getElementById("regWhatsapp").value.trim();
-  const password = document.getElementById("regPassword").value.trim();
-  const confirmPassword = document.getElementById("regConfirmPassword").value.trim();
-
-  if (!name || !studentClass || !roll || !whatsapp || !password || !confirmPassword) {
-    alert("⚠️ Please fill all fields.");
+  if(password !== confirmPassword){
+    alert("Passwords do not match!");
     return;
   }
 
-  if (password !== confirmPassword) {
-    alert("⚠️ Passwords do not match!");
-    return;
-  }
-
-  // Generate unique Student ID (Format: S[Year][Class][Roll])
   const year = new Date().getFullYear();
   const studentId = `S${year}${studentClass}${roll}`;
-
-  const registrationData = {
-    name: name,
-    class: studentClass,
-    roll: roll,
-    whatsapp: whatsapp,
-    password: password,
-    studentId: studentId,
-    approved: false,
-    date: new Date().toLocaleDateString()
-  };
+  const email = `${studentId}@student.theacademiccare.com`;
 
   try {
-    await set(ref(db, "registrations/" + studentId), registrationData);
-    alert(`✅ Registration successful!\nYour Student ID: ${studentId}\nPlease wait for admin approval.`);
-    
-    // Clear form fields
-    document.getElementById("regName").value = "";
-    document.getElementById("regClass").value = "";
-    document.getElementById("regRoll").value = "";
-    document.getElementById("regWhatsapp").value = "";
-    document.getElementById("regPassword").value = "";
-    document.getElementById("regConfirmPassword").value = "";
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
 
-    // Go back to Login
-    registerContainer.style.display = 'none';
-    loginContainer.style.display = 'block';
+    await set(ref(db, `registrations/${studentId}`), {
+      uid: uid,
+      name: name,
+      class: studentClass,
+      roll: roll,
+      whatsapp: whatsapp,
+      approved: false
+    });
 
-  } catch (error) {
+    alert(`Registration submitted! Your student ID: ${studentId}`);
+    document.getElementById("registrationForm").reset();
+  } catch(error){
     console.error(error);
-    alert("❌ Error submitting registration: " + error.message);
+    alert("Error: " + error.message);
   }
 });
 
+// Login
+document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const userId = document.getElementById("studentId").value;
+  const password = document.getElementById("password").value;
 
-// -----------------------------
-// 🔹 LOGIN SYSTEM (Admin + Student)
-// -----------------------------
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const userInput = document.getElementById("userInput").value.trim();
-  const password = document.getElementById("passwordInput").value.trim();
-
-  if (!userInput || !password) {
-    alert("⚠️ Please enter both ID/email and password.");
-    return;
+  let email;
+  if(userId === "admin"){
+    email = "theacademiccare2025@gmail.com";  // Admin login
+  } else {
+    email = `${userId}@student.theacademiccare.com`;
   }
 
-  // 🔸 Admin Login (Firebase Auth)
-  if (userInput === "theacademiccare2025@gmail.com") {
-    try {
-      await signInWithEmailAndPassword(auth, userInput, password);
-      alert("✅ Admin login successful!");
-      window.location.href = "admin.html"; // redirect
-    } catch (error) {
-      alert("❌ Admin login failed: " + error.message);
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const uid = userCredential.user.uid;
+
+    if(userId === "admin"){
+      localStorage.setItem("adminLoggedIn", "true");
+      window.location.href = "adminPanel.html";
+      return;
     }
-  } 
-  
-  // 🔸 Student Login (Realtime Database)
-  else {
-    try {
-      const studentRef = ref(db, "registrations/" + userInput);
-      const snapshot = await get(studentRef);
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        if (data.password === password) {
-          if (data.approved) {
-            alert(`✅ Welcome ${data.name}!`);
-            localStorage.setItem("studentId", userInput);
-            window.location.href = "student.html";
-          } else {
-            alert("⏳ Your registration is pending admin approval.");
-          }
-        } else {
-          alert("❌ Incorrect password!");
-        }
-      } else {
-        alert("❌ Student ID not found!");
-      }
-    } catch (error) {
-      alert("❌ Login error: " + error.message);
+
+    const snapshot = await get(ref(db, `registrations/${userId}`));
+    if(snapshot.exists() && snapshot.val().approved){
+      localStorage.setItem("studentId", userId);
+      window.location.href = "studentPanel.html";
+    } else {
+      alert("Your registration is not approved yet.");
+      await signOut(auth);
     }
+
+  } catch(error){
+    console.error(error);
+    alert("Login failed: " + error.message);
   }
 });
+
+// Logout (used in both panels)
+export async function logout(){
+  await signOut(auth);
+  localStorage.clear();
+  window.location.href = "index.html";
+}
