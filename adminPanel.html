@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Academic Care - Admin Panel</title>
-<link rel="stylesheet" href="style.css">
-<script type="module" src="admin.js" defer></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Academic Care - Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -13,38 +12,27 @@
     <h2>Academic Year 2025</h2>
   </header>
 
-  <nav>
-    <button onclick="showTab('home')">Home</button>
-    <button onclick="showTab('classes')">Classes</button>
-    <button onclick="showTab('registrations')">Registration</button>
-    <button onclick="showTab('breaks')">Break Request</button>
-    <button id="logoutBtn" style="float:right;">Logout</button>
+  <nav id="adminNav">
+    <button id="homeTab">Home</button>
+    <button id="classTab">Class</button>
+    <button id="registrationTab">Registration</button>
+    <button id="breakRequestTab">Break Request</button>
+    <button id="logoutBtn">Log Out</button>
   </nav>
 
-  <!-- Home Tab -->
-  <section id="home">
-    <h3>Welcome to Admin Panel</h3>
-    <p>Select a tab to manage students and tuition.</p>
-  </section>
+  <div id="classTabs" style="display:none;"></div>
 
-  <!-- Classes Tab -->
-  <section id="classes" style="display:none;">
-    <h3>Classes</h3>
-    <div id="classTabs" style="margin-bottom:15px;"></div>
-    <div id="classStudents"></div>
-  </section>
-
-  <!-- Registration Tab -->
-  <section id="registrations" style="display:none;">
+  <section id="studentList" style="display:none;"></section>
+  <section id="tuitionPanel" style="display:none;"></section>
+  <section id="registrationSection" style="display:none;">
     <h3>Registration Requests</h3>
-    <div id="registrationRequests"></div>
+    <div id="registrationList"></div>
   </section>
-
-  <!-- Break Requests Tab -->
-  <section id="breaks" style="display:none;">
+  <section id="breakRequestSection" style="display:none;">
     <h3>Break Requests</h3>
-    <div id="breakRequestsContainer"></div>
+    <div id="breakList"></div>
   </section>
 
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
