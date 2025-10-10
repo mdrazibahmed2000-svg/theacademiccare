@@ -1,31 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Academic Care - Student Panel</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Academic Care - Student Panel</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <h1>The Academic Care</h1>
     <h2>Academic Year 2025</h2>
+    <h3>Welcome to Student Panel</h3>
+    <button id="logoutBtnStudent">Logout</button>
 
-    <div class="tabs">
-      <button class="studentTabBtn" data-tab="home">Home</button>
-      <button class="studentTabBtn" data-tab="myProfile">My Profile</button>
-      <button class="studentTabBtn" data-tab="tuitionFee">Tuition Fee Status</button>
-      <button class="studentTabBtn" data-tab="breakRequest">Break Request</button>
-      <button id="logoutBtnStudent" class="right">Logout</button>
+    <div class="tabContainer">
+        <button class="tabBtn" data-target="homeTab">Home</button>
+        <button class="tabBtn" data-target="profileTab">My Profile</button>
+        <button class="tabBtn" data-target="tuitionTab">Tuition Fee Status</button>
+        <button class="tabBtn" data-target="breakTab">Break Request</button>
     </div>
 
-    <div id="studentTabContents">
-      <div id="home" class="tabContent">Welcome to Student Panel</div>
-      <div id="myProfile" class="tabContent" style="display:none;"></div>
-      <div id="tuitionFee" class="tabContent" style="display:none;"></div>
-      <div id="breakRequest" class="tabContent" style="display:none;"></div>
+    <div id="homeTab" class="tabContent">Student Home</div>
+    <div id="profileTab" class="tabContent" style="display:none;">
+        <div id="profileInfo"></div>
     </div>
-  </div>
-
-  <script type="module" src="student.js"></script>
+    <div id="tuitionTab" class="tabContent" style="display:none;">
+        <div id="tuitionTable"></div>
+    </div>
+    <div id="breakTab" class="tabContent" style="display:none;">
+        <div id="breakRequestDiv"></div>
+    </div>
+</div>
+<script src="student.js"></script>
 </body>
 </html>

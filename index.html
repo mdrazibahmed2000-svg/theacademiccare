@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Academic Care - Login</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Academic Care - Login</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <h1>The Academic Care</h1>
     <h2>Academic Year 2025</h2>
 
-    <div id="loginForm">
-      <input type="text" id="userId" placeholder="Student ID or Admin Email">
-      <input type="password" id="password" placeholder="Password">
-      <button id="loginBtn">Login</button>
-      <button id="showRegisterBtn">Register</button>
-      <p id="loginError" class="error"></p>
+    <div id="loginPanel">
+        <input type="text" id="userIdEmail" placeholder="Student ID or Admin Email">
+        <input type="password" id="password" placeholder="Password">
+        <button id="loginBtn">Login</button>
+        <button id="showRegisterBtn">Register</button>
     </div>
 
-    <div id="registerForm" style="display:none;">
-      <input type="text" id="name" placeholder="Name">
-      <input type="number" id="class" placeholder="Class (6-12)">
-      <input type="number" id="roll" placeholder="Roll Number">
-      <input type="text" id="whatsapp" placeholder="WhatsApp Number">
-      <input type="password" id="regPassword" placeholder="Password">
-      <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
-      <button id="submitRegistration">Submit Registration</button>
-      <button id="backLogin">Back to Login</button>
-      <p id="registerError" class="error"></p>
-      <p id="registerSuccess" class="success"></p>
+    <div id="registerPanel" style="display:none;">
+        <input type="text" id="regName" placeholder="Full Name">
+        <input type="number" id="regClass" placeholder="Class (6-12)">
+        <input type="number" id="regRoll" placeholder="Roll">
+        <input type="text" id="regWhatsapp" placeholder="WhatsApp Number">
+        <input type="password" id="regPassword" placeholder="Password">
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+        <button id="registerBtn">Submit Registration</button>
+        <button id="cancelRegisterBtn">Cancel</button>
     </div>
-  </div>
-
-  <script type="module" src="script.js"></script>
+</div>
+<script src="script.js"></script>
 </body>
 </html>

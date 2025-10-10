@@ -1,51 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Academic Care - Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Academic Care - Admin Panel</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <h1>The Academic Care</h1>
     <h2>Academic Year 2025</h2>
+    <h3>Welcome to Admin Panel</h3>
+    <button id="logoutBtnAdmin">Logout</button>
 
-    <div class="tabs">
-      <button class="tabBtn" data-tab="home">Home</button>
-      <button class="tabBtn" data-tab="class">Class</button>
-      <button class="tabBtn" data-tab="registration">Registration</button>
-      <button class="tabBtn" data-tab="breakRequests">Break Requests</button>
-      <button id="logoutBtn" class="right">Logout</button>
+    <div class="tabContainer">
+        <button class="tabBtn" data-target="homeTab">Home</button>
+        <button class="tabBtn" data-target="classTab">Class</button>
+        <button class="tabBtn" data-target="registrationTab">Registration</button>
+        <button class="tabBtn" data-target="breakTab">Break Request</button>
     </div>
 
-    <div id="tabContents">
-      <div id="home" class="tabContent">Welcome to Admin Panel</div>
+    <div id="homeTab" class="tabContent">Admin Home</div>
 
-      <div id="class" class="tabContent" style="display:none;">
-        <div class="subTabs">
-          <button class="subTabBtn" data-class="6">Class 6</button>
-          <button class="subTabBtn" data-class="7">Class 7</button>
-          <button class="subTabBtn" data-class="8">Class 8</button>
-          <button class="subTabBtn" data-class="9">Class 9</button>
-          <button class="subTabBtn" data-class="10">Class 10</button>
-          <button class="subTabBtn" data-class="11">Class 11</button>
-          <button class="subTabBtn" data-class="12">Class 12</button>
-        </div>
+    <div id="classTab" class="tabContent" style="display:none;">
+        <div class="subTabContainer" id="classSubTabs"></div>
         <div id="classContent"></div>
-      </div>
-
-      <div id="registration" class="tabContent" style="display:none;">
-        <h3>Pending Registrations</h3>
-        <div id="registrationRequests"></div>
-      </div>
-
-      <div id="breakRequests" class="tabContent" style="display:none;">
-        <h3>Break Requests</h3>
-        <div id="breakRequestsList"></div>
-      </div>
     </div>
-  </div>
 
-  <script type="module" src="admin.js"></script>
+    <div id="registrationTab" class="tabContent" style="display:none;">
+        <h4>Pending Registrations</h4>
+        <div id="registrationList"></div>
+    </div>
+
+    <div id="breakTab" class="tabContent" style="display:none;">
+        <h4>Break Requests</h4>
+        <div id="breakRequestsList"></div>
+    </div>
+</div>
+<script src="admin.js"></script>
 </body>
 </html>

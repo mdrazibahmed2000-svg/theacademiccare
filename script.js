@@ -1,95 +1,68 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-
-// Firebase Config
+// Firebase initialization
 const firebaseConfig = {
-  apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-  authDomain: "the-academic-care-de611.firebaseapp.com",
-  databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.firebasedatabase.app",
-  messagingSenderId: "142271027321",
-  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8"
+    apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
+    authDomain: "the-academic-care-de611.firebaseapp.com",
+    databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "the-academic-care-de611",
+    storageBucket: "the-academic-care-de611.firebasedatabase.app",
+    messagingSenderId: "142271027321",
+    appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+    measurementId: "G-Q7MCGKTYMX"
 };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
-
-// Elements
-const loginForm = document.getElementById("loginForm");
-const registerForm = document.getElementById("registerForm");
-
-const loginBtn = document.getElementById("loginBtn");
-const showRegisterBtn = document.getElementById("showRegisterBtn");
-const backLoginBtn = document.getElementById("backLogin");
-
-const submitRegistration = document.getElementById("submitRegistration");
-
-// ---------------- Form toggle ----------------
-showRegisterBtn.addEventListener("click", () => {
-  loginForm.style.display = "none";
-  registerForm.style.display = "block";
+// Show/Hide Registration Panel
+document.getElementById('showRegisterBtn').addEventListener('click', () => {
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('registerPanel').style.display = 'block';
+});
+document.getElementById('cancelRegisterBtn').addEventListener('click', () => {
+    document.getElementById('loginPanel').style.display = 'block';
+    document.getElementById('registerPanel').style.display = 'none';
 });
 
-backLoginBtn.addEventListener("click", () => {
-  registerForm.style.display = "none";
-  loginForm.style.display = "block";
-});
+// Login
+document.getElementById('loginBtn').addEventListener('click', () => {
+    const uidEmail = document.getElementById('userIdEmail').value.trim();
+    const password = document.getElementById('password').value;
 
-// ---------------- Login ----------------
-loginBtn.addEventListener("click", () => {
-  const userId = document.getElementById("userId").value.trim();
-  const password = document.getElementById("password").value;
-
-  if(userId.includes("@")) {
     // Admin login
-    signInWithEmailAndPassword(auth, userId, password)
-      .then(() => window.location.href="adminPanel.html")
-      .catch(err => document.getElementById("loginError").innerText = err.message);
-  } else {
+    if (uidEmail === 'theacademiccare2025@gmail.com') {
+        auth.signInWithEmailAndPassword(uidEmail, password)
+        .then(() => { location.href = 'adminPanel.html'; })
+        .catch(err => alert(err.message));
+        return;
+    }
+
     // Student login
-    get(child(ref(db), `students/${userId}`)).then(snap => {
-      if(snap.exists()){
+    db.ref(`students/${uidEmail}`).once('value').then(snap => {
         const student = snap.val();
-        if(student.password === password && student.status === "approved"){
-          window.location.href = `studentPanel.html?studentId=${userId}`;
-        } else if(student.status !== "approved") {
-          document.getElementById("loginError").innerText = "Your registration is not approved yet";
-        } else {
-          document.getElementById("loginError").innerText = "Password incorrect";
-        }
-      } else {
-        document.getElementById("loginError").innerText = "Student ID not found";
-      }
+        if (!student) return alert('Student not found.');
+        if (!student.approved) return alert('Registration pending approval.');
+        if (student.password !== password) return alert('Incorrect password.');
+        localStorage.setItem('studentId', uidEmail);
+        location.href = 'studentPanel.html';
     });
-  }
 });
 
-// ---------------- Registration ----------------
-submitRegistration.addEventListener("click", () => {
-  const name = document.getElementById("name").value.trim();
-  const cls = document.getElementById("class").value.trim();
-  const roll = document.getElementById("roll").value.trim();
-  const whatsapp = document.getElementById("whatsapp").value.trim();
-  const password = document.getElementById("regPassword").value;
-  const confirmPassword = document.getElementById("regConfirmPassword").value;
+// Registration
+document.getElementById('registerBtn').addEventListener('click', () => {
+    const name = document.getElementById('regName').value.trim();
+    const cls = document.getElementById('regClass').value.trim();
+    const roll = document.getElementById('regRoll').value.trim();
+    const whatsapp = document.getElementById('regWhatsapp').value.trim();
+    const pass = document.getElementById('regPassword').value;
+    const confirmPass = document.getElementById('regConfirmPassword').value;
 
-  if(password !== confirmPassword){
-    document.getElementById("registerError").innerText = "Passwords do not match";
-    return;
-  }
+    if (pass !== confirmPass) return alert("Passwords don't match!");
 
-  const year = new Date().getFullYear();
-  const studentId = `S${year}${cls}${roll}`;
+    const year = new Date().getFullYear();
+    const studentId = `S${year}${cls}${roll}`;
 
-  set(ref(db, `students/${studentId}`), {
-    name, class: cls, roll, whatsapp, password, studentId, status: "pending"
-  }).then(()=>{
-    document.getElementById("registerSuccess").innerText = `Registration submitted. Your ID: ${studentId}`;
-    document.getElementById("registerError").innerText="";
-  }).catch(err => {
-    document.getElementById("registerError").innerText = err.message;
-  });
+    db.ref(`students/${studentId}`).set({
+        name, class: cls, roll, whatsapp, password: pass, approved: false
+    }).then(() => alert(`Registration submitted! Your Student ID: ${studentId}`))
+      .catch(err => alert(err.message));
 });

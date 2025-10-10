@@ -1,158 +1,25 @@
-/* ===== Global Styles ===== */
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f5f6fa;
-  margin: 0;
-  padding: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin:0;
+    padding:0;
 }
-
 .container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
+    max-width: 900px;
+    margin:auto;
+    background:#fff;
+    padding:20px;
+    margin-top:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.2);
 }
-
-h1 {
-  text-align: center;
-  color: #2f3640;
-  margin-bottom: 5px;
-}
-
-h2 {
-  text-align: center;
-  color: #718093;
-  margin-bottom: 20px;
-}
-
-/* ===== Tabs ===== */
-.tabs, .subTabs {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-
-.tabBtn, .subTabBtn, .studentTabBtn {
-  background-color: #dcdde1;
-  border: none;
-  padding: 10px 15px;
-  margin-right: 5px;
-  cursor: pointer;
-  border-radius: 5px;
-  font-weight: bold;
-  transition: all 0.2s ease;
-}
-
-.tabBtn:hover, .subTabBtn:hover, .studentTabBtn:hover {
-  background-color: #718093;
-  color: #fff;
-}
-
-.tabBtn.right, #logoutBtnStudent {
-  margin-left: auto;
-  background-color: #e84118;
-  color: #fff;
-}
-
-.tabBtn.right:hover, #logoutBtnStudent:hover {
-  background-color: #c23616;
-}
-
-/* ===== Tab Content ===== */
-.tabContent {
-  background-color: #fff;
-  padding: 15px;
-  border-radius: 5px;
-  min-height: 100px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-/* ===== Buttons ===== */
-button {
-  cursor: pointer;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-weight: bold;
-  transition: 0.2s;
-  margin-right: 5px;
-}
-
-button:hover {
-  opacity: 0.8;
-}
-
-button.approve {
-  background-color: #44bd32;
-  color: white;
-}
-
-button.deny {
-  background-color: #e84118;
-  color: white;
-}
-
-button.markPaid {
-  background-color: #4cd137;
-  color: white;
-}
-
-button.markBreak {
-  background-color: #8c7ae6;
-  color: white;
-}
-
-button.undo {
-  background-color: #fbc531;
-  color: white;
-}
-
-/* ===== Tables ===== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-table th, table td {
-  border: 1px solid #dcdde1;
-  padding: 8px;
-  text-align: center;
-}
-
-table th {
-  background-color: #f5f6fa;
-}
-
-table tr:nth-child(even) {
-  background-color: #f1f2f6;
-}
-
-/* ===== Forms ===== */
-input[type=text], input[type=password], input[type=number] {
-  width: 100%;
-  padding: 8px;
-  margin: 5px 0 10px 0;
-  border: 1px solid #dcdde1;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-.error {
-  color: #e84118;
-  font-weight: bold;
-}
-
-.success {
-  color: #44bd32;
-  font-weight: bold;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .tabs, .subTabs {
-    flex-direction: column;
-  }
-  button.tabBtn, button.subTabBtn, button.studentTabBtn {
-    margin-bottom: 5px;
-  }
-}
+h1,h2,h3,h4 { margin: 5px 0; }
+input { display:block; margin:10px 0; padding:8px; width:100%; max-width:300px; }
+button { padding:8px 12px; margin:5px; cursor:pointer; }
+.tabContainer, .subTabContainer { margin:10px 0; }
+.tabBtn { background:#007BFF; color:#fff; border:none; border-radius:5px; padding:8px 12px; margin-right:5px; }
+.tabBtn:hover { background:#0056b3; }
+.tabContent { margin-top:15px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+table, th, td { border:1px solid #ccc; }
+th, td { padding:8px; text-align:left; }
