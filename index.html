@@ -1,41 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Academic Care</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <h1>The Academic Care</h1>
-    <h2>Academic Year 2025</h2>
-  </header>
+  <h1>The Academic Care</h1>
+  <h2>Academic Year 2025</h2>
 
-  <!-- Login Panel -->
-  <div class="container login-container">
-    <h3>Login Panel</h3>
-    <input type="text" id="userInput" placeholder="Student ID or admin email" />
-    <input type="password" id="passwordInput" placeholder="Password" />
-    <button id="loginBtn">Login</button>
-    <button id="showRegisterBtn" class="secondary-btn">Registration</button>
-  </div>
+  <!-- Login Form -->
+  <form id="loginForm">
+    <input type="text" id="studentId" placeholder="Student ID or 'admin'" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button type="submit">Login</button>
+    <button type="button" id="showRegistration">Register</button>
+  </form>
 
-  <!-- Registration Panel -->
-  <div class="container register-container" style="display: none;">
-    <h3>Student Registration</h3>
-    <input type="text" id="regName" placeholder="Full Name" />
-    <input type="text" id="regClass" placeholder="Class (e.g. 10)" />
-    <input type="text" id="regRoll" placeholder="Roll" />
-    <input type="text" id="regWhatsapp" placeholder="WhatsApp Number" />
-    <input type="password" id="regPassword" placeholder="Set Password" />
-    <input type="password" id="regConfirmPassword" placeholder="Confirm Password" />
-    <button id="submitRegistration">Submit Registration</button>
-    <button id="backToLoginBtn" class="secondary-btn">Back to Login</button>
-  </div>
+  <!-- Registration Form (hidden initially) -->
+  <form id="registrationForm" style="display:none;">
+    <input type="text" id="name" placeholder="Name" required />
+    <input type="number" id="class" placeholder="Class" required />
+    <input type="number" id="roll" placeholder="Roll" required />
+    <input type="text" id="whatsapp" placeholder="WhatsApp Number" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="password" id="confirmPassword" placeholder="Confirm Password" required />
+    <button type="submit">Submit Registration</button>
+  </form>
 
-  <!-- Firebase & App Script -->
   <script type="module" src="script.js"></script>
 </body>
 </html>
