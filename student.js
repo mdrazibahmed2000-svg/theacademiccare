@@ -1,95 +1,85 @@
-const auth = firebase.auth();
-const db = firebase.database();
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-database.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
 
-const logoutBtn = document.getElementById('logoutBtn');
-logoutBtn.addEventListener('click', () => {
-    auth.signOut().then(() => location.href = 'index.html');
-});
+const firebaseConfig = {
+  apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
+  authDomain: "the-academic-care-de611.firebaseapp.com",
+  databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "the-academic-care-de611",
+  storageBucket: "the-academic-care-de611.firebasedatabase.app",
+  messagingSenderId: "142271027321",
+  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+  measurementId: "G-Q7MCGKTYMX"
+};
 
-const tabs = document.querySelectorAll('.tab');
-const profileContainer = document.getElementById('profileContainer');
-const tuitionContainer = document.getElementById('tuitionContainer');
-const breakContainer = document.getElementById('breakContainer');
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
-const studentId = localStorage.getItem('studentId');
+const urlParams = new URLSearchParams(window.location.search);
+const studentId = urlParams.get('studentId');
 
-// Tab click events
+const tabs = document.querySelectorAll('.tabBtn');
+const contents = document.querySelectorAll('.tabContent');
+
 tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-        profileContainer.style.display = 'none';
-        tuitionContainer.style.display = 'none';
-        breakContainer.style.display = 'none';
-
-        if (tab.id === 'homeTab') return;
-        if (tab.id === 'profileTab') loadProfile();
-        if (tab.id === 'tuitionTab') loadTuition();
-        if (tab.id === 'breakTab') loadBreakRequests();
-    });
+  tab.addEventListener('click', () => {
+    contents.forEach(c => c.style.display='none');
+    document.getElementById(tab.dataset.tab).style.display='block';
+    if(tab.dataset.tab==='profile') loadProfile();
+    if(tab.dataset.tab==='tuition') loadTuition();
+    if(tab.dataset.tab==='breakRequest') loadBreakRequest();
+  });
 });
 
-// Load profile
-function loadProfile() {
-    profileContainer.style.display = 'block';
-    db.ref(`students/${studentId}`).once('value').then(snap => {
-        const student = snap.val();
-        profileContainer.innerHTML = `
-            <p>Name: ${student.name}</p>
-            <p>Class: ${student.class}</p>
-            <p>Roll: ${student.roll}</p>
-            <p>WhatsApp: ${student.whatsapp}</p>
-        `;
-    });
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  signOut(auth).then(()=>{window.location.href='index.html';});
+});
+
+async function loadProfile(){
+  const profileDiv = document.getElementById('profile');
+  const snapshot = await get(ref(db, 'students/' + studentId));
+  if(snapshot.exists()){
+    const s = snapshot.val();
+    profileDiv.innerHTML = `<b>Name:</b> ${s.name}<br>
+                            <b>Class:</b> ${s.class}<br>
+                            <b>Roll:</b> ${s.roll}<br>
+                            <b>WhatsApp:</b> ${s.whatsapp}`;
+  }
 }
 
-// Load tuition
-function loadTuition() {
-    tuitionContainer.style.display = 'block';
-    tuitionContainer.innerHTML = '';
-    const table = document.createElement('table');
-    table.innerHTML = `<tr><th>Month</th><th>Status</th><th>Date & Method</th></tr>`;
-
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    db.ref(`tuition/${studentId}`).once('value').then(snapshot => {
-        const data = snapshot.val() || {};
-        const currentMonthIndex = new Date().getMonth();
-        months.forEach((month, idx) => {
-            if (idx > currentMonthIndex) return; // Only up to current month
-            const row = document.createElement('tr');
-            const status = data[month]?.status || "Unpaid";
-            const date = data[month]?.date || "";
-            const method = data[month]?.method || "";
-            row.innerHTML = `<td>${month}</td><td>${status}</td><td>${date} ${method}</td>`;
-            table.appendChild(row);
-        });
-    });
-
-    tuitionContainer.appendChild(table);
+async function loadTuition(){
+  const tuitionDiv = document.getElementById('tuition');
+  tuitionDiv.innerHTML = '<h3>Tuition Fee Status</h3>';
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const snapshot = await get(ref(db, 'tuition/'+studentId));
+  months.forEach((m, idx)=>{
+    if(idx <= new Date().getMonth()){
+      let status = 'Unpaid', date='', method='';
+      if(snapshot.exists() && snapshot.val()[m]){
+        status = snapshot.val()[m].status;
+        date = snapshot.val()[m].date;
+        method = snapshot.val()[m].method;
+      }
+      tuitionDiv.innerHTML += `${m} - ${status} ${date} ${method}<br>`;
+    }
+  });
 }
 
-// Load break requests
-function loadBreakRequests() {
-    breakContainer.style.display = 'block';
-    breakContainer.innerHTML = '';
-    const table = document.createElement('table');
-    table.innerHTML = `<tr><th>Month</th><th>Request Break</th></tr>`;
-
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    const currentMonthIndex = new Date().getMonth();
-
-    months.forEach((month, idx) => {
-        if (idx <= currentMonthIndex) return; // Only upcoming months
-        const row = document.createElement('tr');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.addEventListener('change', () => {
-            db.ref(`breakRequests/${studentId}/${month}`).set({requested: checkbox.checked});
-        });
-        row.innerHTML = `<td>${month}</td>`;
-        const td = document.createElement('td');
-        td.appendChild(checkbox);
-        row.appendChild(td);
-        table.appendChild(row);
-    });
-
-    breakContainer.appendChild(table);
+async function loadBreakRequest(){
+  const breakDiv = document.getElementById('breakRequest');
+  breakDiv.innerHTML = '<h3>Break Request</h3>';
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  months.forEach((m, idx)=>{
+    if(idx > new Date().getMonth()){
+      breakDiv.innerHTML += `${m} <button onclick="requestBreak('${m}')">Request Break</button><br>`;
+    }
+  });
 }
+
+window.requestBreak = async (month)=>{
+  await update(ref(db, 'breakRequests/'+studentId+'/'+month), {requested:true, approved:false});
+  alert('Break requested for '+month);
+  loadBreakRequest();
+};
