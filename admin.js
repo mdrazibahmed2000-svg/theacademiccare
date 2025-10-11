@@ -1,4 +1,4 @@
-// Firebase Configuration
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -11,197 +11,158 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Tabs switching
+// 🔹 Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  window.location.href = "index.html";
+});
+
+// 🔹 Tab switching
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
     document.getElementById(btn.dataset.tab).classList.add("active");
-    document.querySelectorAll(".tab-btn").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
     btn.classList.add("active");
+
+    if (btn.dataset.tab === "classes") showClassSubTabs();
   });
 });
 
-document.getElementById("homeBtn").addEventListener("click", () => {
-  document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-  document.getElementById("home").classList.add("active");
-});
-
-// Create Class sub-tabs
-const classTabsDiv = document.getElementById("classTabs");
-for (let i = 6; i <= 12; i++) {
-  const btn = document.createElement("button");
-  btn.textContent = "Class " + i;
-  btn.classList.add("class-btn");
-  btn.addEventListener("click", () => loadClassStudents(i));
-  classTabsDiv.appendChild(btn);
+// 🔹 Show Class sub-tabs dynamically
+function showClassSubTabs() {
+  const container = document.getElementById("classSubTabs");
+  container.innerHTML = "";
+  for (let i = 6; i <= 12; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = "Class " + i;
+    btn.onclick = () => loadStudents(i);
+    container.appendChild(btn);
+  }
 }
 
-// Load Students per Class
-function loadClassStudents(classNum) {
-  const studentListDiv = document.getElementById("studentList");
-  studentListDiv.innerHTML = `<h3>Students of Class ${classNum}</h3>
-  <table>
-    <thead><tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition Fee</th></tr></thead>
-    <tbody id="studentRows"></tbody>
-  </table>`;
+// 🔹 Load approved students
+function loadStudents(classNum) {
+  const div = document.getElementById("studentList");
+  div.innerHTML = `<h3>Approved Students (Class ${classNum})</h3>
+  <table><thead><tr><th>Name</th><th>ID</th><th>WhatsApp</th><th>Tuition</th></tr></thead><tbody id="students"></tbody></table>`;
 
-  const tbody = document.getElementById("studentRows");
-  db.ref("students").orderByChild("class").equalTo(String(classNum)).once("value", (snapshot) => {
+  const tbody = document.getElementById("students");
+  db.ref("students").orderByChild("class").equalTo(String(classNum)).once("value", snap => {
     tbody.innerHTML = "";
-    snapshot.forEach((child) => {
+    snap.forEach(child => {
       const st = child.val();
-      const row = `
+      tbody.innerHTML += `
         <tr>
           <td>${st.name}</td>
           <td>${st.id}</td>
           <td>${st.whatsapp}</td>
-          <td><button class="feeStatusBtn" data-id="${st.id}">💰</button></td>
+          <td><button class="tuitionBtn" data-id="${st.id}">💰</button></td>
         </tr>`;
-      tbody.innerHTML += row;
     });
-    document.querySelectorAll(".feeStatusBtn").forEach(btn => {
-      btn.addEventListener("click", () => openTuitionFeeModal(btn.dataset.id));
-    });
+    document.querySelectorAll(".tuitionBtn").forEach(b => b.addEventListener("click", () => openTuition(b.dataset.id)));
   });
 }
 
-// Tuition Fee Modal
-const modal = document.getElementById("tuitionFeeModal");
+// 🔹 Tuition modal
+const modal = document.getElementById("tuitionModal");
 const closeModal = document.getElementById("closeModal");
 closeModal.onclick = () => (modal.style.display = "none");
-window.onclick = (event) => {
-  if (event.target === modal) modal.style.display = "none";
-};
+window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
 
-function openTuitionFeeModal(studentId) {
-  modal.style.display = "block";
+function openTuition(studentId) {
+  modal.style.display = "flex";
   const tbody = document.querySelector("#feeTable tbody");
   tbody.innerHTML = "";
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const current = new Date().getMonth();
 
-  const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-  const currentMonth = new Date().getMonth();
-
-  db.ref("tuitionFees/" + studentId).once("value", (snapshot) => {
-    for (let i = 0; i <= currentMonth; i++) {
-      const month = months[i];
-      const fee = snapshot.child(month).val() || {};
+  db.ref("tuitionFees/" + studentId).once("value", snap => {
+    for (let i = 0; i <= current; i++) {
+      const m = months[i];
+      const fee = snap.child(m).val() || {};
       const status = fee.status || "Unpaid";
       const color = status === "Paid" ? "green" : status === "Break" ? "purple" : "red";
-      const method = fee.method || "";
-      const date = fee.date || "";
-      const actions = status === "Unpaid" ? `
-          <button class="markPaid" data-month="${month}" data-id="${studentId}">Mark Paid</button>
-          <button class="markBreak" data-month="${month}" data-id="${studentId}">Mark Break</button>`
-        : `<button class="undo" data-month="${month}" data-id="${studentId}">Undo</button>`;
-
+      const actions = status === "Unpaid"
+        ? `<button class='markPaid' data-month='${m}' data-id='${studentId}'>Mark Paid</button>
+           <button class='markBreak' data-month='${m}' data-id='${studentId}'>Mark Break</button>`
+        : `<button class='undo' data-month='${m}' data-id='${studentId}'>Undo</button>`;
       tbody.innerHTML += `
         <tr>
-          <td>${month}</td>
-          <td style="color:${color};font-weight:bold;">${status}</td>
-          <td>${date} ${method}</td>
+          <td>${m}</td>
+          <td style='color:${color};font-weight:bold;'>${status}</td>
+          <td>${fee.date || ""} ${fee.method || ""}</td>
           <td>${actions}</td>
         </tr>`;
     }
 
-    // Attach event listeners
-    document.querySelectorAll(".markPaid").forEach(b =>
-      b.addEventListener("click", () => markStatus(b.dataset.id, b.dataset.month, "Paid"))
-    );
-    document.querySelectorAll(".markBreak").forEach(b =>
-      b.addEventListener("click", () => markStatus(b.dataset.id, b.dataset.month, "Break"))
-    );
-    document.querySelectorAll(".undo").forEach(b =>
-      b.addEventListener("click", () => undoStatus(b.dataset.id, b.dataset.month))
-    );
+    document.querySelectorAll(".markPaid").forEach(b => b.addEventListener("click", () => markStatus(b.dataset.id, b.dataset.month, "Paid")));
+    document.querySelectorAll(".markBreak").forEach(b => b.addEventListener("click", () => markStatus(b.dataset.id, b.dataset.month, "Break")));
+    document.querySelectorAll(".undo").forEach(b => b.addEventListener("click", () => undoStatus(b.dataset.id, b.dataset.month)));
   });
 }
 
 function markStatus(studentId, month, status) {
-  const method = status === "Paid" ? prompt("Enter payment method (Cash/Bkash/etc):") : "";
-  const now = new Date().toLocaleDateString();
-  db.ref(`tuitionFees/${studentId}/${month}`).set({
-    status,
-    method,
-    date: now
-  });
+  const method = status === "Paid" ? prompt("Enter payment method:") : "";
+  const date = new Date().toLocaleDateString();
+  db.ref(`tuitionFees/${studentId}/${month}`).set({ status, method, date });
   alert(`Marked as ${status}`);
-  openTuitionFeeModal(studentId);
+  openTuition(studentId);
 }
-
 function undoStatus(studentId, month) {
   db.ref(`tuitionFees/${studentId}/${month}`).remove();
-  alert("Status undone!");
-  openTuitionFeeModal(studentId);
+  alert("Status undone");
+  openTuition(studentId);
 }
 
-// Pending Registration
+// 🔹 Registration Management
 const pendingTable = document.querySelector("#pendingTable tbody");
-db.ref("pendingRegistrations").on("value", (snapshot) => {
+db.ref("pendingRegistrations").on("value", snap => {
   pendingTable.innerHTML = "";
-  snapshot.forEach((child) => {
-    const reg = child.val();
-    const row = `
+  snap.forEach(child => {
+    const s = child.val();
+    pendingTable.innerHTML += `
       <tr>
-        <td>${reg.name}</td>
-        <td>${reg.class}</td>
-        <td>${reg.roll}</td>
-        <td>${reg.whatsapp}</td>
+        <td>${s.name}</td><td>${s.class}</td><td>${s.roll}</td><td>${s.whatsapp}</td>
         <td>
           <button class="approve" data-id="${child.key}">Approve</button>
           <button class="deny" data-id="${child.key}">Deny</button>
         </td>
       </tr>`;
-    pendingTable.innerHTML += row;
   });
-
   document.querySelectorAll(".approve").forEach(b => b.addEventListener("click", () => approveStudent(b.dataset.id)));
   document.querySelectorAll(".deny").forEach(b => b.addEventListener("click", () => denyStudent(b.dataset.id)));
 });
 
 function approveStudent(id) {
-  db.ref("pendingRegistrations/" + id).once("value", (snap) => {
-    const student = snap.val();
-    if (student) {
-      const studentID = "S" + new Date().getFullYear() + student.class + student.roll;
-      db.ref("students/" + studentID).set({
-        id: studentID,
-        name: student.name,
-        class: student.class,
-        roll: student.roll,
-        whatsapp: student.whatsapp,
-        password: student.password,
-        status: "Active"
-      });
+  db.ref("pendingRegistrations/" + id).once("value", snap => {
+    const st = snap.val();
+    if (st) {
+      const sid = "S" + new Date().getFullYear() + st.class + st.roll;
+      db.ref("students/" + sid).set({ ...st, id: sid });
       db.ref("pendingRegistrations/" + id).remove();
-      alert("Student approved successfully!");
+      alert("Approved successfully!");
     }
   });
 }
-
 function denyStudent(id) {
   db.ref("pendingRegistrations/" + id).remove();
-  alert("Registration denied and removed.");
+  alert("Denied successfully!");
 }
 
-// Break Requests
+// 🔹 Break Requests
 const breakTable = document.querySelector("#breakTable tbody");
-db.ref("breakRequests").on("value", (snapshot) => {
+db.ref("breakRequests").on("value", snap => {
   breakTable.innerHTML = "";
-  snapshot.forEach((child) => {
-    const req = child.val();
-    const row = `
+  snap.forEach(child => {
+    const r = child.val();
+    breakTable.innerHTML += `
       <tr>
-        <td>${req.studentID}</td>
-        <td>${req.name}</td>
-        <td>${req.reason}</td>
-        <td><button class="deleteBreak" data-id="${child.key}">Remove</button></td>
+        <td>${r.studentID}</td><td>${r.name}</td><td>${r.reason}</td>
+        <td><button class='removeBreak' data-id='${child.key}'>Remove</button></td>
       </tr>`;
-    breakTable.innerHTML += row;
   });
-  document.querySelectorAll(".deleteBreak").forEach(b =>
-    b.addEventListener("click", () => db.ref("breakRequests/" + b.dataset.id).remove())
-  );
+  document.querySelectorAll(".removeBreak").forEach(b => b.addEventListener("click", () => {
+    db.ref("breakRequests/" + b.dataset.id).remove();
+    alert("Break request removed");
+  }));
 });
