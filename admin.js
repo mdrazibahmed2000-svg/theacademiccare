@@ -86,16 +86,95 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // =============================
-  // Manage Tuition Fee
-  // =============================
-  function manageTuition(studentId){
-    const tuitionRef = db.ref(`tuition/${studentId}`);
-    tuitionRef.once("value", snap => {
-      console.log("Tuition data for:", studentId, snap.val());
-      alert("Implement tuition management table here!");
-      // Add your Mark Paid / Mark Break / Undo logic
-    });
-  }
+// Manage Tuition Fee
+// =============================
+function manageTuition(studentId){
+  const container = document.getElementById("studentsList");
+  container.innerHTML = `<h3>Tuition Management for ${studentId}</h3>`;
+  const table = document.createElement("table");
+  table.style.width = "100%";
+  table.border = "1";
+
+  // Table Header
+  const header = table.insertRow();
+  header.innerHTML = `<th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th>`;
+
+  // Get current month index (0=Jan)
+  const now = new Date();
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const currentMonthIndex = now.getMonth();
+
+  const tuitionRef = db.ref(`tuition/${studentId}`);
+
+  // Load existing tuition data
+  tuitionRef.once("value", snapshot => {
+    const data = snapshot.val() || {};
+
+    for(let i=0; i<=currentMonthIndex; i++){
+      const month = monthNames[i];
+      const monthData = data[month] || { status: "Unpaid", date: "", method: "" };
+      const row = table.insertRow();
+
+      const statusCell = row.insertCell(1);
+      const actionCell = row.insertCell(3);
+
+      row.insertCell(0).textContent = month;
+      statusCell.textContent = monthData.status;
+      row.insertCell(2).textContent = monthData.date + " " + monthData.method;
+
+      // Action buttons
+      if(monthData.status === "Unpaid" || monthData.status === "Break"){
+        const markPaidBtn = document.createElement("button");
+        markPaidBtn.textContent = "Mark Paid";
+        markPaidBtn.addEventListener("click", () => {
+          const method = prompt("Enter Payment Method (Bkash/Rocket/Bank)");
+          if(!method) return;
+          tuitionRef.child(month).set({
+            status: "Paid",
+            date: new Date().toISOString().split("T")[0],
+            method: method
+          });
+          alert(`Payment marked as Paid for ${month}`);
+          manageTuition(studentId); // refresh table
+        });
+
+        const markBreakBtn = document.createElement("button");
+        markBreakBtn.textContent = "Mark Break";
+        markBreakBtn.addEventListener("click", () => {
+          tuitionRef.child(month).set({
+            status: "Break",
+            date: "",
+            method: ""
+          });
+          manageTuition(studentId); // refresh table
+        });
+
+        actionCell.appendChild(markPaidBtn);
+        actionCell.appendChild(markBreakBtn);
+      } else {
+        const undoBtn = document.createElement("button");
+        undoBtn.textContent = "Undo";
+        undoBtn.addEventListener("click", () => {
+          tuitionRef.child(month).set({
+            status: "Unpaid",
+            date: "",
+            method: ""
+          });
+          manageTuition(studentId);
+        });
+        actionCell.appendChild(undoBtn);
+      }
+
+      // Coloring Status
+      if(monthData.status === "Paid") statusCell.style.color = "green";
+      else if(monthData.status === "Break") statusCell.style.color = "purple";
+      else statusCell.style.color = "red";
+    }
+
+    container.appendChild(table);
+  });
+}
+
 
   // =============================
   // Load Registration Requests
