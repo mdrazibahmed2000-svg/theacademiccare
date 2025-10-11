@@ -1,80 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Academic Care | Login & Registration</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Academic Care - Login & Registration</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
-  <div class="container">
+  <header>
     <h1>The Academic Care</h1>
-    <p class="subtitle">Login & Registration Portal</p>
+    <h2>Academic Year 2025</h2>
+  </header>
 
-    <!-- Login Form -->
-    <div id="loginForm" class="form-box">
-      <h2>Login</h2>
-      <label>Student ID or Admin Email</label>
-      <input type="text" id="loginEmail" placeholder="Enter Student ID or Admin Email">
+  <main>
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="form-box">
+      <h3>Login</h3>
+      <label for="loginID">Student ID or Admin Email</label>
+      <input type="text" id="loginID" placeholder="Enter Student ID or Admin Email" required />
 
-      <label>Password</label>
-      <input type="password" id="loginPassword" placeholder="Enter Password">
+      <label for="loginPassword">Password</label>
+      <input type="password" id="loginPassword" placeholder="Enter Password" required />
 
-      <button id="loginBtn">Login</button>
+      <button id="loginBtn" type="submit">Login</button>
+      <p>Don’t have an account? <a href="#" id="registerLink">Register here</a></p>
+    </form>
 
-      <p class="switch-text">Don’t have an account? 
-        <button id="showRegister" class="link-btn">Register</button>
-      </p>
-    </div>
+    <!-- REGISTRATION FORM -->
+    <form id="registerForm" class="form-box" style="display: none;">
+      <h3>Student Registration</h3>
 
-    <!-- Registration Form -->
-    <div id="registerForm" class="form-box" style="display: none;">
-      <h2>Student Registration</h2>
+      <label for="regName">Full Name</label>
+      <input type="text" id="regName" placeholder="Enter Full Name" required />
 
-      <label>Name</label>
-      <input type="text" id="regName" placeholder="Enter Full Name">
+      <label for="regClass">Class</label>
+      <input type="number" id="regClass" placeholder="Enter Class (6-12)" min="6" max="12" required />
 
-      <label>Class</label>
-      <input type="number" id="regClass" placeholder="Enter Class (6–12)" min="6" max="12">
+      <label for="regRoll">Roll</label>
+      <input type="number" id="regRoll" placeholder="Enter Roll" required />
 
-      <label>Roll</label>
-      <input type="number" id="regRoll" placeholder="Enter Roll Number">
+      <label for="regWhatsapp">WhatsApp Number</label>
+      <input type="text" id="regWhatsapp" placeholder="Enter WhatsApp Number" required />
 
-      <label>WhatsApp Number</label>
-      <input type="text" id="regWhatsapp" placeholder="Enter WhatsApp Number">
+      <label for="regPassword">Password</label>
+      <input type="password" id="regPassword" placeholder="Set Password" required />
 
-      <label>Password</label>
-      <input type="password" id="regPassword" placeholder="Create Password">
+      <label for="regConfirmPassword">Confirm Password</label>
+      <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required />
 
-      <label>Confirm Password</label>
-      <input type="password" id="regConfirmPassword" placeholder="Confirm Password">
+      <button id="registerBtn" type="submit">Submit Registration</button>
 
-      <button id="registerBtn">Submit Registration</button>
+      <p>Already registered? <a href="#" id="backToLoginLink">Go back to login</a></p>
+    </form>
+  </main>
 
-      <p class="switch-text">
-        Already registered? 
-        <button id="showLogin" class="link-btn">Login</button>
-      </p>
-    </div>
-  </div>
+  <footer>
+    <p>&copy; 2025 The Academic Care. All rights reserved.</p>
+  </footer>
 
-  <script>
-    // Your Firebase configuration
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "the-academic-care-de611.firebaseapp.com",
-      databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "the-academic-care-de611",
-      storageBucket: "the-academic-care-de611.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-  </script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+  <!-- Custom Script -->
   <script src="script.js"></script>
 </body>
 </html>
