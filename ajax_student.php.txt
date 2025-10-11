@@ -1,0 +1,27 @@
+<?php
+session_start();
+include 'db.php';
+
+$response = ['status'=>'error','msg'=>'Invalid request'];
+
+if(isset($_POST['action']) && $_POST['action']=='request_break'){
+    $student_id = $_POST['student_id'];
+    $month = $_POST['month_name'];
+
+    // Check if already requested
+    $stmt = $conn->prepare("SELECT * FROM break_requests WHERE student_id=? AND month_name=?");
+    $stmt->bind_param("ss",$student_id,$month);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    if($res->num_rows>0){
+        $response = ['status'=>'error','msg'=>'Break already requested for '.$month];
+    } else {
+        $stmt_insert = $conn->prepare("INSERT INTO break_requests (student_id,month_name,status) VALUES (?,?, 'Pending')");
+        $stmt_insert->bind_param("ss",$student_id,$month);
+        if($stmt_insert->execute()){
+            $response = ['status'=>'success','msg'=>'Break requested for '.$month];
+        }
+    }
+}
+
+echo json_encode($response);

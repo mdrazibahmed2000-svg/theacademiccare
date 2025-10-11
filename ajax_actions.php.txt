@@ -1,0 +1,71 @@
+<?php
+session_start();
+include 'db.php';
+
+// Only allow if admin is logged in
+if(!isset($_SESSION['admin'])) {
+    echo json_encode(['status'=>'error','msg'=>'Unauthorized']);
+    exit();
+}
+
+$response = ['status'=>'error','msg'=>'Invalid request'];
+
+// Mark Paid
+if(isset($_POST['action']) && $_POST['action']=='mark_paid'){
+    $fee_id = $_POST['fee_id'];
+    $method = $_POST['method'];
+    $date = date('Y-m-d');
+    $stmt = $conn->prepare("UPDATE tuition_fee SET status='Paid', payment_date=?, payment_method=? WHERE id=?");
+    $stmt->bind_param("ssi",$date,$method,$fee_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Marked Paid'];
+}
+
+// Mark Break
+if(isset($_POST['action']) && $_POST['action']=='mark_break'){
+    $fee_id = $_POST['fee_id'];
+    $stmt = $conn->prepare("UPDATE tuition_fee SET status='Break' WHERE id=?");
+    $stmt->bind_param("i",$fee_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Marked Break'];
+}
+
+// Undo
+if(isset($_POST['action']) && $_POST['action']=='undo'){
+    $fee_id = $_POST['fee_id'];
+    $stmt = $conn->prepare("UPDATE tuition_fee SET status='Unpaid', payment_date=NULL, payment_method=NULL WHERE id=?");
+    $stmt->bind_param("i",$fee_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Undo Successful'];
+}
+
+// Approve Registration
+if(isset($_POST['action']) && $_POST['action']=='approve_registration'){
+    $student_id = $_POST['student_id'];
+    $stmt = $conn->prepare("UPDATE students SET status='approved' WHERE student_id=?");
+    $stmt->bind_param("s",$student_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Registration Approved'];
+}
+
+// Deny Registration
+if(isset($_POST['action']) && $_POST['action']=='deny_registration'){
+    $student_id = $_POST['student_id'];
+    $stmt = $conn->prepare("UPDATE students SET status='denied' WHERE student_id=?");
+    $stmt->bind_param("s",$student_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Registration Denied'];
+}
+
+// Approve Break
+if(isset($_POST['action']) && $_POST['action']=='approve_break'){
+    $request_id = $_POST['request_id'];
+    $stmt = $conn->prepare("UPDATE break_requests SET status='Approved' WHERE id=?");
+    $stmt->bind_param("i",$request_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Break Approved'];
+}
+
+// Deny Break
+if(isset($_POST['action']) && $_POST['action']=='deny_break'){
+    $request_id = $_POST['request_id'];
+    $stmt = $conn->prepare("UPDATE break_requests SET status='Denied' WHERE id=?");
+    $stmt->bind_param("i",$request_id);
+    if($stmt->execute()) $response = ['status'=>'success','msg'=>'Break Denied'];
+}
+
+echo json_encode($response);
