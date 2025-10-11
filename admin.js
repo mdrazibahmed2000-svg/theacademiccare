@@ -1,116 +1,186 @@
-// Firebase Initialization
-const firebaseConfig = {
-  apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-  authDomain: "the-academic-care-de611.firebaseapp.com",
-  databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.firebasestorage.app",
-  messagingSenderId: "142271027321",
-  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-  measurementId: "G-Q7MCGKTYMX"
-};
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase Database
 const db = firebase.database();
-const auth = firebase.auth();
 
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  auth.signOut().then(() => location.href="index.html");
-});
+// Admin Tabs
+const tabs = document.querySelectorAll(".tab");
+const subTabsContainer = document.getElementById("subTabs");
+const studentsContainer = document.getElementById("studentsList");
 
-// Tab Functionality
-document.querySelectorAll(".tabBtn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tabContent").forEach(tc => tc.style.display="none");
-    document.getElementById(btn.dataset.tab).style.display = "block";
-    if(btn.dataset.tab === "classes") loadClasses();
-    if(btn.dataset.tab === "registration") loadRegistrations();
-    if(btn.dataset.tab === "breakRequests") loadBreakRequests();
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    const tabName = tab.dataset.tab;
+    showTab(tabName);
   });
 });
 
-// Load Classes Sub-tabs
-function loadClasses(){
-  const subContainer = document.getElementById("subClassTabs");
-  subContainer.innerHTML = "";
-  for(let c=6;c<=12;c++){
-    const btn = document.createElement("button");
-    btn.textContent = "Class " + c;
-    btn.addEventListener("click", () => loadStudentsByClass(c));
-    subContainer.appendChild(btn);
+// Show Tab function
+function showTab(tabName){
+  subTabsContainer.innerHTML = "";
+  studentsContainer.innerHTML = "";
+
+  if(tabName === "Home"){
+    // Only tabs visible
+  } else if(tabName === "Class"){
+    showClassSubTabs();
+  } else if(tabName === "Registration"){
+    showRegistrationRequests();
+  } else if(tabName === "BreakRequest"){
+    showBreakRequests();
   }
 }
 
-// Load Students by Class
-function loadStudentsByClass(cls){
-  const list = document.getElementById("studentsList");
-  list.innerHTML = "";
-  db.ref("students").orderByChild("class").equalTo(String(cls)).once("value", snap => {
-    const data = snap.val();
-    if(!data) return list.textContent="No students in this class.";
-    for(let sid in data){
-      const s = data[sid];
-      if(!s.approved) continue;
-      const div = document.createElement("div");
-      div.innerHTML = `
-        ${s.name} (${s.studentId}) - ${s.whatsapp} 
-        <button onclick="manageTuition('${s.studentId}')">Manage Tuition</button>`;
-      list.appendChild(div);
-    }
-  });
+// Show Class SubTabs
+function showClassSubTabs(){
+  for(let i=6;i<=12;i++){
+    const btn = document.createElement("button");
+    btn.textContent = "Class " + i;
+    btn.addEventListener("click",()=>showStudentsInClass(i));
+    subTabsContainer.appendChild(btn);
+  }
 }
 
-// Manage Tuition Function (use previous corrected manageTuition function)
-function manageTuition(studentId){
-  const container = document.getElementById("studentsList");
-  container.innerHTML = `<h3>Tuition Management for ${studentId}</h3>`; // header
-  // Add the table code from previous message here
-}
-
-// Load Registrations
-function loadRegistrations(){
-  const container = document.getElementById("registrationList");
-  container.innerHTML = "";
-  db.ref("students").once("value", snap => {
+// Show Students in Class
+function showStudentsInClass(classNo){
+  studentsContainer.innerHTML = "";
+  db.ref("students").orderByChild("class").equalTo(""+classNo).once("value", snap => {
     const data = snap.val();
-    for(let sid in data){
-      const s = data[sid];
-      if(!s.approved){
+    if(!data) return studentsContainer.innerHTML="No students in this class.";
+    Object.keys(data).forEach(id=>{
+      if(data[id].approved){
         const div = document.createElement("div");
-        div.innerHTML = `${s.name} (${s.studentId}) 
-          <button onclick="approveStudent('${sid}')">Approve</button> 
-          <button onclick="denyStudent('${sid}')">Deny</button>`;
-        container.appendChild(div);
+        div.innerHTML = `
+          <b>${data[id].name}</b> (${data[id].studentId}) | WhatsApp: ${data[id].whatsapp} 
+          <button onclick="manageTuition('${id}')">Manage Tuition</button>
+        `;
+        studentsContainer.appendChild(div);
       }
-    }
+    });
   });
 }
 
-// Approve/Deny Functions
-function approveStudent(sid){ db.ref(`students/${sid}/approved`).set(true); loadRegistrations();}
-function denyStudent(sid){ db.ref(`students/${sid}`).remove(); loadRegistrations();}
+// Manage Tuition Function
+function manageTuition(studentId){
+  const container = studentsContainer;
+  container.innerHTML = `<h3>Tuition Management for ${studentId}</h3>`;
 
-// Load Break Requests
-function loadBreakRequests(){
-  const container = document.getElementById("breakRequestList");
-  container.innerHTML = "";
-  db.ref("breakRequests").once("value", snap => {
+  const table = document.createElement("table");
+  table.border = "1";
+  table.style.width = "100%";
+  const thead = document.createElement("thead");
+  thead.innerHTML = `<tr>
+    <th>Month's Name</th>
+    <th>Status</th>
+    <th>Date & Method</th>
+    <th>Action</th>
+  </tr>`;
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+  table.appendChild(tbody);
+  container.appendChild(table);
+
+  db.ref(`tuition/${studentId}`).once("value", snap => {
+    const data = snap.val() || {};
+    const months = Object.keys(data);
+    months.forEach(month => {
+      const tr = document.createElement("tr");
+      const status = data[month].status || "Unpaid";
+      const date = data[month].date || "";
+      const method = data[month].method || "";
+
+      let actionHTML = `
+        <button onclick="markPaid('${studentId}','${month}')">Mark Paid</button>
+        <button onclick="markBreak('${studentId}','${month}')">Mark Break</button>
+      `;
+      if(status === "Paid" || status === "Break") {
+        actionHTML = `<button onclick="undoStatus('${studentId}','${month}')">Undo</button>`;
+      }
+
+      tr.innerHTML = `
+        <td>${month}</td>
+        <td style="color:${status==="Paid"?'green':status==="Break"?'purple':'red'}">${status}</td>
+        <td>${date} ${method}</td>
+        <td>${actionHTML}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
+
+// Tuition Actions
+function markPaid(studentId, month){
+  const method = prompt("Enter Payment Method:");
+  if(!method) return alert("Payment method is required!");
+  const today = new Date().toISOString().split("T")[0];
+  db.ref(`tuition/${studentId}/${month}`).set({
+    status: "Paid",
+    date: today,
+    method: method
+  }).then(()=> manageTuition(studentId));
+}
+
+function markBreak(studentId, month){
+  db.ref(`tuition/${studentId}/${month}`).set({
+    status: "Break",
+    date: "",
+    method: ""
+  }).then(()=> manageTuition(studentId));
+}
+
+function undoStatus(studentId, month){
+  db.ref(`tuition/${studentId}/${month}`).set({
+    status: "Unpaid",
+    date: "",
+    method: ""
+  }).then(()=> manageTuition(studentId));
+}
+
+// Show Registration Requests
+function showRegistrationRequests(){
+  studentsContainer.innerHTML="";
+  db.ref("students").once("value", snap=>{
     const data = snap.val();
-    for(let sid in data){
-      const months = Object.keys(data[sid]);
-      months.forEach(month => {
-        const req = data[sid][month];
-        if(req.requested && !req.approved){
-          const div = document.createElement("div");
-          div.innerHTML = `${sid} - ${month} 
-            <button onclick="approveBreak('${sid}','${month}')">Approve</button> 
-            <button onclick="denyBreak('${sid}','${month}')">Deny</button>`;
-          container.appendChild(div);
-        }
-      });
-    }
+    if(!data) return studentsContainer.innerHTML="No registration requests.";
+    Object.keys(data).forEach(id=>{
+      const student = data[id];
+      if(!student.approved){
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <b>${student.name}</b> (${student.studentId}) | Class: ${student.class} | WhatsApp: ${student.whatsapp}
+          <button onclick="approveStudent('${id}')">Approve</button>
+          <button onclick="denyStudent('${id}')">Deny</button>
+        `;
+        studentsContainer.appendChild(div);
+      }
+    });
   });
 }
 
-function approveBreak(sid, month){ db.ref(`breakRequests/${sid}/${month}/approved`).set(true); loadBreakRequests();}
-function denyBreak(sid, month){ db.ref(`breakRequests/${sid}/${month}`).remove(); loadBreakRequests();}
+// Approve/Deny Student
+function approveStudent(id){
+  db.ref(`students/${id}/approved`).set(true).then(()=>showRegistrationRequests());
+}
+
+function denyStudent(id){
+  db.ref(`students/${id}`).remove().then(()=>showRegistrationRequests());
+}
+
+// Show Break Requests
+function showBreakRequests(){
+  studentsContainer.innerHTML="";
+  db.ref("breakRequests").once("value",snap=>{
+    const data = snap.val();
+    if(!data) return studentsContainer.innerHTML="No break requests.";
+    Object.keys(data).forEach(id=>{
+      const request = data[id];
+      const div = document.createElement("div");
+      div.innerHTML = `<b>${id}</b> - Requests: ${JSON.stringify(request)}`;
+      studentsContainer.appendChild(div);
+    });
+  });
+}
+
+// Logout
+document.getElementById("logout").addEventListener("click",()=>{
+  firebase.auth().signOut().then(()=> window.location="index.html");
+});
