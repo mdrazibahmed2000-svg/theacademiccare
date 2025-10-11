@@ -1,6 +1,4 @@
-// =============================
 // Firebase Initialization
-// =============================
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -11,221 +9,108 @@ const firebaseConfig = {
   appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
   measurementId: "G-Q7MCGKTYMX"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const auth = firebase.auth();
 
-document.addEventListener("DOMContentLoaded", () => {
+// Logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  auth.signOut().then(() => location.href="index.html");
+});
 
-  // =============================
-  // Logout
-  // =============================
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      auth.signOut().then(() => window.location.href = "index.html");
-    });
-  }
-
-  // =============================
-  // Tab Navigation
-  // =============================
-  const tabs = document.querySelectorAll(".tab");
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll(".section").forEach(s => s.style.display = "none");
-      const target = tab.dataset.target;
-      document.getElementById(target).style.display = "block";
-
-      if(target === "classSection") loadClassSubTabs();
-      if(target === "registrationSection") loadRegistrations();
-      if(target === "breakSection") loadBreakRequests();
-    });
+// Tab Functionality
+document.querySelectorAll(".tabBtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tabContent").forEach(tc => tc.style.display="none");
+    document.getElementById(btn.dataset.tab).style.display = "block";
+    if(btn.dataset.tab === "classes") loadClasses();
+    if(btn.dataset.tab === "registration") loadRegistrations();
+    if(btn.dataset.tab === "breakRequests") loadBreakRequests();
   });
+});
 
-  // =============================
-  // Load Class Sub-Tabs
-  // =============================
-  function loadClassSubTabs() {
-    const container = document.getElementById("classSubTabs");
-    container.innerHTML = "";
-    for(let c=6; c<=12; c++){
-      const btn = document.createElement("button");
-      btn.textContent = `Class ${c}`;
-      btn.addEventListener("click", () => loadStudentsByClass(c));
-      container.appendChild(btn);
-    }
+// Load Classes Sub-tabs
+function loadClasses(){
+  const subContainer = document.getElementById("subClassTabs");
+  subContainer.innerHTML = "";
+  for(let c=6;c<=12;c++){
+    const btn = document.createElement("button");
+    btn.textContent = "Class " + c;
+    btn.addEventListener("click", () => loadStudentsByClass(c));
+    subContainer.appendChild(btn);
   }
+}
 
-  // =============================
-  // Load Students by Class
-  // =============================
-  function loadStudentsByClass(classNumber) {
-    const container = document.getElementById("studentsList");
-    container.innerHTML = "Loading...";
-    db.ref("students").orderByChild("class").equalTo(String(classNumber))
-      .on("value", snapshot => {
-        container.innerHTML = "";
-        snapshot.forEach(studentSnap => {
-          const s = studentSnap.val();
-          if(s.approved){
-            const div = document.createElement("div");
-            div.textContent = `${s.name} (${s.studentId}) - WhatsApp: ${s.whatsapp}`;
-
-            // Tuition Fee Icon
-            const tuitionBtn = document.createElement("button");
-            tuitionBtn.textContent = "Manage Tuition";
-            tuitionBtn.addEventListener("click", () => manageTuition(s.studentId));
-            div.appendChild(tuitionBtn);
-
-            container.appendChild(div);
-          }
-        });
-      });
-  }
-
-  // =============================
-// Manage Tuition Fee
-// =============================
-function manageTuition(studentId){
-  const container = document.getElementById("studentsList");
-  container.innerHTML = `<h3>Tuition Management for ${studentId}</h3>`;
-  const table = document.createElement("table");
-  table.style.width = "100%";
-  table.border = "1";
-
-  // Table Header
-  const header = table.insertRow();
-  header.innerHTML = `<th>Month</th><th>Status</th><th>Date & Method</th><th>Action</th>`;
-
-  // Get current month index (0=Jan)
-  const now = new Date();
-  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const currentMonthIndex = now.getMonth();
-
-  const tuitionRef = db.ref(`tuition/${studentId}`);
-
-  // Load existing tuition data
-  tuitionRef.once("value", snapshot => {
-    const data = snapshot.val() || {};
-
-    for(let i=0; i<=currentMonthIndex; i++){
-      const month = monthNames[i];
-      const monthData = data[month] || { status: "Unpaid", date: "", method: "" };
-      const row = table.insertRow();
-
-      const statusCell = row.insertCell(1);
-      const actionCell = row.insertCell(3);
-
-      row.insertCell(0).textContent = month;
-      statusCell.textContent = monthData.status;
-      row.insertCell(2).textContent = monthData.date + " " + monthData.method;
-
-      // Action buttons
-      if(monthData.status === "Unpaid" || monthData.status === "Break"){
-        const markPaidBtn = document.createElement("button");
-        markPaidBtn.textContent = "Mark Paid";
-        markPaidBtn.addEventListener("click", () => {
-          const method = prompt("Enter Payment Method (Bkash/Rocket/Bank)");
-          if(!method) return;
-          tuitionRef.child(month).set({
-            status: "Paid",
-            date: new Date().toISOString().split("T")[0],
-            method: method
-          });
-          alert(`Payment marked as Paid for ${month}`);
-          manageTuition(studentId); // refresh table
-        });
-
-        const markBreakBtn = document.createElement("button");
-        markBreakBtn.textContent = "Mark Break";
-        markBreakBtn.addEventListener("click", () => {
-          tuitionRef.child(month).set({
-            status: "Break",
-            date: "",
-            method: ""
-          });
-          manageTuition(studentId); // refresh table
-        });
-
-        actionCell.appendChild(markPaidBtn);
-        actionCell.appendChild(markBreakBtn);
-      } else {
-        const undoBtn = document.createElement("button");
-        undoBtn.textContent = "Undo";
-        undoBtn.addEventListener("click", () => {
-          tuitionRef.child(month).set({
-            status: "Unpaid",
-            date: "",
-            method: ""
-          });
-          manageTuition(studentId);
-        });
-        actionCell.appendChild(undoBtn);
-      }
-
-      // Coloring Status
-      if(monthData.status === "Paid") statusCell.style.color = "green";
-      else if(monthData.status === "Break") statusCell.style.color = "purple";
-      else statusCell.style.color = "red";
+// Load Students by Class
+function loadStudentsByClass(cls){
+  const list = document.getElementById("studentsList");
+  list.innerHTML = "";
+  db.ref("students").orderByChild("class").equalTo(String(cls)).once("value", snap => {
+    const data = snap.val();
+    if(!data) return list.textContent="No students in this class.";
+    for(let sid in data){
+      const s = data[sid];
+      if(!s.approved) continue;
+      const div = document.createElement("div");
+      div.innerHTML = `
+        ${s.name} (${s.studentId}) - ${s.whatsapp} 
+        <button onclick="manageTuition('${s.studentId}')">Manage Tuition</button>`;
+      list.appendChild(div);
     }
-
-    container.appendChild(table);
   });
 }
 
+// Manage Tuition Function (use previous corrected manageTuition function)
+function manageTuition(studentId){
+  const container = document.getElementById("studentsList");
+  container.innerHTML = `<h3>Tuition Management for ${studentId}</h3>`; // header
+  // Add the table code from previous message here
+}
 
-  // =============================
-  // Load Registration Requests
-  // =============================
-  function loadRegistrations() {
-    const container = document.getElementById("registrationList");
-    container.innerHTML = "Loading...";
-    db.ref("students").orderByChild("approved").equalTo(false)
-      .once("value", snapshot => {
-        container.innerHTML = "";
-        snapshot.forEach(snap => {
-          const s = snap.val();
-          const div = document.createElement("div");
-          div.textContent = `${s.name} (${s.studentId}) - Class: ${s.class} - Roll: ${s.roll}`;
-          
-          const approveBtn = document.createElement("button");
-          approveBtn.textContent = "Approve";
-          approveBtn.addEventListener("click", () => {
-            db.ref(`students/${s.studentId}/approved`).set(true);
-            loadRegistrations();
-          });
-
-          const denyBtn = document.createElement("button");
-          denyBtn.textContent = "Deny";
-          denyBtn.addEventListener("click", () => {
-            db.ref(`students/${s.studentId}`).remove();
-            loadRegistrations();
-          });
-
-          div.appendChild(approveBtn);
-          div.appendChild(denyBtn);
-          container.appendChild(div);
-        });
-      });
-  }
-
-  // =============================
-  // Load Break Requests
-  // =============================
-  function loadBreakRequests(){
-    const container = document.getElementById("breakRequestsList");
-    container.innerHTML = "Loading...";
-    db.ref("breakRequests").once("value", snap => {
-      container.innerHTML = "";
-      snap.forEach(studentSnap => {
-        const studentId = studentSnap.key;
+// Load Registrations
+function loadRegistrations(){
+  const container = document.getElementById("registrationList");
+  container.innerHTML = "";
+  db.ref("students").once("value", snap => {
+    const data = snap.val();
+    for(let sid in data){
+      const s = data[sid];
+      if(!s.approved){
         const div = document.createElement("div");
-        div.textContent = `Break Request: ${studentId}`;
+        div.innerHTML = `${s.name} (${s.studentId}) 
+          <button onclick="approveStudent('${sid}')">Approve</button> 
+          <button onclick="denyStudent('${sid}')">Deny</button>`;
         container.appendChild(div);
-      });
-    });
-  }
+      }
+    }
+  });
+}
 
-});
+// Approve/Deny Functions
+function approveStudent(sid){ db.ref(`students/${sid}/approved`).set(true); loadRegistrations();}
+function denyStudent(sid){ db.ref(`students/${sid}`).remove(); loadRegistrations();}
+
+// Load Break Requests
+function loadBreakRequests(){
+  const container = document.getElementById("breakRequestList");
+  container.innerHTML = "";
+  db.ref("breakRequests").once("value", snap => {
+    const data = snap.val();
+    for(let sid in data){
+      const months = Object.keys(data[sid]);
+      months.forEach(month => {
+        const req = data[sid][month];
+        if(req.requested && !req.approved){
+          const div = document.createElement("div");
+          div.innerHTML = `${sid} - ${month} 
+            <button onclick="approveBreak('${sid}','${month}')">Approve</button> 
+            <button onclick="denyBreak('${sid}','${month}')">Deny</button>`;
+          container.appendChild(div);
+        }
+      });
+    }
+  });
+}
+
+function approveBreak(sid, month){ db.ref(`breakRequests/${sid}/${month}/approved`).set(true); loadBreakRequests();}
+function denyBreak(sid, month){ db.ref(`breakRequests/${sid}/${month}`).remove(); loadBreakRequests();}
