@@ -1,4 +1,4 @@
-// Initialize Firebase (if not already in your HTML)
+// Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -12,33 +12,40 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ----------------- Tabs -----------------
-const tabButtons = document.querySelectorAll(".tabBtn");
-const tabContents = document.querySelectorAll(".tabContent");
+// ----------------- Run after DOM loads -----------------
+document.addEventListener("DOMContentLoaded", () => {
 
-tabButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    const tab = btn.getAttribute("data-tab");
-    tabContents.forEach(tc => tc.style.display = "none");
-    document.getElementById(tab + "Tab").style.display = "block";
+  // --- Tabs ---
+  const tabButtons = document.querySelectorAll(".tabBtn");
+  const tabContents = document.querySelectorAll(".tabContent");
 
-    if(tab === "classes") loadClasses();
-    if(tab === "registration") loadRegistrations();
-    if(tab === "breakRequests") loadBreakRequests();
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tab = btn.getAttribute("data-tab");
+      tabContents.forEach(tc => tc.style.display = "none");
+      document.getElementById(tab + "Tab").style.display = "block";
+
+      if(tab === "classes") loadClasses();
+      if(tab === "registration") loadRegistrations();
+      if(tab === "breakRequests") loadBreakRequests();
+    });
   });
-});
-document.getElementById("homeTab").style.display = "block";
 
-// ----------------- Logout -----------------
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  firebase.auth().signOut().then(() => window.location="index.html")
-  .catch(err => console.error("Logout Error:", err));
+  // Initially show Home tab
+  document.getElementById("homeTab").style.display = "block";
+
+  // --- Logout ---
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    firebase.auth().signOut().then(() => window.location="index.html")
+    .catch(err => console.error("Logout Error:", err));
+  });
+
 });
 
-// ----------------- Load Classes -----------------
+// ----------------- Load Classes & Sub-tabs -----------------
 function loadClasses() {
   const classesTab = document.getElementById("classesTab");
-  classesTab.innerHTML = "";
+  classesTab.innerHTML = ""; // Clear previous
 
   const classes = ["6","7","8","9","10","11","12"];
   classes.forEach(cls => {
@@ -49,12 +56,12 @@ function loadClasses() {
   });
 }
 
-// Load approved students in selected class
+// Load approved students for a class
 function loadStudents(cls) {
   const classesTab = document.getElementById("classesTab");
   const studentDiv = document.createElement("div");
   studentDiv.innerHTML = `<h4>Approved Students - Class ${cls}</h4>`;
-  
+
   db.ref("students").orderByChild("class").equalTo(cls).once("value").then(snap => {
     const data = snap.val() || {};
     Object.values(data).forEach(stu => {
@@ -76,7 +83,7 @@ function manageTuition(studentId){
   window.open(`tuitionPanel.html?studentId=${studentId}`, "_blank");
 }
 
-// ----------------- Load Registrations -----------------
+// ----------------- Registration Tab -----------------
 function loadRegistrations(){
   const regTab = document.getElementById("registrationTab");
   regTab.innerHTML = "<h4>Pending Registrations</h4>";
@@ -97,7 +104,6 @@ function loadRegistrations(){
   });
 }
 
-// Approve / Deny functions
 function approveStudent(id){
   db.ref(`students/${id}/approved`).set(true).then(()=> loadRegistrations());
 }
@@ -105,7 +111,7 @@ function denyStudent(id){
   db.ref(`students/${id}`).remove().then(()=> loadRegistrations());
 }
 
-// ----------------- Break Requests -----------------
+// ----------------- Break Requests Tab -----------------
 function loadBreakRequests(){
   const breakTab = document.getElementById("breakRequestsTab");
   breakTab.innerHTML = "<h4>Pending Break Requests</h4>";
