@@ -1,86 +1,127 @@
-const auth = firebase.auth();
+// Firebase Configuration (use the same one from script.js)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "the-academic-care-de611.firebaseapp.com",
+  databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "the-academic-care-de611",
+  storageBucket: "the-academic-care-de611.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Tabs
-const tabBtns = document.querySelectorAll('.tabBtn');
-const tabContents = document.querySelectorAll('.tabContent');
-
-tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tab = btn.dataset.tab;
-    tabContents.forEach(c => c.style.display = 'none');
-    if(tab) document.getElementById(tab).style.display = 'block';
-    if(tab === 'class') loadClassTabs();
-    if(tab === 'registration') loadRegistration();
-    if(tab === 'breakRequest') loadBreakRequests();
+// Tab navigation
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-content").forEach((tab) => tab.classList.remove("active"));
+    document.getElementById(btn.dataset.tab).classList.add("active");
   });
 });
 
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', () => {
-  auth.signOut().then(() => window.location.href = 'index.html');
+document.getElementById("homeBtn").addEventListener("click", () => {
+  document.querySelectorAll(".tab-content").forEach((tab) => tab.classList.remove("active"));
+  document.getElementById("home").classList.add("active");
 });
 
-// Load class sub-tabs
-function loadClassTabs() {
-  const classTabsDiv = document.getElementById('classTabs');
-  classTabsDiv.innerHTML = '';
-  for(let cls=6; cls<=12; cls++){
-    const btn = document.createElement('button');
-    btn.textContent = `Class ${cls}`;
-    btn.addEventListener('click', () => loadStudents(cls));
-    classTabsDiv.appendChild(btn);
-  }
+// Load pending registrations
+const pendingTable = document.querySelector("#pendingTable tbody");
+db.ref("pendingRegistrations").on("value", (snapshot) => {
+  pendingTable.innerHTML = "";
+  snapshot.forEach((child) => {
+    const reg = child.val();
+    const row = `
+      <tr>
+        <td>${reg.name}</td>
+        <td>${reg.class}</td>
+        <td>${reg.roll}</td>
+        <td>${reg.whatsapp}</td>
+        <td>
+          <button class="approve" data-id="${child.key}">Approve</button>
+          <button class="deny" data-id="${child.key}">Deny</button>
+        </td>
+      </tr>
+    `;
+    pendingTable.innerHTML += row;
+  });
+
+  document.querySelectorAll(".approve").forEach((btn) => {
+    btn.addEventListener("click", () => approveStudent(btn.dataset.id));
+  });
+  document.querySelectorAll(".deny").forEach((btn) => {
+    btn.addEventListener("click", () => denyStudent(btn.dataset.id));
+  });
+});
+
+function approveStudent(id) {
+  db.ref("pendingRegistrations/" + id).once("value", (snapshot) => {
+    const student = snapshot.val();
+    if (student) {
+      const studentID = "S" + new Date().getFullYear() + student.class + student.roll;
+      db.ref("students/" + studentID).set({
+        id: studentID,
+        name: student.name,
+        class: student.class,
+        roll: student.roll,
+        whatsapp: student.whatsapp,
+        password: student.password,
+        status: "Active"
+      });
+      db.ref("pendingRegistrations/" + id).remove();
+      alert("Student approved successfully!");
+    }
+  });
 }
 
-// Load students for a class
-function loadStudents(cls){
-  const studentsListDiv = document.getElementById('studentsList');
-  studentsListDiv.innerHTML = '';
-  db.ref('students').get().then(snapshot => {
-    snapshot.forEach(snap => {
-      const s = snap.val();
-      const id = snap.key;
-      if(s.class == cls && s.approved){
-        const div = document.createElement('div');
-        div.innerHTML = `
-          ${s.name} (${id}) - ${s.whatsapp} 
-          <button onclick="manageTuition('${id}')">Tuition Status</button>`;
-        studentsListDiv.appendChild(div);
-      }
+function denyStudent(id) {
+  db.ref("pendingRegistrations/" + id).remove();
+  alert("Registration denied and removed.");
+}
+
+// Load classes
+const classTabsDiv = document.getElementById("classTabs");
+for (let i = 6; i <= 12; i++) {
+  const btn = document.createElement("button");
+  btn.textContent = "Class " + i;
+  btn.classList.add("class-btn");
+  btn.addEventListener("click", () => loadClass(i));
+  classTabsDiv.appendChild(btn);
+}
+
+const classListDiv = document.getElementById("classList");
+function loadClass(classNum) {
+  db.ref("students").orderByChild("class").equalTo(String(classNum)).once("value", (snapshot) => {
+    classListDiv.innerHTML = `<h3>Class ${classNum}</h3><table><tr><th>ID</th><th>Name</th><th>Status</th></tr></table>`;
+    snapshot.forEach((child) => {
+      const st = child.val();
+      const row = `<tr><td>${st.id}</td><td>${st.name}</td><td>${st.status}</td></tr>`;
+      classListDiv.querySelector("table").innerHTML += row;
     });
   });
 }
 
-// Load registration requests
-function loadRegistration(){
-  const regDiv = document.getElementById('registrationList');
-  regDiv.innerHTML = '';
-  db.ref('students').get().then(snapshot => {
-    snapshot.forEach(snap => {
-      const s = snap.val();
-      const id = snap.key;
-      if(!s.approved && !s.denied){
-        const div = document.createElement('div');
-        div.innerHTML = `
-          ${s.name} (${id}) - ${s.whatsapp} 
-          <button onclick="approve('${id}')">Approve</button>
-          <button onclick="deny('${id}')">Deny</button>`;
-        regDiv.appendChild(div);
-      }
+// Load break requests
+const breakTable = document.querySelector("#breakTable tbody");
+db.ref("breakRequests").on("value", (snapshot) => {
+  breakTable.innerHTML = "";
+  snapshot.forEach((child) => {
+    const req = child.val();
+    const row = `
+      <tr>
+        <td>${req.studentID}</td>
+        <td>${req.name}</td>
+        <td>${req.reason}</td>
+        <td><button class="deleteBreak" data-id="${child.key}">Delete</button></td>
+      </tr>
+    `;
+    breakTable.innerHTML += row;
+  });
+
+  document.querySelectorAll(".deleteBreak").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      db.ref("breakRequests/" + btn.dataset.id).remove();
+      alert("Break request removed.");
     });
   });
-}
-
-// Approve / Deny
-window.approve = id => db.ref(`students/${id}/approved`).set(true);
-window.deny = id => db.ref(`students/${id}/denied`).set(true);
-
-// Placeholder for tuition management (Mark Paid/Break/Undo)
-window.manageTuition = id => alert(`Open tuition table for ${id}`);
-
-// Break Requests placeholder
-function loadBreakRequests(){
-  const breakDiv = document.getElementById('breakRequestList');
-  breakDiv.innerHTML = 'No break requests yet';
-}
+});

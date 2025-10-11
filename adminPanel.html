@@ -1,42 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Panel - The Academic Care</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - The Academic Care</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="header">
-    <h1>The Academic Care</h1>
-    <h3>Academic Year 2025</h3>
-  </div>
+  <header>
+    <h1>Admin Panel</h1>
+    <button id="homeBtn" class="top-btn">🏠 Home</button>
+  </header>
 
-  <div class="tabs">
-    <button class="tabBtn" data-tab="home">Home</button>
-    <button class="tabBtn" data-tab="class">Class</button>
-    <button class="tabBtn" data-tab="registration">Registration</button>
-    <button class="tabBtn" data-tab="breakRequest">Break Request</button>
-    <button id="logoutBtn">Logout</button>
-  </div>
+  <main>
+    <div class="admin-tabs">
+      <button class="tab-btn" data-tab="home">Home</button>
+      <button class="tab-btn" data-tab="registration">Registration</button>
+      <button class="tab-btn" data-tab="break">Break Requests</button>
+      <button class="tab-btn" data-tab="classes">Classes</button>
+    </div>
 
-  <div id="home" class="tabContent">Welcome to Admin Panel</div>
-  <div id="class" class="tabContent" style="display:none;">
-    <div class="subTabs" id="classTabs"></div>
-    <div id="studentsList"></div>
-  </div>
-  <div id="registration" class="tabContent" style="display:none;">
-    <h3>Registration Requests</h3>
-    <div id="registrationList"></div>
-  </div>
-  <div id="breakRequest" class="tabContent" style="display:none;">
-    <h3>Break Requests</h3>
-    <div id="breakRequestList"></div>
-  </div>
+    <!-- HOME TAB -->
+    <section id="home" class="tab-content active">
+      <h2>Welcome, Admin</h2>
+      <p>Manage student registrations, class lists, and break requests.</p>
+    </section>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-<script src="admin.js"></script>
+    <!-- REGISTRATION TAB -->
+    <section id="registration" class="tab-content">
+      <h2>Pending Registrations</h2>
+      <table id="pendingTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Roll</th>
+            <th>WhatsApp</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- BREAK REQUEST TAB -->
+    <section id="break" class="tab-content">
+      <h2>Break Requests</h2>
+      <table id="breakTable">
+        <thead>
+          <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Reason</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <!-- CLASSES TAB -->
+    <section id="classes" class="tab-content">
+      <h2>Classes</h2>
+      <div id="classTabs"></div>
+      <div id="classList"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 The Academic Care | Admin Dashboard</p>
+  </footer>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- Admin Logic -->
+  <script src="admin.js"></script>
 </body>
 </html>
