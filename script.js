@@ -24,7 +24,7 @@ const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 const forgotBox = document.getElementById("forgotBox");
 
-// Toggle forms
+// ------------------- TOGGLE FORMS -------------------
 document.getElementById("registrationBtn").addEventListener("click", () => {
   loginBox.style.display = "none";
   registerBox.style.display = "block";
@@ -67,14 +67,14 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       class: cls,
       roll,
       whatsapp,
-      password,
+      password, // Insecure, but kept for your current system
       approved: false
     });
     alert(`Registration submitted! Your Student ID: ${studentId}`);
     registerBox.style.display = "none";
     loginBox.style.display = "block";
   } catch (err) {
-    alert("Error: " + err.message);
+    alert("Error submitting registration: " + err.message);
   }
 });
 
@@ -85,30 +85,45 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const id = document.getElementById("loginId").value.trim();
   const password = document.getElementById("loginPassword").value;
 
+  // ------------------- ADMIN LOGIN -------------------
   if (id.toLowerCase() === "admin") {
-    // Admin login via Firebase Auth only
+    const adminEmail = "theacademiccare2025@gmail.com";
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, "theacademiccare2025@gmail.com", password);
-      // Successful login
+      await signInWithEmailAndPassword(auth, adminEmail, password);
+      alert("Admin Sign In successful!");
       window.location.href = "admin.html";
     } catch (err) {
-      alert("Admin login failed: " + err.message);
+      let errorMessage = "Admin login failed.";
+      if (err.code === "auth/wrong-password") errorMessage = "Incorrect password for admin.";
+      else if (err.code === "auth/user-not-found") errorMessage = "Admin email not found in Firebase Auth.";
+      alert(errorMessage + " (" + err.code + ")");
     }
-  } else {
-    // Student login
-    try {
-      const snapshot = await get(child(ref(db), `Registrations/${id}`));
-      if (!snapshot.exists()) return alert("Student ID not found!");
+    return;
+  }
 
-      const data = snapshot.val();
-      if (!data.approved) return alert("Your registration is not approved yet!");
-      if (data.password !== password) return alert("Incorrect password!");
-
-      localStorage.setItem("studentId", id);
-      window.location.href = "student.html";
-    } catch (err) {
-      alert("Error: " + err.message);
+  // ------------------- PREVENT INVALID STUDENT PATH -------------------
+  const invalidChars = [".", "#", "$", "[", "]", "@"]; 
+  for (const char of invalidChars) {
+    if (id.includes(char)) {
+      alert("Invalid Student ID! Do not enter email or special characters.");
+      return;
     }
+  }
+
+  // ------------------- STUDENT LOGIN -------------------
+  try {
+    const snapshot = await get(child(ref(db), `Registrations/${id}`));
+    if (!snapshot.exists()) return alert("Student ID not found!");
+
+    const data = snapshot.val();
+    if (!data.approved) return alert("Your registration is not approved yet!");
+    if (data.password !== password) return alert("Incorrect password!");
+
+    localStorage.setItem("studentId", id);
+    alert(`Student Sign In successful for ID: ${id}`);
+    window.location.href = "student.html";
+  } catch (err) {
+    alert("Error during student login: " + err.message);
   }
 });
 
@@ -142,6 +157,6 @@ document.getElementById("forgotForm").addEventListener("submit", async (e) => {
 
     if (!found) alert("No student found with this WhatsApp number!");
   } catch (err) {
-    alert("Error: " + err.message);
+    alert("Error during password reset: " + err.message);
   }
 });
