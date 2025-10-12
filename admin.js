@@ -63,6 +63,7 @@ window.approve = function(id) {
   db.ref("Registrations/" + id).update({ approved: true });
   alert("Approved " + id);
   loadPending();
+  loadClasses();
 };
 
 window.deny = function(id) {

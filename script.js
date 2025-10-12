@@ -61,7 +61,7 @@ document.getElementById("registerForm").addEventListener("submit", (e) => {
     roll,
     whatsapp,
     password,
-    approved: false
+    approved: false // initially not approved
   })
   .then(() => {
     alert(`Registration submitted! Your Student ID: ${studentId}`);
@@ -82,20 +82,18 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
     // Admin login
     auth.signInWithEmailAndPassword("theacademiccare2025@gmail.com", password)
       .then(() => {
-        alert("Admin login successful!");
         window.location.href = "admin.html";
       })
       .catch(err => alert("Admin login failed: " + err.message));
   } else {
-    // Student login
+    // Student login (approved only)
     db.ref("Registrations/" + id).once("value")
       .then(snapshot => {
         if (!snapshot.exists()) return alert("Student ID not found!");
         const data = snapshot.val();
-        if (!data.approved) return alert("Your registration is not yet approved!");
+        if (!data.approved) return alert("Your registration is not approved yet!");
         if (data.password !== password) return alert("Incorrect password!");
         localStorage.setItem("studentId", id);
-        alert("Login successful!");
         window.location.href = "student.html";
       })
       .catch(err => alert("Error: " + err.message));
