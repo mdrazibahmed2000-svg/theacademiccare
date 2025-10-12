@@ -1,8 +1,9 @@
 // ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get, set, update, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// ------------------- CONFIG -------------------
+// ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -15,111 +16,239 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
 
-const classSection = document.getElementById("classSection");
-const classTitle = document.getElementById("classTitle");
-const classTableBody = document.getElementById("classTableBody");
-let studentsData = {};
-
-// ------------------- LOAD STUDENTS REAL-TIME -------------------
-const studentsRef = ref(db, "Registrations");
-onValue(studentsRef, snapshot => {
-  studentsData = snapshot.val() || {};
-  const visibleClass = classTitle.textContent.split(" ")[1];
-  if (visibleClass) showClass(visibleClass);
-});
-
-// ------------------- SHOW CLASS -------------------
-window.showClass = (cls) => {
-  classTitle.textContent = `Class ${cls}`;
-  classSection.style.display = "block";
-  classTableBody.innerHTML = "";
-
-  for (const id in studentsData) {
-    const student = studentsData[id];
-    if (student.class === cls) {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${id}</td>
-        <td>${student.name}</td>
-        <td>${student.roll}</td>
-        <td><button onclick="showTuitionModal('${id}')">${getTuitionStatus(student)}</button></td>
-      `;
-      classTableBody.appendChild(tr);
-    }
-  }
+// ------------------- ELEMENTS -------------------
+const sections = {
+  home: document.getElementById("homeSection"),
+  class: document.getElementById("classSection"),
+  registration: document.getElementById("registrationSection"),
+  break: document.getElementById("breakSection")
 };
 
-function getTuitionStatus(student) {
-  if (!student.tuition) return "Unpaid";
-  const months = Object.keys(student.tuition);
-  if (!months.length) return "Unpaid";
-  // Get latest month
-  const latest = months.sort().pop();
-  return student.tuition[latest].status.charAt(0).toUpperCase() + student.tuition[latest].status.slice(1);
+const logoutBtn = document.getElementById("logoutBtn");
+const classMenuBtn = document.getElementById("classMenuBtn");
+const classSubmenu = document.getElementById("classSubmenu");
+
+// ------------------- TAB SWITCHING -------------------
+function showHome() {
+  hideAllSections();
+  sections.home.style.display = "block";
+}
+
+function showClass(cls) {
+  hideAllSections();
+  sections.class.style.display = "block";
+  document.getElementById("classTitle").innerText = `Class ${cls}`;
+  loadClassStudents(cls);
+}
+
+function showRegistration() {
+  hideAllSections();
+  sections.registration.style.display = "block";
+  loadRegistrations();
+}
+
+function showBreakRequests() {
+  hideAllSections();
+  sections.break.style.display = "block";
+  loadBreakRequests();
+}
+
+function hideAllSections() {
+  for (let key in sections) sections[key].style.display = "none";
+}
+
+// ------------------- CLASS SUBMENU TOGGLE -------------------
+classMenuBtn.addEventListener("click", () => {
+  classSubmenu.style.display = classSubmenu.style.display === "block" ? "none" : "block";
+});
+
+window.addEventListener("click", (e) => {
+  if (!classMenuBtn.contains(e.target) && !classSubmenu.contains(e.target)) {
+    classSubmenu.style.display = "none";
+  }
+});
+
+// ------------------- LOGOUT -------------------
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    window.location.href = "index.html";
+  } catch (err) {
+    alert("Logout failed: " + err.message);
+  }
+});
+
+// ------------------- LOAD CLASS STUDENTS -------------------
+async function loadClassStudents(cls) {
+  const tbody = document.getElementById("classTableBody");
+  tbody.innerHTML = "<tr><td colspan='4'>Loading...</td></tr>";
+
+  try {
+    const snapshot = await get(ref(db, "Registrations"));
+    tbody.innerHTML = "";
+    snapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      if (data.class === cls) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${childSnap.key}</td>
+          <td>${data.name}</td>
+          <td>${data.roll}</td>
+          <td>
+            <button class="actionBtn" onclick="openTuitionModal('${childSnap.key}', '${data.name}')">View</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan='4'>Error: ${err.message}</td></tr>`;
+  }
 }
 
 // ------------------- TUITION MODAL -------------------
-window.showTuitionModal = (studentId) => {
+window.openTuitionModal = async function(studentId, studentName) {
   const modal = document.getElementById("tuitionModal");
-  const tbody = document.querySelector("#modalTuitionTable tbody");
-  const student = studentsData[studentId];
-  document.getElementById("modalStudentName").textContent = `Tuition for ${student.name}`;
-  tbody.innerHTML = "";
-
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
-
-  for (let month = 1; month <= currentMonth; month++) {
-    const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
-    const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
-    const tuition = student.tuition?.[monthKey] || { status: "unpaid", date: null, method: null };
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${monthName}</td>
-      <td style="color:${tuition.status==="paid"?"green":tuition.status==="unpaid"?"red":"purple"}">${tuition.status.charAt(0).toUpperCase()+tuition.status.slice(1)}</td>
-      <td>${tuition.date ? `${tuition.date} (${tuition.method || ""})` : ""}</td>
-      <td>
-        ${tuition.status === "unpaid" ? `<button onclick="markPaid('${studentId}','${monthKey}')">Mark Paid</button>
-        <button onclick="markBreak('${studentId}','${monthKey}')">Mark Break</button>` : 
-        `<button onclick="undoStatus('${studentId}','${monthKey}')">Undo</button>`}
-      </td>
-    `;
-    tbody.appendChild(tr);
-  }
-
   modal.style.display = "block";
-};
+  document.getElementById("modalStudentName").innerText = `Tuition for ${studentName}`;
+  const tbody = document.querySelector("#modalTuitionTable tbody");
+  tbody.innerHTML = "<tr><td colspan='4'>Loading...</td></tr>";
 
-window.closeModal = () => {
+  try {
+    const snapshot = await get(ref(db, `Tuition/${studentId}`));
+    tbody.innerHTML = "";
+    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    months.forEach((month, i) => {
+      const monthData = snapshot?.val()?.[month] || {};
+      const status = monthData.status || "";
+      const dateMethod = monthData.dateMethod || "";
+      let actionBtns = "";
+      if (!status) {
+        actionBtns = `
+          <button class="actionBtn" onclick="markPaid('${studentId}','${month}')">Mark Paid</button>
+          <button class="actionBtn" onclick="markBreak('${studentId}','${month}')">Mark Break</button>
+        `;
+      } else {
+        actionBtns = `<button class="actionBtn" onclick="undo('${studentId}','${month}')">Undo</button>`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${month}</td>
+        <td style="color:${statusColor(status)}">${status}</td>
+        <td>${dateMethod}</td>
+        <td>${actionBtns}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan='4'>Error: ${err.message}</td></tr>`;
+  }
+}
+
+window.closeModal = function() {
   document.getElementById("tuitionModal").style.display = "none";
-};
+}
 
-// ------------------- MARK PAID / BREAK / UNDO -------------------
-window.markPaid = async (studentId, monthKey) => {
+// ------------------- TUITION ACTIONS -------------------
+function statusColor(status) {
+  if (status === "Paid") return "green";
+  if (status === "Break") return "purple";
+  return "red";
+}
+
+window.markPaid = async function(studentId, month) {
   const method = prompt("Enter payment method:");
   if (!method) return alert("Payment method required!");
-  const date = new Date().toISOString().split("T")[0];
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
-  await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid`, date });
-  showTuitionModal(studentId);
-};
+  await update(ref(db, `Tuition/${studentId}/${month}`), {
+    status: "Paid",
+    dateMethod: new Date().toLocaleDateString() + " | " + method
+  });
+  openTuitionModal(studentId, studentId); // refresh modal
+}
 
-window.markBreak = async (studentId, monthKey) => {
-  const date = new Date().toISOString().split("T")[0];
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break", date, method: null });
-  await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break`, date });
-  showTuitionModal(studentId);
-};
+window.markBreak = async function(studentId, month) {
+  await update(ref(db, `Tuition/${studentId}/${month}`), {
+    status: "Break",
+    dateMethod: new Date().toLocaleDateString()
+  });
+  openTuitionModal(studentId, studentId);
+}
 
-window.undoStatus = async (studentId, monthKey) => {
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date: null, method: null });
-  showTuitionModal(studentId);
-};
+window.undo = async function(studentId, month) {
+  await update(ref(db, `Tuition/${studentId}/${month}`), {
+    status: "",
+    dateMethod: ""
+  });
+  openTuitionModal(studentId, studentId);
+}
 
-// ------------------- HOME -------------------
-window.showHome = () => {
-  classSection.style.display = "none";
-};
+// ------------------- LOAD REGISTRATIONS -------------------
+async function loadRegistrations() {
+  const tbody = document.getElementById("registrationTableBody");
+  tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+  try {
+    const snapshot = await get(ref(db, "Registrations"));
+    tbody.innerHTML = "";
+    snapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      if (!data.approved) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${childSnap.key}</td>
+          <td>${data.name}</td>
+          <td>${data.class}</td>
+          <td>${data.roll}</td>
+          <td>
+            <button class="actionBtn" onclick="approveRegistration('${childSnap.key}')">Approve</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan='5'>Error: ${err.message}</td></tr>`;
+  }
+}
+
+window.approveRegistration = async function(studentId) {
+  await update(ref(db, `Registrations/${studentId}`), { approved: true });
+  loadRegistrations();
+  alert(`Student ${studentId} approved!`);
+}
+
+// ------------------- LOAD BREAK REQUESTS -------------------
+async function loadBreakRequests() {
+  const tbody = document.getElementById("breakTableBody");
+  tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
+  try {
+    const snapshot = await get(ref(db, "BreakRequests"));
+    tbody.innerHTML = "";
+    snapshot.forEach(childSnap => {
+      const data = childSnap.val();
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${childSnap.key}</td>
+        <td>${data.name}</td>
+        <td>${data.class}</td>
+        <td>${data.roll}</td>
+        <td><button class="actionBtn" onclick="resolveBreak('${childSnap.key}')">Resolve</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan='5'>Error: ${err.message}</td></tr>`;
+  }
+}
+
+window.resolveBreak = async function(studentId) {
+  await set(ref(db, `BreakRequests/${studentId}`), null);
+  loadBreakRequests();
+  alert(`Break request for ${studentId} resolved`);
+}
+
+// ------------------- INITIAL DISPLAY -------------------
+showHome();
