@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Panel</title>
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="student.css">
 </head>
 <body>
@@ -16,7 +15,9 @@
     <hr>
   </header>
 
-  <!-- Navigation -->
+  <h2>Student Panel</h2>
+
+  <!-- NAVIGATION -->
   <nav>
     <button id="homeTab">Home</button>
     <button id="profileTab">My Profile</button>
@@ -27,7 +28,7 @@
 
   <!-- HOME SECTION -->
   <section id="homeSection" class="tabSection">
-    <h2>Welcome!</h2>
+    <h3>Welcome!</h3>
     <div id="notificationsDiv">
       <p>Loading notifications...</p>
     </div>
@@ -35,7 +36,7 @@
 
   <!-- PROFILE SECTION -->
   <section id="profileSection" class="tabSection" style="display:none">
-    <h2>My Profile</h2>
+    <h3>My Profile</h3>
     <div id="profileDiv">
       <p>Loading profile...</p>
     </div>
@@ -43,7 +44,7 @@
 
   <!-- TUITION SECTION -->
   <section id="tuitionSection" class="tabSection" style="display:none">
-    <h2>Tuition Status</h2>
+    <h3>Tuition Status</h3>
     <table id="tuitionTable">
       <thead>
         <tr>
@@ -60,10 +61,11 @@
 
   <!-- BREAK REQUEST SECTION -->
   <section id="breakSection" class="tabSection" style="display:none">
-    <h2>Break Request</h2>
+    <h3>Break Request</h3>
     <button id="breakRequestBtn">Submit Break Request</button>
   </section>
 
+  <!-- SCRIPT -->
   <script type="module" src="student.js"></script>
 </body>
 </html>
