@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+// ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -44,23 +45,29 @@ registrationTab.addEventListener("click", async () => {
 
   const snapshot = await get(ref(db, "Registrations"));
   registrationContent.innerHTML = "<h3>Pending Registrations</h3>";
-  snapshot.forEach(child => {
-    const data = child.val();
+
+  snapshot.forEach(childSnap => {
+    const data = childSnap.val();
     if (!data.approved) {
       const div = document.createElement("div");
       div.innerHTML = `
-        <p>${child.key} - ${data.name} (Class: ${data.class}, Roll: ${data.roll}) 
-        <button onclick="approveStudent('${child.key}')">Approve</button></p>
+        <p>${childSnap.key} - ${data.name} (Class: ${data.class}, Roll: ${data.roll}) 
+        <button onclick="approveStudent('${childSnap.key}')">Approve</button></p>
       `;
       registrationContent.appendChild(div);
     }
   });
 });
 
+// ------------------- APPROVE STUDENT -------------------
 window.approveStudent = async (studentId) => {
-  await update(ref(db, `Registrations/${studentId}`), { approved: true });
-  alert(`${studentId} approved successfully!`);
-  location.reload();
+  try {
+    await update(ref(db, `Registrations/${studentId}`), { approved: true });
+    alert(`${studentId} approved successfully!`);
+    location.reload();
+  } catch (err) {
+    alert("Error approving student: " + err.message);
+  }
 };
 
 // ------------------- LOGOUT -------------------

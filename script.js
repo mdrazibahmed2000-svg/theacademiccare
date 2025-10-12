@@ -86,7 +86,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const password = document.getElementById("loginPassword").value;
 
   if (id.toLowerCase() === "admin") {
-    // Admin login
+    // Admin login using Auth only (no database path with email)
     try {
       const userCredential = await signInWithEmailAndPassword(auth, "theacademiccare2025@gmail.com", password);
       const user = userCredential.user;
