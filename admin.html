@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel | The Academic Care</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase v8 -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <h1 style="text-align:center;">Admin Panel</h1>
+
+  <div class="menu">
+    <button class="menuBtn" data-tab="homeTab">Home</button>
+    <button class="menuBtn" data-tab="registrationTab">Registration</button>
+    <button class="menuBtn" data-tab="classTab">Class</button>
+    <button class="menuBtn" data-tab="breakTab">Break Request</button>
+    <button id="logoutBtn" style="float:right;">Logout</button>
+  </div>
+
+  <div id="homeTab" class="tabContent">
+    <h2>Welcome, Admin!</h2>
+    <p>Use the menu to manage students and classes.</p>
+  </div>
+
+  <div id="registrationTab" class="tabContent" style="display:none;">
+    <h2>Pending Registrations</h2>
+    <table border="1" id="pendingTable">
+      <tr>
+        <th>Student ID</th>
+        <th>Name</th>
+        <th>Class</th>
+        <th>Roll</th>
+        <th>WhatsApp</th>
+        <th>Action</th>
+      </tr>
+    </table>
+  </div>
+
+  <div id="classTab" class="tabContent" style="display:none;">
+    <h2>Approved Students by Class</h2>
+    <div id="classesContainer"></div>
+  </div>
+
+  <div id="breakTab" class="tabContent" style="display:none;">
+    <h2>Break Requests</h2>
+    <p>No break requests yet.</p>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
