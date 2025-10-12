@@ -1,26 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Student Panel</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    nav { margin-bottom: 20px; }
+    nav button { margin-right: 10px; padding: 8px 12px; cursor: pointer; }
+    nav button#logoutBtn { float: right; background: red; color: white; }
+    section { display: none; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    #notificationsDiv p { border-bottom: 1px solid #eee; padding: 5px 0; }
+    #breakRequestBtn { margin-top: 10px; padding: 8px 12px; cursor: pointer; }
+  </style>
 </head>
 <body>
 
-<div class="tabs">
-  <button id="homeTab">Home</button>
-  <button id="profileTab">My Profile</button>
-  <button id="tuitionTab">Tuition Fee Status</button>
-  <button id="breakTab">Break Request</button>
-  <button id="studentLogoutBtn">Logout</button>
-</div>
+  <h2>Student Panel</h2>
 
-<div class="content" id="homeContent"></div>
-<div class="content" id="profileContent"></div>
-<div class="content" id="tuitionContent"></div>
-<div class="content" id="breakContent"></div>
+  <nav>
+    <button id="homeTab">Home</button>
+    <button id="profileTab">My Profile</button>
+    <button id="tuitionTab">Tuition Status</button>
+    <button id="breakTab">Break Request</button>
+    <button id="logoutBtn">Logout</button>
+  </nav>
 
-<script type="module" src="student.js"></script>
+  <!-- HOME -->
+  <section id="homeSection">
+    <h3>Welcome!</h3>
+    <div id="notificationsDiv">
+      <p>Loading notifications...</p>
+    </div>
+  </section>
+
+  <!-- MY PROFILE -->
+  <section id="profileSection">
+    <h3>My Profile</h3>
+    <div id="profileDiv">
+      <p>Loading profile...</p>
+    </div>
+  </section>
+
+  <!-- TUITION STATUS -->
+  <section id="tuitionSection">
+    <h3>Tuition Status</h3>
+    <table id="tuitionTable">
+      <thead>
+        <tr>
+          <th>Month's Name</th>
+          <th>Status</th>
+          <th>Date & Method</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- BREAK REQUEST -->
+  <section id="breakSection">
+    <h3>Break Request</h3>
+    <button id="breakRequestBtn">Submit Break Request</button>
+  </section>
+
+  <script type="module" src="student.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
+      authDomain: "the-academic-care-de611.firebaseapp.com",
+      databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "the-academic-care-de611",
+      storageBucket: "the-academic-care-de611.firebasestorage.app",
+      messagingSenderId: "142271027321",
+      appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+      measurementId: "G-Q7MCGKTYMX"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // ------------------- TAB SWITCHING -------------------
+    const sections = {
+      home: document.getElementById("homeSection"),
+      profile: document.getElementById("profileSection"),
+      tuition: document.getElementById("tuitionSection"),
+      break: document.getElementById("breakSection")
+    };
+
+    document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
+    document.getElementById("profileTab").addEventListener("click", () => switchTab("profile"));
+    document.getElementById("tuitionTab").addEventListener("click", () => switchTab("tuition"));
+    document.getElementById("breakTab").addEventListener("click", () => switchTab("break"));
+
+    function switchTab(tabName) {
+      for (const key in sections) sections[key].style.display = "none";
+      sections[tabName].style.display = "block";
+    }
+
+    // Show home by default
+    switchTab("home");
+
+    // ------------------- LOGOUT -------------------
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+      try {
+        await signOut(auth);
+        localStorage.removeItem("studentId");
+        window.location.href = "index.html";
+      } catch (err) {
+        alert("Logout failed: " + err.message);
+      }
+    });
+  </script>
 </body>
 </html>
