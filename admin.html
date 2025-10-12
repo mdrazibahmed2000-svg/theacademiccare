@@ -1,44 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Academic Care - Admin Panel</title>
+  <link rel="stylesheet" href="style.css" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    header { text-align: center; margin-bottom: 20px; }
-    h1 { margin:0; font-size:2em; }
-    h3 { margin:0; font-size:1.2em; color:#555; }
-    hr { margin-top:10px; }
-    nav { margin-bottom: 20px; }
-    nav button { margin-right: 10px; padding: 8px 12px; cursor: pointer; }
-    nav button#logoutBtn { float: right; background: red; color: white; }
-    div#classSubmenu { display:none; position:absolute; background:#f9f9f9; border:1px solid #ccc; }
-    div#classSubmenu button { display:block; width:100%; text-align:left; padding:8px 12px; border:none; background:none; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    button.actionBtn { margin-right:5px; padding:5px 10px; cursor:pointer; }
-    #tuitionModal { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
-      background:#fff; padding:20px; border:1px solid #ccc; max-width:600px; z-index:1000; }
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background-color: #003366;
+      color: white;
+      text-align: center;
+      padding: 15px 0;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    header small {
+      display: block;
+      font-size: 16px;
+      color: #f1c40f;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #0055aa;
+      padding: 10px 0;
+    }
+
+    nav button {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    nav button:hover {
+      color: #ffcc00;
+    }
+
+    .submenu {
+      display: none;
+      position: absolute;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      top: 115px;
+      left: 42%;
+      z-index: 100;
+    }
+
+    .submenu button {
+      display: block;
+      background: white;
+      color: #003366;
+      border: none;
+      padding: 10px 20px;
+      text-align: left;
+      width: 150px;
+      cursor: pointer;
+    }
+
+    .submenu button:hover {
+      background: #f1f1f1;
+    }
+
+    section {
+      display: none;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #0055aa;
+      color: white;
+    }
+
+    .actionBtn {
+      padding: 5px 10px;
+      border: none;
+      background-color: #0055aa;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .actionBtn:hover {
+      background-color: #003d80;
+    }
+
+    #logoutBtn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    #logoutBtn:hover {
+      color: #f1c40f;
+    }
+
+    /* Modal styling */
+    #tuitionModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modalContent {
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 800px;
+    }
+
+    #closeModalBtn {
+      float: right;
+      background: #ff4444;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #closeModalBtn:hover {
+      background: #cc0000;
+    }
   </style>
 </head>
 <body>
 
   <!-- HEADER -->
   <header>
-    <h1>The Academic Care</h1>
-    <h3>Academic Year 2025</h3>
-    <hr>
+    The Academic Care
+    <small>Academic Year 2025</small>
   </header>
 
-  <h2>Admin Panel</h2>
+  <!-- NAVIGATION BAR -->
   <nav>
-    <button onclick="showHome()">Home</button>
-
-    <!-- Class Menu -->
-    <div style="display:inline-block; position:relative;">
-      <button id="classMenuBtn">Class ▾</button>
-      <div id="classSubmenu">
+    <button onclick="showHome()">🏠 Home</button>
+    <div style="position: relative;">
+      <button id="classMenuBtn">📘 Class ▼</button>
+      <div class="submenu" id="classSubmenu">
         <button onclick="showClass('6')">Class 6</button>
         <button onclick="showClass('7')">Class 7</button>
         <button onclick="showClass('8')">Class 8</button>
@@ -48,91 +187,86 @@
         <button onclick="showClass('12')">Class 12</button>
       </div>
     </div>
-
-    <button onclick="showRegistration()">Registration</button>
-    <button onclick="showBreakRequests()">Break Request</button>
-    <button id="logoutBtn">Logout</button>
+    <button onclick="showRegistration()">📝 Registration</button>
+    <button onclick="showBreakRequests()">☕ Break Request</button>
+    <button id="logoutBtn">🚪 Logout</button>
   </nav>
 
-  <!-- HOME -->
-  <section id="homeSection">
-    <h3>Welcome, Admin</h3>
-    <p>Use the menu to navigate.</p>
+  <!-- HOME SECTION -->
+  <section id="homeSection" style="display: block;">
+    <h2>Welcome to Admin Panel</h2>
+    <p>Use the navigation menu to manage registrations, classes, and tuition.</p>
   </section>
 
   <!-- CLASS SECTION -->
-  <section id="classSection" style="display:none;">
-    <h3 id="classTitle">Class</h3>
+  <section id="classSection">
+    <h2 id="classTitle">Class</h2>
     <table>
       <thead>
         <tr>
           <th>Student ID</th>
           <th>Name</th>
           <th>Roll</th>
-          <th>Tuition Details</th>
+          <th>Action</th>
         </tr>
       </thead>
-      <tbody id="classTableBody">
-        <tr><td colspan="4">Loading...</td></tr>
-      </tbody>
+      <tbody id="classTableBody"></tbody>
     </table>
   </section>
 
   <!-- REGISTRATION SECTION -->
-  <section id="registrationSection" style="display:none;">
-    <h3>Registration Requests</h3>
+  <section id="registrationSection">
+    <h2>Registration Requests</h2>
     <table>
       <thead>
         <tr>
           <th>Student ID</th>
           <th>Name</th>
           <th>Class</th>
-          <th>Roll</th>
           <th>Action</th>
         </tr>
       </thead>
-      <tbody id="registrationTableBody">
-        <tr><td colspan="5">Loading...</td></tr>
-      </tbody>
+      <tbody id="registrationTableBody"></tbody>
     </table>
   </section>
 
   <!-- BREAK REQUEST SECTION -->
-  <section id="breakSection" style="display:none;">
-    <h3>Break Requests</h3>
+  <section id="breakSection">
+    <h2>Break Requests</h2>
     <table>
       <thead>
         <tr>
           <th>Student ID</th>
           <th>Name</th>
           <th>Class</th>
-          <th>Roll</th>
-          <th>Action</th>
+          <th>Status</th>
         </tr>
       </thead>
-      <tbody id="breakTableBody">
-        <tr><td colspan="5">Loading...</td></tr>
-      </tbody>
+      <tbody id="breakTableBody"></tbody>
     </table>
   </section>
 
   <!-- TUITION MODAL -->
   <div id="tuitionModal">
-    <h3 id="modalStudentName">Tuition for Student</h3>
-    <table id="modalTuitionTable">
-      <thead>
-        <tr>
-          <th>Month</th>
-          <th>Status</th>
-          <th>Date & Method</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <button onclick="closeModal()">Close</button>
+    <div id="modalContent">
+      <button id="closeModalBtn" onclick="closeModal()">X</button>
+      <h3 id="modalStudentName"></h3>
+      <table id="modalTuitionTable">
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th>Status</th>
+            <th>Date/Method</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- SCRIPT -->
   <script type="module" src="admin.js"></script>
+
 </body>
 </html>
