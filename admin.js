@@ -1,8 +1,10 @@
+// ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, update, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, child, update, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+
   // ------------------- FIREBASE CONFIG -------------------
   const firebaseConfig = {
     apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
@@ -51,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ------------------- LOAD HOME STATS -------------------
+  // ------------------- HOME STATS -------------------
   async function loadHomeStats() {
     await ensureRegistrationsNode();
     const snapshot = await get(ref(db, "Registrations"));
@@ -90,7 +92,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ------------------- APPROVE / DENY -------------------
   window.approve = async (id) => {
     await update(ref(db, `Registrations/${id}`), { approved: true });
     alert(`${id} approved!`);
@@ -128,7 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ------------------- CLASSES -------------------
+  // ------------------- CLASSES TAB -------------------
   async function loadClasses() {
     const classTabs = document.getElementById("classTabs");
     const classStudentsDiv = document.getElementById("classStudents");
@@ -146,20 +147,121 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadClassStudents(cls) {
     const snapshot = await get(ref(db, "Registrations"));
     const div = document.getElementById("classStudents");
-    div.innerHTML = `<h3>Class ${cls}</h3><table border="1"><tr><th>ID</th><th>Name</th><th>Roll</th><th>Tuition Status</th></tr></table>`;
-    const table = div.querySelector("table");
+    div.innerHTML = `<h3>Class ${cls}</h3><table border="1">
+      <thead><tr>
+        <th>ID</th><th>Name</th><th>Roll</th><th>Tuition Details</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>`;
+    const tbody = div.querySelector("tbody");
 
     snapshot.forEach(child => {
       const data = child.val();
       if (data.class == cls && data.approved) {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${child.key}</td><td>${data.name}</td><td>${data.roll}</td><td>${data.tuitionStatus || "unpaid"}</td>`;
-        table.appendChild(tr);
+        tr.innerHTML = `
+          <td>${child.key}</td>
+          <td>${data.name}</td>
+          <td>${data.roll}</td>
+          <td>
+            <span class="tuitionIcon" style="cursor:pointer;" onclick="window.showTuitionModal('${child.key}')">💰</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
       }
     });
   }
 
+  // ------------------- Tuition Modal -------------------
+  window.showTuitionModal = async (studentId) => {
+    const snapshot = await get(ref(db, `Registrations/${studentId}`));
+    if (!snapshot.exists()) return alert("Student not found!");
+    const data = snapshot.val();
+    const tuition = data.tuition || {};
+
+    const modal = document.createElement("div");
+    modal.id = "tuitionModal";
+    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;";
+    modal.innerHTML = `
+      <div style="background:white;padding:20px;border-radius:10px;max-height:80%;overflow:auto;">
+        <h3>Tuition Details: ${data.name} (${studentId})</h3>
+        <table border="1" id="tuitionTable">
+          <thead><tr>
+            <th>Month's Name</th><th>Status</th><th>Date & Method</th><th>Action</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      document.body.removeChild(modal);
+    });
+
+    const tbody = modal.querySelector("tbody");
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+
+    for (let month = 1; month <= currentMonth; month++) {
+      const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
+      const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
+      const status = tuition[monthKey]?.status || "unpaid";
+      const dateMethod = tuition[monthKey]?.date ? `${tuition[monthKey].date} (${tuition[monthKey].method})` : "";
+
+      let actionHtml = "";
+      if (status === "unpaid") {
+        actionHtml = `
+          <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
+          <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
+        `;
+      } else {
+        actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${monthName}</td>
+        <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
+        <td>${dateMethod}</td>
+        <td>${actionHtml}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  };
+
+  // ------------------- Tuition Actions -------------------
+  window.markPaid = async (studentId, monthKey) => {
+    const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
+    if (!method) return;
+    const date = new Date().toISOString().split("T")[0];
+
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"paid", date, method });
+
+    // Add notification
+    await push(ref(db, `Notifications/${studentId}`), { message:`${monthKey} tuition marked Paid.`, date });
+
+    alert(`Payment recorded for ${monthKey}. Student will get confirmation.`);
+    window.showTuitionModal(studentId);
+  };
+
+  window.markBreak = async (studentId, monthKey) => {
+    const date = new Date().toISOString().split("T")[0];
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"break" });
+    await push(ref(db, `Notifications/${studentId}`), { message:`${monthKey} tuition marked Break.`, date });
+    alert(`Break marked for ${monthKey}. Student will get confirmation.`);
+    window.showTuitionModal(studentId);
+  };
+
+  window.undoStatus = async (studentId, monthKey) => {
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"unpaid", date:null, method:null });
+    alert(`Status reset for ${monthKey}.`);
+    window.showTuitionModal(studentId);
+  };
+
   // ------------------- INITIAL LOAD -------------------
+  switchTab("home");
   loadHomeStats();
   loadRegistrations();
   loadBreakRequests();
