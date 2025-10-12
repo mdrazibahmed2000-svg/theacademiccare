@@ -1,173 +1,124 @@
-/* ------------------- GLOBAL STYLES ------------------- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ================== GENERAL STYLES ================== */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f7fa;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background: #f9f9f9;
   color: #333;
-  line-height: 1.6;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.3s;
 }
 
 h1, h2, h3 {
-  margin-bottom: 10px;
-  color: #222;
+  margin: 0.5em 0;
 }
 
 header {
   text-align: center;
-  padding: 20px 10px;
-  background: #4a90e2;
-  color: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  transition: background 0.3s;
+  padding: 10px 0;
+  background-color: #004080;
+  color: #fff;
 }
 
 header h1 {
   font-size: 2rem;
-  margin-bottom: 5px;
 }
 
 header h3 {
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: normal;
 }
 
 hr {
-  border: none;
-  border-top: 2px solid #fff;
-  margin: 10px 0 0 0;
+  border: 0;
+  border-top: 2px solid #0066cc;
+  margin: 10px 0 20px 0;
 }
 
-/* ------------------- NAVIGATION ------------------- */
+/* ================== NAVIGATION ================== */
 nav {
+  margin: 10px 0 20px 0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
-  background: #fff;
-  padding: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-  border-radius: 5px;
-  transition: box-shadow 0.3s;
+  gap: 10px;
 }
 
 nav button {
-  background: #4a90e2;
-  color: white;
+  padding: 10px 15px;
+  background: #0066cc;
+  color: #fff;
   border: none;
-  padding: 8px 16px;
-  margin: 5px;
   border-radius: 5px;
   cursor: pointer;
-  transition: background 0.3s, transform 0.2s;
+  transition: 0.3s;
 }
 
 nav button:hover {
-  background: #357ab8;
-  transform: translateY(-2px);
+  background: #004d99;
 }
 
-nav button#logoutBtn {
-  background: #e94e4e;
+#logoutBtn {
   margin-left: auto;
+  background: #cc0000;
 }
 
-nav button#logoutBtn:hover {
-  background: #c0392b;
-  transform: translateY(-2px);
+#logoutBtn:hover {
+  background: #990000;
 }
 
-/* ------------------- SECTIONS ------------------- */
-section {
+/* ================== SECTIONS ================== */
+.tabSection {
   background: #fff;
-  padding: 20px;
+  padding: 15px;
+  margin-bottom: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-bottom: 20px;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.5s forwards;
 }
 
-.tabSection {
-  display: none;
-}
-
-/* ------------------- TABLES ------------------- */
+/* ================== TABLES ================== */
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  transition: all 0.3s;
 }
 
-table, th, td {
-  border: 1px solid #ddd;
-}
-
-th, td {
-  padding: 10px;
+table th, table td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
   text-align: left;
-  transition: background 0.3s, color 0.3s;
+  vertical-align: middle;
 }
 
-th {
-  background: #4a90e2;
-  color: white;
+table th {
+  background: #f0f0f0;
 }
 
-td {
-  background: #f9f9f9;
-}
-
-tr:nth-child(even) td {
-  background: #f1f1f1;
-}
-
-tr:hover td {
-  background: #e8f0fe;
-}
-
-button.tuitionIcon {
-  font-size: 1.2rem;
-  background: none;
-  border: none;
+/* ================== TUITION ICON ================== */
+.tuitionIcon {
+  font-size: 1.3rem;
   cursor: pointer;
-  transition: transform 0.2s;
+  display: inline-block;
+  padding: 4px;
+  transition: transform 0.2s, color 0.2s;
 }
 
-button.tuitionIcon:hover {
+.tuitionIcon:hover {
   transform: scale(1.2);
+  color: #009900;
 }
 
-/* ------------------- MODALS ------------------- */
+/* ================== MODAL ================== */
 #tuitionModal {
-  display: none;
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(0,0,0,0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s;
+  z-index: 9999;
 }
 
-#tuitionModal.show {
-  opacity: 1;
-}
-
-#tuitionModal div {
+#tuitionModal > div {
   background: #fff;
   padding: 20px;
   border-radius: 8px;
@@ -175,87 +126,82 @@ button.tuitionIcon:hover {
   overflow-y: auto;
   width: 90%;
   max-width: 600px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  transform: scale(0.8);
-  transition: transform 0.3s;
-}
-
-#tuitionModal.show div {
-  transform: scale(1);
-}
-
-#tuitionModal table {
-  margin-top: 10px;
 }
 
 #tuitionModal button {
   margin: 5px 5px 0 0;
   padding: 6px 12px;
+  border: none;
   border-radius: 5px;
   cursor: pointer;
-  border: none;
-  background: #4a90e2;
-  color: white;
-  transition: background 0.3s, transform 0.2s;
+  background: #0066cc;
+  color: #fff;
+  transition: 0.3s;
 }
 
 #tuitionModal button:hover {
-  background: #357ab8;
-  transform: translateY(-1px);
+  background: #004d99;
 }
 
-/* ------------------- NOTIFICATIONS ------------------- */
-#notificationsDiv p {
-  border-bottom: 1px solid #eee;
-  padding: 8px 5px;
-  transition: background 0.3s;
-}
-
-#notificationsDiv p:hover {
-  background: #f0f8ff;
-}
-
-/* ------------------- BREAK REQUEST ------------------- */
+/* ================== BREAK REQUEST BUTTON ================== */
 #breakRequestBtn {
-  background: #ff9500;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
   margin-top: 10px;
-  transition: background 0.3s, transform 0.2s;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #ff9900;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 #breakRequestBtn:hover {
   background: #cc7a00;
-  transform: translateY(-2px);
 }
 
-/* ------------------- ANIMATIONS ------------------- */
-@keyframes fadeInUp {
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* ================== NOTIFICATIONS ================== */
+#notificationsDiv p {
+  border-bottom: 1px solid #eee;
+  padding: 5px 0;
 }
 
-/* ------------------- RESPONSIVE ------------------- */
+/* ================== CLASS BUTTONS ================== */
+#classTabs button {
+  padding: 6px 12px;
+  margin: 3px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  background: #0099cc;
+  color: #fff;
+  transition: 0.3s;
+}
+
+#classTabs button:hover {
+  background: #007399;
+}
+
+/* ================== RESPONSIVE ================== */
 @media (max-width: 768px) {
   nav {
     flex-direction: column;
-    align-items: stretch;
   }
 
   nav button {
-    margin: 5px 0;
+    width: 100%;
+    margin-left: 0;
   }
 
-  table, th, td {
+  table th, table td {
     font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+
+  .tuitionIcon {
+    font-size: 1.1rem;
+  }
+
+  #tuitionModal > div {
+    width: 95%;
   }
 }
