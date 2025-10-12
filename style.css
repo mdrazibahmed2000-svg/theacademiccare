@@ -1,196 +1,261 @@
-/* -------------------- GENERAL -------------------- */
-body {
-  font-family: 'Arial', sans-serif;
+/* ------------------- GLOBAL STYLES ------------------- */
+* {
+  box-sizing: border-box;
   margin: 0;
-  padding: 0 15px;
-  background-color: #f9f9f9;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f5f7fa;
   color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.3s;
+}
+
+h1, h2, h3 {
+  margin-bottom: 10px;
+  color: #222;
 }
 
 header {
   text-align: center;
-  padding: 15px 0;
-  background-color: #1e90ff;
+  padding: 20px 10px;
+  background: #4a90e2;
   color: white;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: background 0.3s;
 }
 
 header h1 {
-  margin: 0;
-  font-size: 28px;
+  font-size: 2rem;
+  margin-bottom: 5px;
 }
 
 header h3 {
-  margin: 5px 0 0 0;
+  font-size: 1rem;
   font-weight: normal;
-  font-size: 16px;
 }
 
-h1, h2, h3 {
-  color: #1e90ff;
+hr {
+  border: none;
+  border-top: 2px solid #fff;
+  margin: 10px 0 0 0;
 }
 
-/* -------------------- NAVIGATION -------------------- */
+/* ------------------- NAVIGATION ------------------- */
 nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  background-color: #fff;
+  background: #fff;
   padding: 10px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  margin: 15px 0;
-  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+  border-radius: 5px;
+  transition: box-shadow 0.3s;
 }
 
 nav button {
-  background-color: #1e90ff;
+  background: #4a90e2;
   color: white;
   border: none;
-  padding: 10px 15px;
+  padding: 8px 16px;
   margin: 5px;
   border-radius: 5px;
   cursor: pointer;
-  flex: 1 1 120px;
-  transition: background-color 0.3s;
+  transition: background 0.3s, transform 0.2s;
 }
 
 nav button:hover {
-  background-color: #0f71d0;
+  background: #357ab8;
+  transform: translateY(-2px);
 }
 
 nav button#logoutBtn {
-  background-color: #ff4d4f;
+  background: #e94e4e;
+  margin-left: auto;
 }
 
 nav button#logoutBtn:hover {
-  background-color: #d9363e;
+  background: #c0392b;
+  transform: translateY(-2px);
 }
 
-/* -------------------- TAB SECTIONS -------------------- */
-.tabSection {
-  background-color: #fff;
-  padding: 15px;
+/* ------------------- SECTIONS ------------------- */
+section {
+  background: #fff;
+  padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   margin-bottom: 20px;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.5s forwards;
 }
 
-.tabSection table {
+.tabSection {
+  display: none;
+}
+
+/* ------------------- TABLES ------------------- */
+table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  transition: all 0.3s;
 }
 
-.tabSection table, th, td {
+table, th, td {
   border: 1px solid #ddd;
 }
 
 th, td {
   padding: 10px;
   text-align: left;
+  transition: background 0.3s, color 0.3s;
 }
 
 th {
-  background-color: #f0f0f0;
+  background: #4a90e2;
+  color: white;
 }
 
 td {
-  background-color: #fafafa;
+  background: #f9f9f9;
 }
 
-td span.tuitionIcon {
-  font-size: 20px;
-  cursor: pointer;
+tr:nth-child(even) td {
+  background: #f1f1f1;
 }
 
-/* -------------------- BUTTONS -------------------- */
-button {
-  cursor: pointer;
+tr:hover td {
+  background: #e8f0fe;
 }
 
-#breakRequestBtn {
-  background-color: #1e90ff;
-  color: white;
-  padding: 10px 15px;
+button.tuitionIcon {
+  font-size: 1.2rem;
+  background: none;
   border: none;
-  border-radius: 5px;
-  transition: background-color 0.3s;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
-#breakRequestBtn:hover {
-  background-color: #0f71d0;
+button.tuitionIcon:hover {
+  transform: scale(1.2);
+}
+
+/* ------------------- MODALS ------------------- */
+#tuitionModal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+#tuitionModal.show {
+  opacity: 1;
+}
+
+#tuitionModal div {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-height: 80%;
+  overflow-y: auto;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  transform: scale(0.8);
+  transition: transform 0.3s;
+}
+
+#tuitionModal.show div {
+  transform: scale(1);
+}
+
+#tuitionModal table {
+  margin-top: 10px;
 }
 
 #tuitionModal button {
-  background-color: #1e90ff;
-  color: white;
-  border: none;
+  margin: 5px 5px 0 0;
   padding: 6px 12px;
-  border-radius: 4px;
-  margin-right: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  background: #4a90e2;
+  color: white;
+  transition: background 0.3s, transform 0.2s;
 }
 
 #tuitionModal button:hover {
-  background-color: #0f71d0;
+  background: #357ab8;
+  transform: translateY(-1px);
 }
 
-/* -------------------- NOTIFICATIONS -------------------- */
+/* ------------------- NOTIFICATIONS ------------------- */
 #notificationsDiv p {
   border-bottom: 1px solid #eee;
-  padding: 8px 0;
-  margin: 0;
+  padding: 8px 5px;
+  transition: background 0.3s;
 }
 
-/* -------------------- CLASS BUTTONS -------------------- */
-#classTabs button {
-  margin: 5px 5px 10px 0;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 5px;
-  background-color: #1e90ff;
+#notificationsDiv p:hover {
+  background: #f0f8ff;
+}
+
+/* ------------------- BREAK REQUEST ------------------- */
+#breakRequestBtn {
+  background: #ff9500;
   color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
   cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.3s, transform 0.2s;
 }
 
-#classTabs button:hover {
-  background-color: #0f71d0;
+#breakRequestBtn:hover {
+  background: #cc7a00;
+  transform: translateY(-2px);
 }
 
-/* -------------------- TUITION TABLE COLORS -------------------- */
-td.paid {
-  color: green;
+/* ------------------- ANIMATIONS ------------------- */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-td.unpaid {
-  color: red;
-}
-
-td.break {
-  color: purple;
-}
-
-/* -------------------- RESPONSIVE -------------------- */
-@media screen and (max-width: 768px) {
+/* ------------------- RESPONSIVE ------------------- */
+@media (max-width: 768px) {
   nav {
     flex-direction: column;
+    align-items: stretch;
   }
+
   nav button {
-    flex: 1 1 100%;
+    margin: 5px 0;
   }
-  header h1 {
-    font-size: 24px;
-  }
-  header h3 {
-    font-size: 14px;
-  }
-  table th, table td {
-    font-size: 14px;
-    padding: 8px;
-  }
-  #tuitionModal {
-    padding: 10px;
-  }
-  #tuitionModal table {
-    font-size: 13px;
+
+  table, th, td {
+    font-size: 0.9rem;
   }
 }
