@@ -14,7 +14,7 @@ h1, h2, h3 {
 header {
   text-align: center;
   padding: 10px 0;
-  background-color: #004080;
+  background-color: #004080; /* Admin/Student panel primary color */
   color: #fff;
 }
 
@@ -43,7 +43,7 @@ nav {
 
 nav button {
   padding: 10px 15px;
-  background: #0066cc;
+  background: #0066cc; /* Matching primary color */
   color: #fff;
   border: none;
   border-radius: 5px;
