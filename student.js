@@ -1,6 +1,7 @@
 // ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, onValue, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
@@ -16,6 +17,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
+const auth = getAuth(app);
 
 // ------------------- STUDENT ID -------------------
 const studentId = localStorage.getItem("studentId");
@@ -26,6 +28,39 @@ const profileDiv = document.getElementById("profileDiv");
 const tuitionTableBody = document.querySelector("#tuitionTable tbody");
 const notificationsDiv = document.getElementById("notificationsDiv");
 const breakRequestBtn = document.getElementById("breakRequestBtn");
+
+// Tabs
+const sections = {
+  home: document.getElementById("homeSection"),
+  profile: document.getElementById("profileSection"),
+  tuition: document.getElementById("tuitionSection"),
+  break: document.getElementById("breakSection")
+};
+
+// ------------------- TAB SWITCHING -------------------
+document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
+document.getElementById("profileTab").addEventListener("click", () => switchTab("profile"));
+document.getElementById("tuitionTab").addEventListener("click", () => switchTab("tuition"));
+document.getElementById("breakTab").addEventListener("click", () => switchTab("break"));
+
+function switchTab(tabName) {
+  for (const key in sections) sections[key].style.display = "none";
+  sections[tabName].style.display = "block";
+}
+
+// Show home by default
+switchTab("home");
+
+// ------------------- LOGOUT -------------------
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  try {
+    await signOut(auth);
+    localStorage.removeItem("studentId");
+    window.location.href = "index.html";
+  } catch (err) {
+    alert("Logout failed: " + err.message);
+  }
+});
 
 // ------------------- LOAD STUDENT PROFILE -------------------
 function loadProfile(data) {
