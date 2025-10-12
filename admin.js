@@ -172,12 +172,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ------------------- Tuition Modal -------------------
+  // ------------------- TUITION MODAL -------------------
   window.showTuitionModal = async (studentId) => {
     const snapshot = await get(ref(db, `Registrations/${studentId}`));
     if (!snapshot.exists()) return alert("Student not found!");
     const data = snapshot.val();
     const tuition = data.tuition || {};
+
+    // Remove existing modal if exists
+    const oldModal = document.getElementById("tuitionModal");
+    if (oldModal) oldModal.remove();
 
     const modal = document.createElement("div");
     modal.id = "tuitionModal";
@@ -197,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(modal);
 
     document.getElementById("closeModalBtn").addEventListener("click", () => {
-      document.body.removeChild(modal);
+      modal.remove();
     });
 
     const tbody = modal.querySelector("tbody");
@@ -231,31 +235,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  // ------------------- Tuition Actions -------------------
+  // ------------------- TUITION ACTIONS -------------------
   window.markPaid = async (studentId, monthKey) => {
     const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
     if (!method) return;
     const date = new Date().toISOString().split("T")[0];
 
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"paid", date, method });
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
+    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
 
-    // Add notification
-    await push(ref(db, `Notifications/${studentId}`), { message:`${monthKey} tuition marked Paid.`, date });
-
-    alert(`Payment recorded for ${monthKey}. Student will get confirmation.`);
+    // Refresh modal to show updated status
     window.showTuitionModal(studentId);
   };
 
   window.markBreak = async (studentId, monthKey) => {
     const date = new Date().toISOString().split("T")[0];
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"break" });
-    await push(ref(db, `Notifications/${studentId}`), { message:`${monthKey} tuition marked Break.`, date });
-    alert(`Break marked for ${monthKey}. Student will get confirmation.`);
+
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
+    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
+
+    // Refresh modal to show updated status
     window.showTuitionModal(studentId);
   };
 
   window.undoStatus = async (studentId, monthKey) => {
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status:"unpaid", date:null, method:null });
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
     alert(`Status reset for ${monthKey}.`);
     window.showTuitionModal(studentId);
   };
