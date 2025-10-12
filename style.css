@@ -1,250 +1,199 @@
-/* ---------- GLOBAL STYLES ---------- */
+/* ===== GENERAL STYLES ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
 body {
-  font-family: "Poppins", Arial, sans-serif;
   background-color: #f4f6f8;
   color: #333;
-  margin: 0;
-  padding: 0;
+  padding: 20px;
+  line-height: 1.6;
 }
 
-/* ---------- HEADER ---------- */
+/* ===== HEADER ===== */
 header {
   text-align: center;
-  background: linear-gradient(90deg, #004aad, #007bff);
-  color: white;
-  padding: 20px 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
 }
 
 header h1 {
+  color: #0078d7;
   font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 5px;
 }
 
 header h3 {
+  color: #666;
   font-weight: 400;
-  font-size: 1.1rem;
-  opacity: 0.9;
 }
 
-/* ---------- NAVIGATION ---------- */
+header hr {
+  border: none;
+  border-top: 2px solid #0078d7;
+  margin-top: 10px;
+}
+
+/* ===== ADMIN PANEL TITLE ===== */
+h1 {
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+  color: #222;
+}
+
+/* ===== NAVIGATION ===== */
 nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  margin-bottom: 25px;
   gap: 10px;
-  background: white;
-  padding: 15px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
 }
 
 nav button {
-  background: #007bff;
-  border: none;
+  background-color: #0078d7;
   color: white;
+  border: none;
   padding: 10px 18px;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: 0.3s ease;
+  font-weight: 500;
 }
 
 nav button:hover {
-  background: #0056b3;
+  background-color: #005fa3;
   transform: translateY(-2px);
 }
 
-nav button#logoutBtn {
-  background: #dc3545;
+nav button:active {
+  transform: scale(0.98);
+  background-color: #004b82;
 }
 
-nav button#logoutBtn:hover {
-  background: #b02a37;
-}
-
-/* ---------- SECTIONS ---------- */
-section {
+/* ===== SECTIONS ===== */
+.tabSection {
   display: none;
   background: white;
-  margin: 20px auto;
-  max-width: 1100px;
-  padding: 20px 25px;
+  padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
 }
 
-section.active {
-  display: block;
-}
-
-section h2 {
-  font-size: 1.5rem;
-  color: #004aad;
+.tabSection h2 {
   margin-bottom: 15px;
-  border-left: 5px solid #004aad;
-  padding-left: 10px;
+  color: #0078d7;
+  font-size: 1.4rem;
+  border-bottom: 2px solid #0078d7;
+  display: inline-block;
+  padding-bottom: 5px;
 }
 
-/* ---------- TABLES ---------- */
+/* ===== TABLES ===== */
 table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
-  font-size: 0.95rem;
+}
+
+table thead {
+  background-color: #0078d7;
+  color: white;
 }
 
 th, td {
-  border: 1px solid #e1e1e1;
+  border: 1px solid #ddd;
   padding: 10px;
-  text-align: center;
+  text-align: left;
 }
 
-th {
-  background: #f1f3f6;
-  color: #333;
-  font-weight: 600;
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
 }
 
-td {
-  background: #fff;
+tbody tr:hover {
+  background-color: #eef6ff;
+  transition: 0.2s;
 }
 
-tr:nth-child(even) td {
-  background: #f9fafc;
-}
-
-button {
-  cursor: pointer;
-}
-
-/* ---------- BUTTONS INSIDE TABLE ---------- */
-table button {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: background 0.3s ease;
-}
-
-table button:hover {
-  background: #0056b3;
-}
-
-/* ---------- CLASS TABS ---------- */
+/* ===== CLASS TABS ===== */
 #classTabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
   margin-bottom: 15px;
 }
 
 #classTabs button {
-  background: #17a2b8;
-  border: none;
-  color: white;
+  background-color: #e1ecf9;
+  color: #0078d7;
+  border: 1px solid #0078d7;
   padding: 8px 14px;
   border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
   transition: 0.3s ease;
 }
 
 #classTabs button:hover {
-  background: #117a8b;
+  background-color: #0078d7;
+  color: white;
 }
 
-/* ---------- MODAL (Tuition Details) ---------- */
-#tuitionModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
+/* ===== LOGOUT BUTTON ===== */
+#logoutBtn {
+  background-color: #ff4d4d;
 }
 
-#tuitionModal > div {
-  background: white;
-  padding: 25px;
-  border-radius: 10px;
-  width: 90%;
-  max-width: 700px;
-  max-height: 80%;
-  overflow-y: auto;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  animation: fadeIn 0.3s ease;
+#logoutBtn:hover {
+  background-color: #d93636;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-#tuitionModal h3 {
-  margin-bottom: 15px;
-  color: #004aad;
-}
-
-/* ---------- RESPONSIVENESS ---------- */
+/* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
-  header h1 {
-    font-size: 1.6rem;
-  }
-
   nav {
     flex-direction: column;
     align-items: center;
   }
 
   nav button {
-    width: 90%;
-    font-size: 1rem;
+    width: 80%;
   }
 
-  section {
-    width: 95%;
-    padding: 15px;
-  }
-
-  table {
-    font-size: 0.85rem;
+  table, th, td {
+    font-size: 0.9rem;
   }
 
   th, td {
-    padding: 6px;
+    padding: 8px;
   }
 
-  #tuitionModal > div {
-    width: 95%;
-    max-height: 85%;
+  header h1 {
+    font-size: 1.6rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  header h1 {
-    font-size: 1.3rem;
-  }
-
-  header h3 {
+  nav button {
+    width: 100%;
     font-size: 0.9rem;
   }
 
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
+  body {
+    padding: 10px;
+  }
+
+  .tabSection {
+    padding: 15px;
+  }
+
+  header h1 {
+    font-size: 1.4rem;
   }
 }
