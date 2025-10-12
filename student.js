@@ -29,7 +29,7 @@ const tuitionTableBody = document.querySelector("#tuitionTable tbody");
 const notificationsDiv = document.getElementById("notificationsDiv");
 const breakRequestBtn = document.getElementById("breakRequestBtn");
 
-// Tabs
+// ------------------- TAB SWITCHING -------------------
 const sections = {
   home: document.getElementById("homeSection"),
   profile: document.getElementById("profileSection"),
@@ -37,7 +37,6 @@ const sections = {
   break: document.getElementById("breakSection")
 };
 
-// ------------------- TAB SWITCHING -------------------
 document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
 document.getElementById("profileTab").addEventListener("click", () => switchTab("profile"));
 document.getElementById("tuitionTab").addEventListener("click", () => switchTab("tuition"));
@@ -48,7 +47,7 @@ function switchTab(tabName) {
   sections[tabName].style.display = "block";
 }
 
-// Show home by default
+// Show home tab by default
 switchTab("home");
 
 // ------------------- LOGOUT -------------------
