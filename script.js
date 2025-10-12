@@ -91,7 +91,6 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       const userCredential = await signInWithEmailAndPassword(auth, "theacademiccare2025@gmail.com", password);
       const user = userCredential.user;
 
-      // UID check for admin
       if (user.uid === "xg4XNMsSJqbXMZ57qicrpgfM6Yn1") {
         window.location.href = "admin.html";
       } else {

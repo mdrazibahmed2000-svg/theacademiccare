@@ -1,4 +1,7 @@
-// Firebase config same as script.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -9,99 +12,59 @@ const firebaseConfig = {
   appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
 };
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
 
-// ---------------- TAB MENU -----------------
-const menuBtns = document.querySelectorAll(".menuBtn");
-const tabs = document.querySelectorAll(".tabContent");
-menuBtns.forEach(btn => {
-  btn.addEventListener("click", () => {
-    tabs.forEach(tab => tab.style.display = "none");
-    document.getElementById(btn.dataset.tab).style.display = "block";
-  });
+// ------------------- ELEMENTS -------------------
+const homeTab = document.getElementById("homeTab");
+const registrationTab = document.getElementById("registrationTab");
+const breakRequestTab = document.getElementById("breakRequestTab");
+const classesTab = document.getElementById("classesTab");
+const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+
+const homeContent = document.getElementById("homeContent");
+const registrationContent = document.getElementById("registrationContent");
+const breakRequestContent = document.getElementById("breakRequestContent");
+const classesContent = document.getElementById("classesContent");
+
+// ------------------- NAVIGATION -------------------
+homeTab.addEventListener("click", () => {
+  homeContent.style.display = "block";
+  registrationContent.style.display = "none";
+  breakRequestContent.style.display = "none";
+  classesContent.style.display = "none";
 });
 
-// ---------------- LOGOUT -----------------
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  auth.signOut().then(() => {
-    window.location.href = "index.html";
-  });
-});
+registrationTab.addEventListener("click", async () => {
+  homeContent.style.display = "none";
+  registrationContent.style.display = "block";
+  breakRequestContent.style.display = "none";
+  classesContent.style.display = "none";
 
-// ---------------- LOAD PENDING REGISTRATIONS -----------------
-function loadPending() {
-  db.ref("Registrations").once("value").then(snapshot => {
-    const table = document.getElementById("pendingTable");
-    table.innerHTML = `<tr>
-      <th>Student ID</th><th>Name</th><th>Class</th><th>Roll</th><th>WhatsApp</th><th>Action</th>
-    </tr>`;
-
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (!data.approved) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${child.key}</td>
-          <td>${data.name}</td>
-          <td>${data.class}</td>
-          <td>${data.roll}</td>
-          <td>${data.whatsapp}</td>
-          <td>
-            <button onclick="approve('${child.key}')">Approve</button>
-            <button onclick="deny('${child.key}')">Deny</button>
-          </td>`;
-        table.appendChild(tr);
-      }
-    });
-  });
-}
-
-// ---------------- APPROVE / DENY -----------------
-window.approve = function(id) {
-  db.ref("Registrations/" + id).update({ approved: true });
-  alert("Approved " + id);
-  loadPending();
-  loadClasses();
-};
-
-window.deny = function(id) {
-  db.ref("Registrations/" + id).remove();
-  alert("Denied " + id);
-  loadPending();
-};
-
-// ---------------- LOAD APPROVED STUDENTS BY CLASS -----------------
-function loadClasses() {
-  db.ref("Registrations").once("value").then(snapshot => {
-    const container = document.getElementById("classesContainer");
-    container.innerHTML = "";
-    let classes = {};
-
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (data.approved) {
-        if (!classes[data.class]) classes[data.class] = [];
-        classes[data.class].push({ id: child.key, name: data.name, roll: data.roll, whatsapp: data.whatsapp });
-      }
-    });
-
-    for (let cls in classes) {
+  const snapshot = await get(ref(db, "Registrations"));
+  registrationContent.innerHTML = "<h3>Pending Registrations</h3>";
+  snapshot.forEach(child => {
+    const data = child.val();
+    if (!data.approved) {
       const div = document.createElement("div");
-      div.innerHTML = `<h3>Class ${cls}</h3>`;
-      let table = `<table border="1">
-        <tr><th>Student ID</th><th>Name</th><th>Roll</th><th>WhatsApp</th></tr>`;
-      classes[cls].forEach(s => {
-        table += `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.roll}</td><td>${s.whatsapp}</td></tr>`;
-      });
-      table += "</table>";
-      div.innerHTML += table;
-      container.appendChild(div);
+      div.innerHTML = `
+        <p>${child.key} - ${data.name} (Class: ${data.class}, Roll: ${data.roll}) 
+        <button onclick="approveStudent('${child.key}')">Approve</button></p>
+      `;
+      registrationContent.appendChild(div);
     }
   });
-}
+});
 
-// Initialize
-loadPending();
-loadClasses();
+window.approveStudent = async (studentId) => {
+  await update(ref(db, `Registrations/${studentId}`), { approved: true });
+  alert(`${studentId} approved successfully!`);
+  location.reload();
+};
+
+// ------------------- LOGOUT -------------------
+adminLogoutBtn.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "index.html";
+});
