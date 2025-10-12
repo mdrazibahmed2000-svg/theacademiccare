@@ -1,6 +1,4 @@
-// ------------------------------
 // Firebase Configuration
-// ------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -9,196 +7,143 @@ const firebaseConfig = {
   storageBucket: "the-academic-care-de611.firebasestorage.app",
   messagingSenderId: "142271027321",
   appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-  measurementId: "G-Q7MCGKTYMX"
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
+const db = firebase.database();
 const auth = firebase.auth();
 
-// ------------------------------
-// Helper Functions
-// ------------------------------
+// ==================== ELEMENTS =====================
+const loginBox = document.getElementById("loginBox");
+const registerBox = document.getElementById("registerBox");
+const forgotBox = document.getElementById("forgotBox");
+const registrationBtn = document.getElementById("registrationBtn");
+const backToLoginBtn = document.getElementById("backToLoginBtn");
+const backToLoginBtn2 = document.getElementById("backToLoginBtn2");
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
 
-// Generate Student ID e.g. S20251015
-function generateStudentId(cls, roll) {
-  const year = new Date().getFullYear();
-  return `S${year}${cls}${roll}`;
-}
+// ==================== NAVIGATION =====================
+registrationBtn.addEventListener("click", () => {
+  loginBox.style.display = "none";
+  registerBox.style.display = "block";
+});
 
-// ------------------------------
-// Registration
-// ------------------------------
-document.getElementById("registerForm")?.addEventListener("submit", function (e) {
+backToLoginBtn.addEventListener("click", () => {
+  registerBox.style.display = "none";
+  loginBox.style.display = "block";
+});
+
+backToLoginBtn2.addEventListener("click", () => {
+  forgotBox.style.display = "none";
+  loginBox.style.display = "block";
+});
+
+forgotPasswordBtn.addEventListener("click", () => {
+  loginBox.style.display = "none";
+  forgotBox.style.display = "block";
+});
+
+// ==================== REGISTRATION =====================
+document.getElementById("registerForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
   const name = document.getElementById("regName").value.trim();
   const cls = document.getElementById("regClass").value.trim();
   const roll = document.getElementById("regRoll").value.trim();
   const whatsapp = document.getElementById("regWhatsapp").value.trim();
-  const password = document.getElementById("regPassword").value.trim();
-  const confirmPassword = document.getElementById("regConfirmPassword").value.trim();
-
-  if (!name || !cls || !roll || !whatsapp || !password || !confirmPassword) {
-    alert("Please fill all fields!");
-    return;
-  }
+  const password = document.getElementById("regPassword").value;
+  const confirmPassword = document.getElementById("regConfirmPassword").value;
 
   if (password !== confirmPassword) {
     alert("Passwords do not match!");
     return;
   }
 
-  const studentId = generateStudentId(cls, roll);
+  const year = new Date().getFullYear();
+  const studentId = `S${year}${cls}${roll}`;
 
-  const newStudent = {
+  db.ref("Registrations/" + studentId).set({
     name,
     class: cls,
     roll,
     whatsapp,
     password,
-    approved: false,
-    studentId
-  };
-
-  database.ref("registrations/" + studentId).set(newStudent)
-    .then(() => {
-      alert(`Registration submitted! Your Student ID is ${studentId}`);
-      document.getElementById("registerForm").reset();
-    })
-    .catch((error) => {
-      console.error("Error saving registration:", error);
-      alert("Error: " + error.message);
-    });
+    status: "pending",
+  })
+  .then(() => {
+    alert(`Registration Submitted! Your Student ID: ${studentId}`);
+    document.getElementById("registerForm").reset();
+    registerBox.style.display = "none";
+    loginBox.style.display = "block";
+  })
+  .catch((error) => {
+    console.error(error);
+    alert("Error submitting registration!");
+  });
 });
 
-// ------------------------------
-// Login System (Admin & Student)
-// ------------------------------
-document.getElementById("loginForm")?.addEventListener("submit", function (e) {
+// ==================== LOGIN =====================
+document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const userId = document.getElementById("loginId").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+  const id = document.getElementById("loginId").value.trim();
+  const password = document.getElementById("loginPassword").value;
 
-  if (!userId || !password) {
-    alert("Please fill both fields!");
-    return;
-  }
-
-  // Admin login
-  if (userId === "admin") {
+  if (id.toLowerCase() === "admin") {
+    // Admin Login
     auth.signInWithEmailAndPassword("theacademiccare2025@gmail.com", password)
       .then(() => {
-        alert("Admin Login Successful!");
+        alert("Admin logged in successfully!");
         window.location.href = "admin.html";
       })
-      .catch((error) => {
-        alert("Admin login failed: " + error.message);
+      .catch(() => {
+        alert("Invalid admin credentials!");
       });
+  } else {
+    // Student Login
+    db.ref("ApprovedStudents/" + id).once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.password === password) {
+          alert("Login Successful!");
+          localStorage.setItem("studentId", id);
+          window.location.href = "student.html";
+        } else {
+          alert("Incorrect password!");
+        }
+      } else {
+        alert("Student not found or not yet approved!");
+      }
+    });
+  }
+});
+
+// ==================== FORGOT PASSWORD =====================
+document.getElementById("forgotForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+
+  const whatsapp = document.getElementById("forgotWhatsapp").value.trim();
+  const newPass = document.getElementById("newPassword").value;
+  const confirmPass = document.getElementById("confirmNewPassword").value;
+
+  if (newPass !== confirmPass) {
+    alert("Passwords do not match!");
     return;
   }
 
-  // Student login
-  database.ref("registrations/" + userId).once("value")
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        if (!data.approved) {
-          alert("Your registration is not yet approved by admin.");
-          return;
-        }
-
-        if (data.password === password) {
-          alert("Login successful!");
-          localStorage.setItem("studentId", userId);
-          window.location.href = "student.html";
-        } else {
-          alert("Invalid password!");
-        }
-      } else {
-        alert("Student ID not found!");
-      }
-    })
-    .catch((error) => {
-      console.error("Error logging in:", error);
-      alert("Error: " + error.message);
-    });
-});
-
-// ------------------------------
-// Reset Password (via WhatsApp)
-// ------------------------------
-document.getElementById("forgotPasswordBtn")?.addEventListener("click", function () {
-  alert("Please contact admin via WhatsApp to reset your password.");
-});
-
-// ------------------------------
-// Admin Panel - Approve Students
-// ------------------------------
-function loadPendingRegistrations() {
-  const tableBody = document.getElementById("pendingRegistrations");
-  if (!tableBody) return;
-
-  database.ref("registrations").once("value")
-    .then((snapshot) => {
-      tableBody.innerHTML = "";
-      snapshot.forEach((childSnapshot) => {
-        const data = childSnapshot.val();
-        if (!data.approved) {
-          const row = `
-            <tr>
-              <td>${data.name}</td>
-              <td>${data.class}</td>
-              <td>${data.roll}</td>
-              <td>${data.whatsapp}</td>
-              <td>${data.studentId}</td>
-              <td><button onclick="approveStudent('${data.studentId}')">Approve</button></td>
-            </tr>
-          `;
-          tableBody.innerHTML += row;
-        }
-      });
-    });
-}
-
-function approveStudent(studentId) {
-  database.ref("registrations/" + studentId).update({ approved: true })
-    .then(() => {
-      alert("Student approved successfully!");
-      loadPendingRegistrations();
-    })
-    .catch((error) => {
-      alert("Error approving student: " + error.message);
-    });
-}
-
-// Load when admin page opens
-if (window.location.pathname.includes("admin.html")) {
-  window.onload = loadPendingRegistrations;
-}
-
-// ------------------------------
-// Student Panel Info
-// ------------------------------
-function loadStudentProfile() {
-  const studentId = localStorage.getItem("studentId");
-  if (!studentId) return;
-
-  database.ref("registrations/" + studentId).once("value")
-    .then((snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        document.getElementById("studentName").textContent = data.name;
-        document.getElementById("studentClass").textContent = data.class;
-        document.getElementById("studentRoll").textContent = data.roll;
-        document.getElementById("studentWhatsapp").textContent = data.whatsapp;
-        document.getElementById("studentIdDisplay").textContent = data.studentId;
+  db.ref("ApprovedStudents").once("value", (snapshot) => {
+    let found = false;
+    snapshot.forEach((child) => {
+      const data = child.val();
+      if (data.whatsapp === whatsapp) {
+        found = true;
+        db.ref("ApprovedStudents/" + child.key).update({ password: newPass });
+        alert("Password reset successful!");
+        forgotBox.style.display = "none";
+        loginBox.style.display = "block";
       }
     });
-}
-
-if (window.location.pathname.includes("student.html")) {
-  window.onload = loadStudentProfile;
-}
+    if (!found) alert("No account found with this WhatsApp number!");
+  });
+});
