@@ -1,7 +1,7 @@
 // ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, child, set, update, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
@@ -24,7 +24,7 @@ const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 const forgotBox = document.getElementById("forgotBox");
 
-// Buttons to toggle forms
+// Toggle forms
 document.getElementById("registrationBtn").addEventListener("click", () => {
   loginBox.style.display = "none";
   registerBox.style.display = "block";
@@ -86,18 +86,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const password = document.getElementById("loginPassword").value;
 
   if (id.toLowerCase() === "admin") {
-    // Admin login using Auth and UID
+    // Admin login via Firebase Auth only
     try {
       const userCredential = await signInWithEmailAndPassword(auth, "theacademiccare2025@gmail.com", password);
-      const user = userCredential.user;
-
-      const snapshot = await get(ref(db, `admins/${user.uid}`));
-      if (snapshot.exists()) {
-        window.location.href = "admin.html";
-      } else {
-        alert("You are not authorized as admin!");
-        await signOut(auth);
-      }
+      // Successful login
+      window.location.href = "admin.html";
     } catch (err) {
       alert("Admin login failed: " + err.message);
     }
