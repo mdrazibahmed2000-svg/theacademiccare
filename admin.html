@@ -10,12 +10,16 @@
     h1 { margin:0; font-size:2em; }
     h3 { margin:0; font-size:1.2em; color:#555; }
     hr { margin-top:10px; }
+    nav { margin-bottom: 20px; }
     nav button { margin-right: 10px; padding: 8px 12px; cursor: pointer; }
+    nav button#logoutBtn { float: right; background: red; color: white; }
+    div#classSubmenu { display:none; position:absolute; background:#f9f9f9; border:1px solid #ccc; }
+    div#classSubmenu button { display:block; width:100%; text-align:left; padding:8px 12px; border:none; background:none; }
     table { border-collapse: collapse; width: 100%; margin-top: 10px; }
     table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    button.actionBtn { margin-right:5px; padding:5px 10px; cursor:pointer; }
     #tuitionModal { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
-      background:#fff; padding:20px; border:1px solid #ccc; max-width:500px; z-index:1000;}
-    #tuitionModal button { margin-right:5px; }
+      background:#fff; padding:20px; border:1px solid #ccc; max-width:600px; z-index:1000; }
   </style>
 </head>
 <body>
@@ -30,18 +34,30 @@
   <h2>Admin Panel</h2>
   <nav>
     <button onclick="showHome()">Home</button>
-    <button onclick="showClass('7')">Class 7</button>
-    <button onclick="showClass('8')">Class 8</button>
-    <button onclick="showClass('9')">Class 9</button>
-    <button onclick="showClass('10')">Class 10</button>
-    <button onclick="showClass('11')">Class 11</button>
-    <button onclick="showClass('12')">Class 12</button>
+
+    <!-- Class Menu -->
+    <div style="display:inline-block; position:relative;">
+      <button id="classMenuBtn">Class ▾</button>
+      <div id="classSubmenu">
+        <button onclick="showClass('6')">Class 6</button>
+        <button onclick="showClass('7')">Class 7</button>
+        <button onclick="showClass('8')">Class 8</button>
+        <button onclick="showClass('9')">Class 9</button>
+        <button onclick="showClass('10')">Class 10</button>
+        <button onclick="showClass('11')">Class 11</button>
+        <button onclick="showClass('12')">Class 12</button>
+      </div>
+    </div>
+
+    <button onclick="showRegistration()">Registration</button>
+    <button onclick="showBreakRequests()">Break Request</button>
+    <button id="logoutBtn">Logout</button>
   </nav>
 
   <!-- HOME -->
   <section id="homeSection">
     <h3>Welcome, Admin</h3>
-    <p>Use the Class buttons to view students.</p>
+    <p>Use the menu to navigate.</p>
   </section>
 
   <!-- CLASS SECTION -->
@@ -53,11 +69,49 @@
           <th>Student ID</th>
           <th>Name</th>
           <th>Roll</th>
-          <th>Tuition Status</th>
+          <th>Tuition Details</th>
         </tr>
       </thead>
       <tbody id="classTableBody">
         <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- REGISTRATION SECTION -->
+  <section id="registrationSection" style="display:none;">
+    <h3>Registration Requests</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Roll</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="registrationTableBody">
+        <tr><td colspan="5">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- BREAK REQUEST SECTION -->
+  <section id="breakSection" style="display:none;">
+    <h3>Break Requests</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Roll</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="breakTableBody">
+        <tr><td colspan="5">Loading...</td></tr>
       </tbody>
     </table>
   </section>
