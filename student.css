@@ -1,0 +1,138 @@
+/* ------------------- GLOBAL ------------------- */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background: #f5f6fa;
+  color: #2f3640;
+}
+
+h1, h2, h3 {
+  margin: 10px 0;
+  text-align: center;
+}
+
+header {
+  text-align: center;
+  padding: 10px 0;
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid #dcdde1;
+  margin-bottom: 20px;
+}
+
+/* ------------------- NAVIGATION ------------------- */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+nav button {
+  padding: 10px 16px;
+  border: none;
+  background: #40739e;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  flex: 1 1 auto;
+}
+
+nav button:hover {
+  background: #2f3640;
+}
+
+nav button#logoutBtn {
+  background: #e84118;
+  margin-left: auto;
+}
+
+/* ------------------- TAB SECTIONS ------------------- */
+section {
+  display: none;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table th,
+table td {
+  border: 1px solid #dcdde1;
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background: #40739e;
+  color: white;
+}
+
+table tr:nth-child(even) {
+  background: #f1f2f6;
+}
+
+/* ------------------- NOTIFICATIONS ------------------- */
+#notificationsDiv p {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+}
+
+/* ------------------- BREAK REQUEST BUTTON ------------------- */
+#breakRequestBtn {
+  margin-top: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background: #8c7ae6;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+#breakRequestBtn:hover {
+  opacity: 0.9;
+}
+
+/* ------------------- TUITION STATUS COLORS ------------------- */
+#tuitionTable td:nth-child(2) {
+  font-weight: bold;
+}
+
+#tuitionTable td:nth-child(2)[data-status="paid"] {
+  color: green;
+}
+
+#tuitionTable td:nth-child(2)[data-status="unpaid"] {
+  color: red;
+}
+
+#tuitionTable td:nth-child(2)[data-status="break"] {
+  color: purple;
+}
+
+/* ------------------- RESPONSIVE ------------------- */
+@media screen and (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+
+  table, th, td {
+    font-size: 14px;
+  }
+
+  #breakRequestBtn {
+    width: 100%;
+  }
+}

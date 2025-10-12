@@ -1,0 +1,208 @@
+/* ------------------- GLOBAL ------------------- */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background: #f5f6fa;
+  color: #2f3640;
+}
+
+h1, h2, h3 {
+  margin: 10px 0;
+}
+
+header {
+  text-align: center;
+  padding: 10px 0;
+}
+
+hr {
+  border: none;
+  border-bottom: 1px solid #dcdde1;
+  margin-bottom: 20px;
+}
+
+/* ------------------- NAVIGATION ------------------- */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+nav button {
+  padding: 10px 16px;
+  border: none;
+  background: #40739e;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  flex: 1 1 auto;
+}
+
+nav button:hover {
+  background: #2f3640;
+}
+
+nav button#logoutBtn {
+  background: #e84118;
+  margin-left: auto;
+}
+
+/* ------------------- TAB SECTIONS ------------------- */
+.tabSection {
+  display: none;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+.tabSection table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.tabSection table th,
+.tabSection table td {
+  border: 1px solid #dcdde1;
+  padding: 10px;
+  text-align: left;
+}
+
+.tabSection table th {
+  background: #40739e;
+  color: white;
+}
+
+.tabSection table tr:nth-child(even) {
+  background: #f1f2f6;
+}
+
+/* ------------------- CLASS BUTTONS ------------------- */
+#classTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#classTabs button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  background: #718093;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#classTabs button:hover {
+  background: #40739e;
+}
+
+/* ------------------- TUITION ICON ------------------- */
+.tuitionIcon {
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* ------------------- TUITION MODAL ------------------- */
+#tuitionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+#tuitionModal > div {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 600px;
+  width: 95%;
+  max-height: 80%;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#tuitionModal table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+#tuitionModal table th,
+#tuitionModal table td {
+  border: 1px solid #dcdde1;
+  padding: 8px;
+  text-align: left;
+}
+
+#tuitionModal table th {
+  background: #40739e;
+  color: white;
+}
+
+#tuitionModal button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 5px;
+  transition: all 0.3s ease;
+}
+
+#tuitionModal button:hover {
+  opacity: 0.9;
+}
+
+/* Action buttons colors */
+#tuitionModal button[onclick*="markPaid"] {
+  background: #44bd32; /* Green */
+  color: white;
+}
+
+#tuitionModal button[onclick*="markBreak"] {
+  background: #8c7ae6; /* Purple */
+  color: white;
+}
+
+#tuitionModal button[onclick*="undoStatus"] {
+  background: #e1b12c; /* Yellow */
+  color: white;
+}
+
+#closeModalBtn {
+  background: #e84118;
+  color: white;
+  margin-top: 10px;
+}
+
+/* ------------------- RESPONSIVE ------------------- */
+@media screen and (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+
+  #classTabs {
+    flex-direction: column;
+  }
+
+  table, th, td {
+    font-size: 14px;
+  }
+
+  #tuitionModal > div {
+    padding: 15px;
+  }
+}
