@@ -4,21 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Student Panel</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    header { text-align: center; margin-bottom: 20px; }
-    h1 { margin:0; font-size:2em; }
-    h3 { margin:0; font-size:1.2em; color:#555; }
-    hr { margin-top:10px; }
-    nav { margin-bottom: 20px; }
-    nav button { margin-right: 10px; padding: 8px 12px; cursor: pointer; }
-    nav button#logoutBtn { float: right; background: red; color: white; }
-    section { display: none; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    #notificationsDiv p { border-bottom: 1px solid #eee; padding: 5px 0; }
-    #breakRequestBtn { margin-top: 10px; padding: 8px 12px; cursor: pointer; }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="student.css">
 </head>
 <body>
 
@@ -29,8 +16,7 @@
     <hr>
   </header>
 
-  <h2>Student Panel</h2>
-
+  <!-- Navigation -->
   <nav>
     <button id="homeTab">Home</button>
     <button id="profileTab">My Profile</button>
@@ -39,25 +25,25 @@
     <button id="logoutBtn">Logout</button>
   </nav>
 
-  <!-- HOME -->
-  <section id="homeSection">
-    <h3>Welcome!</h3>
+  <!-- HOME SECTION -->
+  <section id="homeSection" class="tabSection">
+    <h2>Welcome!</h2>
     <div id="notificationsDiv">
       <p>Loading notifications...</p>
     </div>
   </section>
 
-  <!-- MY PROFILE -->
-  <section id="profileSection">
-    <h3>My Profile</h3>
+  <!-- PROFILE SECTION -->
+  <section id="profileSection" class="tabSection" style="display:none">
+    <h2>My Profile</h2>
     <div id="profileDiv">
       <p>Loading profile...</p>
     </div>
   </section>
 
-  <!-- TUITION STATUS -->
-  <section id="tuitionSection">
-    <h3>Tuition Status</h3>
+  <!-- TUITION SECTION -->
+  <section id="tuitionSection" class="tabSection" style="display:none">
+    <h2>Tuition Status</h2>
     <table id="tuitionTable">
       <thead>
         <tr>
@@ -72,62 +58,12 @@
     </table>
   </section>
 
-  <!-- BREAK REQUEST -->
-  <section id="breakSection">
-    <h3>Break Request</h3>
+  <!-- BREAK REQUEST SECTION -->
+  <section id="breakSection" class="tabSection" style="display:none">
+    <h2>Break Request</h2>
     <button id="breakRequestBtn">Submit Break Request</button>
   </section>
 
   <script type="module" src="student.js"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-      authDomain: "the-academic-care-de611.firebaseapp.com",
-      databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "the-academic-care-de611",
-      storageBucket: "the-academic-care-de611.firebasestorage.app",
-      messagingSenderId: "142271027321",
-      appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-      measurementId: "G-Q7MCGKTYMX"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
-    // ------------------- TAB SWITCHING -------------------
-    const sections = {
-      home: document.getElementById("homeSection"),
-      profile: document.getElementById("profileSection"),
-      tuition: document.getElementById("tuitionSection"),
-      break: document.getElementById("breakSection")
-    };
-
-    document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
-    document.getElementById("profileTab").addEventListener("click", () => switchTab("profile"));
-    document.getElementById("tuitionTab").addEventListener("click", () => switchTab("tuition"));
-    document.getElementById("breakTab").addEventListener("click", () => switchTab("break"));
-
-    function switchTab(tabName) {
-      for (const key in sections) sections[key].style.display = "none";
-      sections[tabName].style.display = "block";
-    }
-
-    // Show home by default
-    switchTab("home");
-
-    // ------------------- LOGOUT -------------------
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        localStorage.removeItem("studentId");
-        window.location.href = "index.html";
-      } catch (err) {
-        alert("Logout failed: " + err.message);
-      }
-    });
-  </script>
 </body>
 </html>
