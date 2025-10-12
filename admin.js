@@ -1,235 +1,273 @@
-// ------------------ IMPORTS ------------------
+// ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  get,
-  update,
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get, child, update, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// ------------------ FIREBASE CONFIG ------------------
-const firebaseConfig = {
-  apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-  authDomain: "the-academic-care-de611.firebaseapp.com",
-  databaseURL:
-    "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "the-academic-care-de611",
-  storageBucket: "the-academic-care-de611.appspot.com",
-  messagingSenderId: "142271027321",
-  appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-};
+document.addEventListener("DOMContentLoaded", () => {
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const auth = getAuth(app);
+  // ------------------- FIREBASE CONFIG -------------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
+    authDomain: "the-academic-care-de611.firebaseapp.com",
+    databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "the-academic-care-de611",
+    storageBucket: "the-academic-care-de611.firebasestorage.app",
+    messagingSenderId: "142271027321",
+    appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
+    measurementId: "G-Q7MCGKTYMX"
+  };
 
-// ------------------ DOM ELEMENTS ------------------
-const homeSection = document.getElementById("homeSection");
-const classSection = document.getElementById("classSection");
-const registrationSection = document.getElementById("registrationSection");
-const breakSection = document.getElementById("breakSection");
-const classTableBody = document.getElementById("classTableBody");
-const classTitle = document.getElementById("classTitle");
-const logoutBtn = document.getElementById("logoutBtn");
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
-// ------------------ NAVIGATION LOGIC ------------------
-function hideAllSections() {
-  homeSection.style.display = "none";
-  classSection.style.display = "none";
-  registrationSection.style.display = "none";
-  breakSection.style.display = "none";
-}
+  // ------------------- LOGOUT -------------------
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "index.html";
+  });
 
-window.showHome = function () {
-  hideAllSections();
-  homeSection.style.display = "block";
-};
+  // ------------------- TAB SWITCHING -------------------
+  const sections = {
+    home: document.getElementById("homeSection"),
+    registration: document.getElementById("registrationSection"),
+    break: document.getElementById("breakSection"),
+    classes: document.getElementById("classesSection")
+  };
 
-window.showRegistration = function () {
-  hideAllSections();
-  registrationSection.style.display = "block";
-  loadRegistrations();
-};
+  document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
+  document.getElementById("registrationTab").addEventListener("click", () => switchTab("registration"));
+  document.getElementById("breakTab").addEventListener("click", () => switchTab("break"));
+  document.getElementById("classesTab").addEventListener("click", () => switchTab("classes"));
 
-window.showBreakRequests = function () {
-  hideAllSections();
-  breakSection.style.display = "block";
-  loadBreakRequests();
-};
+  function switchTab(tabName) {
+    for (const key in sections) sections[key].style.display = "none";
+    sections[tabName].style.display = "block";
+  }
 
-window.showClass = async function (className) {
-  hideAllSections();
-  classSection.style.display = "block";
-  classTitle.textContent = `Approved Students of Class ${className}`;
-  await loadStudentsByClass(className);
-};
+  // ------------------- HELPER: CREATE REGISTRATIONS NODE IF MISSING -------------------
+  async function ensureRegistrationsNode() {
+    const snapshot = await get(ref(db, "Registrations"));
+    if (!snapshot.exists()) {
+      await set(ref(db, "Registrations"), {});
+    }
+  }
 
-// ------------------ FETCH APPROVED STUDENTS ------------------
-async function loadStudentsByClass(className) {
-  classTableBody.innerHTML = `<tr><td colspan="4">Loading...</td></tr>`;
+  // ------------------- HOME STATS -------------------
+  async function loadHomeStats() {
+    await ensureRegistrationsNode();
+    const snapshot = await get(ref(db, "Registrations"));
+    let total = 0, pending = 0;
+    snapshot.forEach(child => {
+      total++;
+      if (child.val().approved === false) pending++;
+    });
+    document.getElementById("totalStudents").textContent = total;
+    document.getElementById("pendingStudents").textContent = pending;
+  }
 
-  const classRef = ref(db, `students/${className}`);
-  const snapshot = await get(classRef);
-
-  if (snapshot.exists()) {
-    const students = snapshot.val();
-    let html = "";
-    let found = false;
-
-    Object.entries(students).forEach(([id, student]) => {
-      if (student.status === "approved") {
-        found = true;
-        html += `
-          <tr>
-            <td>${id}</td>
-            <td>${student.name}</td>
-            <td>${student.roll || "-"}</td>
-            <td>
-              <button class="actionBtn" onclick="openTuitionModal('${className}', '${id}', '${student.name}')">Tuition</button>
-            </td>
-          </tr>
+  // ------------------- LOAD REGISTRATIONS -------------------
+  async function loadRegistrations() {
+    await ensureRegistrationsNode();
+    const snapshot = await get(ref(db, "Registrations"));
+    const tbody = document.querySelector("#registrationTable tbody");
+    tbody.innerHTML = "";
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data.approved === false) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${child.key}</td>
+          <td>${data.name}</td>
+          <td>${data.class}</td>
+          <td>${data.roll}</td>
+          <td>${data.whatsapp}</td>
+          <td>
+            <button onclick="window.approve('${child.key}')">Approve</button>
+            <button onclick="window.deny('${child.key}')">Deny</button>
+          </td>
         `;
+        tbody.appendChild(tr);
       }
     });
+  }
 
-    if (!found) {
-      html = `<tr><td colspan="4">No approved students found for Class ${className}</td></tr>`;
+  window.approve = async (id) => {
+    await update(ref(db, `Registrations/${id}`), { approved: true });
+    alert(`${id} approved!`);
+    loadRegistrations();
+    loadHomeStats();
+  };
+
+  window.deny = async (id) => {
+    await update(ref(db, `Registrations/${id}`), { approved: false });
+    alert(`${id} denied!`);
+    loadRegistrations();
+    loadHomeStats();
+  };
+
+  // ------------------- BREAK REQUESTS -------------------
+  async function loadBreakRequests() {
+    await ensureRegistrationsNode();
+    const snapshot = await get(ref(db, "Registrations"));
+    const tbody = document.querySelector("#breakTable tbody");
+    tbody.innerHTML = "";
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data.breakRequest) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${child.key}</td>
+          <td>${data.name}</td>
+          <td>${data.class}</td>
+          <td>${data.roll}</td>
+          <td>${data.whatsapp}</td>
+          <td>Requested</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  }
+
+  // ------------------- CLASSES TAB -------------------
+  async function loadClasses() {
+    const classTabs = document.getElementById("classTabs");
+    const classStudentsDiv = document.getElementById("classStudents");
+    classTabs.innerHTML = "";
+    classStudentsDiv.innerHTML = "";
+
+    for (let cls = 6; cls <= 12; cls++) {
+      const btn = document.createElement("button");
+      btn.textContent = "Class " + cls;
+      btn.addEventListener("click", () => loadClassStudents(cls));
+      classTabs.appendChild(btn);
     }
-
-    classTableBody.innerHTML = html;
-  } else {
-    classTableBody.innerHTML = `<tr><td colspan="4">No data found for Class ${className}</td></tr>`;
   }
-}
 
-// ------------------ TUITION MODAL ------------------
-window.openTuitionModal = async function (className, studentId, studentName) {
-  const modal = document.getElementById("tuitionModal");
-  const modalTableBody = document.querySelector("#modalTuitionTable tbody");
-  const modalStudentName = document.getElementById("modalStudentName");
-  modal.style.display = "flex";
-  modalStudentName.textContent = `Tuition Details - ${studentName} (${studentId})`;
+  async function loadClassStudents(cls) {
+    const snapshot = await get(ref(db, "Registrations"));
+    const div = document.getElementById("classStudents");
+    div.innerHTML = `<h3>Class ${cls}</h3><table border="1">
+      <thead><tr>
+        <th>ID</th><th>Name</th><th>Roll</th><th>Tuition Details</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>`;
+    const tbody = div.querySelector("tbody");
 
-  const tuitionRef = ref(db, `tuition/${className}/${studentId}`);
-  const snapshot = await get(tuitionRef);
-
-  if (snapshot.exists()) {
-    const tuitionData = snapshot.val();
-    let rows = "";
-    Object.entries(tuitionData).forEach(([month, info]) => {
-      rows += `
-        <tr>
-          <td>${month}</td>
-          <td>${info.status || "Unpaid"}</td>
-          <td>${info.dateMethod || "-"}</td>
+    snapshot.forEach(child => {
+      const data = child.val();
+      if (data.class == cls && data.approved) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${child.key}</td>
+          <td>${data.name}</td>
+          <td>${data.roll}</td>
           <td>
-            <button class="actionBtn" onclick="markPaid('${className}', '${studentId}', '${month}')">Mark Paid</button>
-            <button class="actionBtn" onclick="markBreak('${className}', '${studentId}', '${month}')">Mark Break</button>
+            <span class="tuitionIcon" style="cursor:pointer;" onclick="window.showTuitionModal('${child.key}')">💰</span>
           </td>
-        </tr>
-      `;
+        `;
+        tbody.appendChild(tr);
+      }
     });
-    modalTableBody.innerHTML = rows;
-  } else {
-    modalTableBody.innerHTML = `<tr><td colspan="4">No tuition record found</td></tr>`;
   }
-};
 
-window.closeModal = function () {
-  document.getElementById("tuitionModal").style.display = "none";
-};
+  // ------------------- TUITION MODAL -------------------
+  window.showTuitionModal = async (studentId) => {
+    const snapshot = await get(ref(db, `Registrations/${studentId}`));
+    if (!snapshot.exists()) return alert("Student not found!");
+    const data = snapshot.val();
+    const tuition = data.tuition || {};
 
-// ------------------ UPDATE TUITION STATUS ------------------
-window.markPaid = async function (className, studentId, month) {
-  const method = prompt("Enter payment method (Bkash/Cash/etc):");
-  if (!method) return;
+    // Remove existing modal if exists
+    const oldModal = document.getElementById("tuitionModal");
+    if (oldModal) oldModal.remove();
 
-  const now = new Date();
-  const dateMethod = `${now.toLocaleDateString()} (${method})`;
+    const modal = document.createElement("div");
+    modal.id = "tuitionModal";
+    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;";
+    modal.innerHTML = `
+      <div style="background:white;padding:20px;border-radius:10px;max-height:80%;overflow:auto;">
+        <h3>Tuition Details: ${data.name} (${studentId})</h3>
+        <table border="1" id="tuitionTable">
+          <thead><tr>
+            <th>Month's Name</th><th>Status</th><th>Date & Method</th><th>Action</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
 
-  const updateRef = ref(db, `tuition/${className}/${studentId}/${month}`);
-  await update(updateRef, { status: "Paid", dateMethod });
-  alert("Payment marked as Paid.");
-  openTuitionModal(className, studentId, ""); // refresh modal
-};
-
-window.markBreak = async function (className, studentId, month) {
-  const updateRef = ref(db, `tuition/${className}/${studentId}/${month}`);
-  await update(updateRef, { status: "Break", dateMethod: "-" });
-  alert("Marked as Break.");
-  openTuitionModal(className, studentId, ""); // refresh modal
-};
-
-// ------------------ LOAD REGISTRATION REQUESTS ------------------
-async function loadRegistrations() {
-  const refReg = ref(db, "registrationRequests");
-  const snap = await get(refReg);
-  const tbody = document.getElementById("registrationTableBody");
-
-  if (snap.exists()) {
-    const data = snap.val();
-    let html = "";
-    Object.entries(data).forEach(([id, info]) => {
-      html += `
-        <tr>
-          <td>${id}</td>
-          <td>${info.name}</td>
-          <td>${info.class}</td>
-          <td>
-            <button class="actionBtn" onclick="approveStudent('${id}', '${info.class}')">Approve</button>
-          </td>
-        </tr>
-      `;
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      modal.remove();
     });
-    tbody.innerHTML = html;
-  } else {
-    tbody.innerHTML = `<tr><td colspan="4">No registration requests</td></tr>`;
-  }
-}
 
-// ------------------ LOAD BREAK REQUESTS ------------------
-async function loadBreakRequests() {
-  const refBreak = ref(db, "breakRequests");
-  const snap = await get(refBreak);
-  const tbody = document.getElementById("breakTableBody");
+    const tbody = modal.querySelector("tbody");
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
 
-  if (snap.exists()) {
-    const data = snap.val();
-    let html = "";
-    Object.entries(data).forEach(([id, info]) => {
-      html += `
-        <tr>
-          <td>${id}</td>
-          <td>${info.name}</td>
-          <td>${info.class}</td>
-          <td>${info.status}</td>
-        </tr>
+    for (let month = 1; month <= currentMonth; month++) {
+      const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
+      const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
+      const status = tuition[monthKey]?.status || "unpaid";
+      const dateMethod = tuition[monthKey]?.date ? `${tuition[monthKey].date} (${tuition[monthKey].method})` : "";
+
+      let actionHtml = "";
+      if (status === "unpaid") {
+        actionHtml = `
+          <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
+          <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
+        `;
+      } else {
+        actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+      }
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${monthName}</td>
+        <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
+        <td>${dateMethod}</td>
+        <td>${actionHtml}</td>
       `;
-    });
-    tbody.innerHTML = html;
-  } else {
-    tbody.innerHTML = `<tr><td colspan="4">No break requests</td></tr>`;
-  }
-}
+      tbody.appendChild(tr);
+    }
+  };
 
-// ------------------ LOGOUT ------------------
-logoutBtn.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-});
+  // ------------------- TUITION ACTIONS -------------------
+  window.markPaid = async (studentId, monthKey) => {
+    const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
+    if (!method) return;
+    const date = new Date().toISOString().split("T")[0];
 
-// ------------------ CLASS MENU TOGGLE ------------------
-const classMenuBtn = document.getElementById("classMenuBtn");
-const classSubmenu = document.getElementById("classSubmenu");
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
+    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
 
-classMenuBtn.addEventListener("click", () => {
-  classSubmenu.style.display =
-    classSubmenu.style.display === "block" ? "none" : "block";
-});
+    // Refresh modal to show updated status
+    window.showTuitionModal(studentId);
+  };
 
-window.addEventListener("click", (e) => {
-  if (!classMenuBtn.contains(e.target) && !classSubmenu.contains(e.target)) {
-    classSubmenu.style.display = "none";
-  }
+  window.markBreak = async (studentId, monthKey) => {
+    const date = new Date().toISOString().split("T")[0];
+
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
+    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
+
+    // Refresh modal to show updated status
+    window.showTuitionModal(studentId);
+  };
+
+  window.undoStatus = async (studentId, monthKey) => {
+    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
+    alert(`Status reset for ${monthKey}.`);
+    window.showTuitionModal(studentId);
+  };
+
+  // ------------------- INITIAL LOAD -------------------
+  switchTab("home");
+  loadHomeStats();
+  loadRegistrations();
+  loadBreakRequests();
+  loadClasses();
 });
