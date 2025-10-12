@@ -1,7 +1,7 @@
 // ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, set, update, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
@@ -41,7 +41,7 @@ function showClass(cls) {
   hideAllSections();
   sections.class.style.display = "block";
   document.getElementById("classTitle").innerText = `Class ${cls}`;
-  loadClassStudents(cls);
+  loadApprovedStudents(cls);
 }
 
 function showRegistration() {
@@ -81,8 +81,8 @@ logoutBtn.addEventListener("click", async () => {
   }
 });
 
-// ------------------- LOAD CLASS STUDENTS -------------------
-async function loadClassStudents(cls) {
+// ------------------- LOAD APPROVED STUDENTS -------------------
+async function loadApprovedStudents(cls) {
   const tbody = document.getElementById("classTableBody");
   tbody.innerHTML = "<tr><td colspan='4'>Loading...</td></tr>";
 
@@ -91,7 +91,7 @@ async function loadClassStudents(cls) {
     tbody.innerHTML = "";
     snapshot.forEach(childSnap => {
       const data = childSnap.val();
-      if (data.class === cls) {
+      if (data.class === cls && data.approved === true) {
         const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${childSnap.key}</td>
@@ -104,6 +104,10 @@ async function loadClassStudents(cls) {
         tbody.appendChild(tr);
       }
     });
+
+    if (tbody.innerHTML.trim() === "")
+      tbody.innerHTML = "<tr><td colspan='4'>No approved students found.</td></tr>";
+
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan='4'>Error: ${err.message}</td></tr>`;
   }
@@ -120,19 +124,22 @@ window.openTuitionModal = async function(studentId, studentName) {
   try {
     const snapshot = await get(ref(db, `Tuition/${studentId}`));
     tbody.innerHTML = "";
-    const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-    months.forEach((month, i) => {
+    const months = [
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
+    ];
+    months.forEach((month) => {
       const monthData = snapshot?.val()?.[month] || {};
       const status = monthData.status || "";
       const dateMethod = monthData.dateMethod || "";
       let actionBtns = "";
       if (!status) {
         actionBtns = `
-          <button class="actionBtn" onclick="markPaid('${studentId}','${month}')">Mark Paid</button>
-          <button class="actionBtn" onclick="markBreak('${studentId}','${month}')">Mark Break</button>
+          <button class="actionBtn" onclick="markPaid('${studentId}','${month}','${studentName}')">Mark Paid</button>
+          <button class="actionBtn" onclick="markBreak('${studentId}','${month}','${studentName}')">Mark Break</button>
         `;
       } else {
-        actionBtns = `<button class="actionBtn" onclick="undo('${studentId}','${month}')">Undo</button>`;
+        actionBtns = `<button class="actionBtn" onclick="undo('${studentId}','${month}','${studentName}')">Undo</button>`;
       }
 
       const tr = document.createElement("tr");
@@ -147,108 +154,44 @@ window.openTuitionModal = async function(studentId, studentName) {
   } catch (err) {
     tbody.innerHTML = `<tr><td colspan='4'>Error: ${err.message}</td></tr>`;
   }
-}
+};
 
 window.closeModal = function() {
   document.getElementById("tuitionModal").style.display = "none";
-}
+};
 
-// ------------------- TUITION ACTIONS -------------------
+// ------------------- STATUS ACTIONS -------------------
 function statusColor(status) {
   if (status === "Paid") return "green";
   if (status === "Break") return "purple";
   return "red";
 }
 
-window.markPaid = async function(studentId, month) {
+window.markPaid = async function(studentId, month, name) {
   const method = prompt("Enter payment method:");
   if (!method) return alert("Payment method required!");
   await update(ref(db, `Tuition/${studentId}/${month}`), {
     status: "Paid",
     dateMethod: new Date().toLocaleDateString() + " | " + method
   });
-  openTuitionModal(studentId, studentId); // refresh modal
-}
+  openTuitionModal(studentId, name);
+};
 
-window.markBreak = async function(studentId, month) {
+window.markBreak = async function(studentId, month, name) {
   await update(ref(db, `Tuition/${studentId}/${month}`), {
     status: "Break",
     dateMethod: new Date().toLocaleDateString()
   });
-  openTuitionModal(studentId, studentId);
-}
+  openTuitionModal(studentId, name);
+};
 
-window.undo = async function(studentId, month) {
+window.undo = async function(studentId, month, name) {
   await update(ref(db, `Tuition/${studentId}/${month}`), {
     status: "",
     dateMethod: ""
   });
-  openTuitionModal(studentId, studentId);
-}
-
-// ------------------- LOAD REGISTRATIONS -------------------
-async function loadRegistrations() {
-  const tbody = document.getElementById("registrationTableBody");
-  tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
-  try {
-    const snapshot = await get(ref(db, "Registrations"));
-    tbody.innerHTML = "";
-    snapshot.forEach(childSnap => {
-      const data = childSnap.val();
-      if (!data.approved) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${childSnap.key}</td>
-          <td>${data.name}</td>
-          <td>${data.class}</td>
-          <td>${data.roll}</td>
-          <td>
-            <button class="actionBtn" onclick="approveRegistration('${childSnap.key}')">Approve</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  } catch (err) {
-    tbody.innerHTML = `<tr><td colspan='5'>Error: ${err.message}</td></tr>`;
-  }
-}
-
-window.approveRegistration = async function(studentId) {
-  await update(ref(db, `Registrations/${studentId}`), { approved: true });
-  loadRegistrations();
-  alert(`Student ${studentId} approved!`);
-}
-
-// ------------------- LOAD BREAK REQUESTS -------------------
-async function loadBreakRequests() {
-  const tbody = document.getElementById("breakTableBody");
-  tbody.innerHTML = "<tr><td colspan='5'>Loading...</td></tr>";
-  try {
-    const snapshot = await get(ref(db, "BreakRequests"));
-    tbody.innerHTML = "";
-    snapshot.forEach(childSnap => {
-      const data = childSnap.val();
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${childSnap.key}</td>
-        <td>${data.name}</td>
-        <td>${data.class}</td>
-        <td>${data.roll}</td>
-        <td><button class="actionBtn" onclick="resolveBreak('${childSnap.key}')">Resolve</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  } catch (err) {
-    tbody.innerHTML = `<tr><td colspan='5'>Error: ${err.message}</td></tr>`;
-  }
-}
-
-window.resolveBreak = async function(studentId) {
-  await set(ref(db, `BreakRequests/${studentId}`), null);
-  loadBreakRequests();
-  alert(`Break request for ${studentId} resolved`);
-}
+  openTuitionModal(studentId, name);
+};
 
 // ------------------- INITIAL DISPLAY -------------------
 showHome();
