@@ -4,66 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    nav button { margin-right: 10px; padding: 8px 12px; cursor: pointer; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    table, th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    #tuitionModal { display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%);
+      background:#fff; padding:20px; border:1px solid #ccc; max-width:500px; z-index:1000;}
+    #tuitionModal button { margin-right:5px; }
+  </style>
 </head>
 <body>
-  <h1>Admin Panel</h1>
 
-  <!-- Navigation -->
+  <h2>Admin Panel</h2>
   <nav>
-    <button id="homeTab">Home</button>
-    <button id="registrationTab">Registration</button>
-    <button id="breakTab">Break Requests</button>
-    <button id="classesTab">Classes</button>
-    <button id="logoutBtn">Logout</button>
+    <button onclick="showHome()">Home</button>
+    <button onclick="showClass('7')">Class 7</button>
+    <button onclick="showClass('8')">Class 8</button>
+    <button onclick="showClass('9')">Class 9</button>
+    <button onclick="showClass('10')">Class 10</button>
+    <button onclick="showClass('11')">Class 11</button>
+    <button onclick="showClass('12')">Class 12</button>
   </nav>
 
-  <!-- Sections -->
-  <section id="homeSection" class="tabSection">
-    <h2>Welcome, Admin!</h2>
-    <p>Total Students: <span id="totalStudents">0</span></p>
-    <p>Pending Approvals: <span id="pendingStudents">0</span></p>
+  <!-- HOME -->
+  <section id="homeSection">
+    <h3>Welcome, Admin</h3>
+    <p>Use the Class buttons to view students.</p>
   </section>
 
-  <section id="registrationSection" class="tabSection" style="display:none">
-    <h2>Student Registrations</h2>
-    <table id="registrationTable">
+  <!-- CLASS SECTION -->
+  <section id="classSection" style="display:none;">
+    <h3 id="classTitle">Class</h3>
+    <table>
       <thead>
         <tr>
           <th>Student ID</th>
           <th>Name</th>
-          <th>Class</th>
           <th>Roll</th>
-          <th>WhatsApp</th>
+          <th>Tuition Status</th>
+        </tr>
+      </thead>
+      <tbody id="classTableBody">
+        <tr><td colspan="4">Loading...</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- TUITION MODAL -->
+  <div id="tuitionModal">
+    <h3 id="modalStudentName">Tuition for Student</h3>
+    <table id="modalTuitionTable">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th>Status</th>
+          <th>Date & Method</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody></tbody>
     </table>
-  </section>
-
-  <section id="breakSection" class="tabSection" style="display:none">
-    <h2>Break Requests</h2>
-    <table id="breakTable">
-      <thead>
-        <tr>
-          <th>Student ID</th>
-          <th>Name</th>
-          <th>Class</th>
-          <th>Roll</th>
-          <th>WhatsApp</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <section id="classesSection" class="tabSection" style="display:none">
-    <h2>Classes</h2>
-    <div id="classTabs"></div>
-    <div id="classStudents"></div>
-  </section>
+    <button onclick="closeModal()">Close</button>
+  </div>
 
   <script type="module" src="admin.js"></script>
 </body>
