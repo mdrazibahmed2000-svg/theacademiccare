@@ -1,4 +1,4 @@
-// Firebase Configuration
+// ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -11,40 +11,32 @@ const firebaseConfig = {
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
 const auth = firebase.auth();
+const db = firebase.database();
 
-// ==================== ELEMENTS =====================
+// ------------------- ELEMENTS -------------------
 const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 const forgotBox = document.getElementById("forgotBox");
-const registrationBtn = document.getElementById("registrationBtn");
-const backToLoginBtn = document.getElementById("backToLoginBtn");
-const backToLoginBtn2 = document.getElementById("backToLoginBtn2");
-const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
 
-// ==================== NAVIGATION =====================
-registrationBtn.addEventListener("click", () => {
+document.getElementById("registrationBtn").addEventListener("click", () => {
   loginBox.style.display = "none";
   registerBox.style.display = "block";
 });
-
-backToLoginBtn.addEventListener("click", () => {
+document.getElementById("backToLoginBtn").addEventListener("click", () => {
   registerBox.style.display = "none";
   loginBox.style.display = "block";
 });
-
-backToLoginBtn2.addEventListener("click", () => {
+document.getElementById("forgotPasswordBtn").addEventListener("click", () => {
+  loginBox.style.display = "none";
+  forgotBox.style.display = "block";
+});
+document.getElementById("backToLoginBtn2").addEventListener("click", () => {
   forgotBox.style.display = "none";
   loginBox.style.display = "block";
 });
 
-forgotPasswordBtn.addEventListener("click", () => {
-  loginBox.style.display = "none";
-  forgotBox.style.display = "block";
-});
-
-// ==================== REGISTRATION =====================
+// ------------------- REGISTRATION -------------------
 document.getElementById("registerForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -69,21 +61,17 @@ document.getElementById("registerForm").addEventListener("submit", (e) => {
     roll,
     whatsapp,
     password,
-    status: "pending",
+    approved: false
   })
   .then(() => {
-    alert(`Registration Submitted! Your Student ID: ${studentId}`);
-    document.getElementById("registerForm").reset();
+    alert(`Registration submitted! Your Student ID: ${studentId}`);
     registerBox.style.display = "none";
     loginBox.style.display = "block";
   })
-  .catch((error) => {
-    console.error(error);
-    alert("Error submitting registration!");
-  });
+  .catch(err => alert("Error: " + err.message));
 });
 
-// ==================== LOGIN =====================
+// ------------------- LOGIN -------------------
 document.getElementById("loginForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -91,35 +79,30 @@ document.getElementById("loginForm").addEventListener("submit", (e) => {
   const password = document.getElementById("loginPassword").value;
 
   if (id.toLowerCase() === "admin") {
-    // Admin Login
+    // Admin login
     auth.signInWithEmailAndPassword("theacademiccare2025@gmail.com", password)
       .then(() => {
-        alert("Admin logged in successfully!");
+        alert("Admin login successful!");
         window.location.href = "admin.html";
       })
-      .catch(() => {
-        alert("Invalid admin credentials!");
-      });
+      .catch(err => alert("Admin login failed: " + err.message));
   } else {
-    // Student Login
-    db.ref("ApprovedStudents/" + id).once("value", (snapshot) => {
-      if (snapshot.exists()) {
+    // Student login
+    db.ref("Registrations/" + id).once("value")
+      .then(snapshot => {
+        if (!snapshot.exists()) return alert("Student ID not found!");
         const data = snapshot.val();
-        if (data.password === password) {
-          alert("Login Successful!");
-          localStorage.setItem("studentId", id);
-          window.location.href = "student.html";
-        } else {
-          alert("Incorrect password!");
-        }
-      } else {
-        alert("Student not found or not yet approved!");
-      }
-    });
+        if (!data.approved) return alert("Your registration is not yet approved!");
+        if (data.password !== password) return alert("Incorrect password!");
+        localStorage.setItem("studentId", id);
+        alert("Login successful!");
+        window.location.href = "student.html";
+      })
+      .catch(err => alert("Error: " + err.message));
   }
 });
 
-// ==================== FORGOT PASSWORD =====================
+// ------------------- FORGOT PASSWORD -------------------
 document.getElementById("forgotForm").addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -132,18 +115,20 @@ document.getElementById("forgotForm").addEventListener("submit", (e) => {
     return;
   }
 
-  db.ref("ApprovedStudents").once("value", (snapshot) => {
-    let found = false;
-    snapshot.forEach((child) => {
-      const data = child.val();
-      if (data.whatsapp === whatsapp) {
-        found = true;
-        db.ref("ApprovedStudents/" + child.key).update({ password: newPass });
-        alert("Password reset successful!");
-        forgotBox.style.display = "none";
-        loginBox.style.display = "block";
-      }
-    });
-    if (!found) alert("No account found with this WhatsApp number!");
-  });
+  db.ref("Registrations").once("value")
+    .then(snapshot => {
+      let found = false;
+      snapshot.forEach(child => {
+        const data = child.val();
+        if (data.whatsapp === whatsapp) {
+          found = true;
+          db.ref("Registrations/" + child.key).update({ password: newPass });
+          alert("Password reset successful!");
+          forgotBox.style.display = "none";
+          loginBox.style.display = "block";
+        }
+      });
+      if (!found) alert("No student found with this WhatsApp number!");
+    })
+    .catch(err => alert("Error: " + err.message));
 });

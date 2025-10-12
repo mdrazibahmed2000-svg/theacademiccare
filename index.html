@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>The Academic Care | Login & Registration</title>
   <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase v8 -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -15,62 +17,40 @@
 
   <div class="container">
 
-    <!-- Login Section -->
+    <!-- LOGIN -->
     <div id="loginBox">
       <h2>Sign In</h2>
       <form id="loginForm">
-        <label>Student ID or 'admin'</label>
-        <input type="text" id="loginId" placeholder="Enter Student ID or 'admin'" required>
-
-        <label>Password</label>
-        <input type="password" id="loginPassword" placeholder="Enter Password" required>
-
+        <input type="text" id="loginId" placeholder="Student ID or 'admin'" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
         <button type="submit">Sign In</button>
       </form>
-      <button id="registrationBtn">Registration</button>
+      <button id="registrationBtn">New Student? Register Here</button>
       <button id="forgotPasswordBtn">Forgot Password?</button>
     </div>
 
-    <!-- Registration Section -->
+    <!-- REGISTRATION -->
     <div id="registerBox" style="display:none;">
       <h2>Student Registration</h2>
       <form id="registerForm">
-        <label>Full Name</label>
-        <input type="text" id="regName" required>
-
-        <label>Class</label>
-        <input type="number" id="regClass" required>
-
-        <label>Roll</label>
-        <input type="number" id="regRoll" required>
-
-        <label>WhatsApp Number</label>
-        <input type="text" id="regWhatsapp" required>
-
-        <label>Password</label>
-        <input type="password" id="regPassword" required>
-
-        <label>Confirm Password</label>
-        <input type="password" id="regConfirmPassword" required>
-
+        <input type="text" id="regName" placeholder="Full Name" required>
+        <input type="number" id="regClass" placeholder="Class" required>
+        <input type="number" id="regRoll" placeholder="Roll" required>
+        <input type="text" id="regWhatsapp" placeholder="WhatsApp Number" required>
+        <input type="password" id="regPassword" placeholder="Password" required>
+        <input type="password" id="regConfirmPassword" placeholder="Confirm Password" required>
         <button type="submit">Submit Registration</button>
         <button type="button" id="backToLoginBtn">Back to Login</button>
       </form>
     </div>
 
-    <!-- Forgot Password Section -->
+    <!-- FORGOT PASSWORD -->
     <div id="forgotBox" style="display:none;">
       <h2>Reset Password</h2>
       <form id="forgotForm">
-        <label>Enter your WhatsApp Number</label>
-        <input type="text" id="forgotWhatsapp" placeholder="e.g. 017xxxxxxx" required>
-
-        <label>Set New Password</label>
-        <input type="password" id="newPassword" required>
-
-        <label>Confirm New Password</label>
-        <input type="password" id="confirmNewPassword" required>
-
+        <input type="text" id="forgotWhatsapp" placeholder="WhatsApp Number" required>
+        <input type="password" id="newPassword" placeholder="New Password" required>
+        <input type="password" id="confirmNewPassword" placeholder="Confirm New Password" required>
         <button type="submit">Verify & Reset</button>
         <button type="button" id="backToLoginBtn2">Back to Login</button>
       </form>
