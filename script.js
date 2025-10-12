@@ -1,9 +1,9 @@
-// ------------------- IMPORT MODULES -------------------
+// ------------------- IMPORT FIREBASE -------------------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, child, set, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// ------------------- INITIALIZE FIREBASE -------------------
+// ------------------- FIREBASE CONFIG -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -24,7 +24,7 @@ const loginBox = document.getElementById("loginBox");
 const registerBox = document.getElementById("registerBox");
 const forgotBox = document.getElementById("forgotBox");
 
-// Toggle Boxes
+// Buttons to toggle forms
 document.getElementById("registrationBtn").addEventListener("click", () => {
   loginBox.style.display = "none";
   registerBox.style.display = "block";
@@ -86,12 +86,13 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const password = document.getElementById("loginPassword").value;
 
   if (id.toLowerCase() === "admin") {
-    // Admin login using Auth only (no database path with email)
+    // Admin login using Auth and UID
     try {
       const userCredential = await signInWithEmailAndPassword(auth, "theacademiccare2025@gmail.com", password);
       const user = userCredential.user;
 
-      if (user.uid === "xg4XNMsSJqbXMZ57qicrpgfM6Yn1") {
+      const snapshot = await get(ref(db, `admins/${user.uid}`));
+      if (snapshot.exists()) {
         window.location.href = "admin.html";
       } else {
         alert("You are not authorized as admin!");

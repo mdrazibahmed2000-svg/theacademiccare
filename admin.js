@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// ------------------- FIREBASE CONFIG -------------------
+// ------------------- Firebase Config -------------------
 const firebaseConfig = {
   apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
   authDomain: "the-academic-care-de611.firebaseapp.com",
@@ -17,35 +17,36 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 
-// ------------------- ELEMENTS -------------------
+// ------------------- Elements -------------------
 const homeTab = document.getElementById("homeTab");
 const registrationTab = document.getElementById("registrationTab");
 const breakRequestTab = document.getElementById("breakRequestTab");
 const classesTab = document.getElementById("classesTab");
-const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+const logoutBtn = document.getElementById("adminLogoutBtn");
 
 const homeContent = document.getElementById("homeContent");
 const registrationContent = document.getElementById("registrationContent");
-const breakRequestContent = document.getElementById("breakRequestContent");
+const breakContent = document.getElementById("breakContent");
 const classesContent = document.getElementById("classesContent");
 
-// ------------------- NAVIGATION -------------------
+// ------------------- Navigation -------------------
 homeTab.addEventListener("click", () => {
   homeContent.style.display = "block";
   registrationContent.style.display = "none";
-  breakRequestContent.style.display = "none";
+  breakContent.style.display = "none";
   classesContent.style.display = "none";
+  homeContent.innerHTML = "<h3>Welcome Admin</h3>";
 });
 
 registrationTab.addEventListener("click", async () => {
   homeContent.style.display = "none";
   registrationContent.style.display = "block";
-  breakRequestContent.style.display = "none";
+  breakContent.style.display = "none";
   classesContent.style.display = "none";
 
-  const snapshot = await get(ref(db, "Registrations"));
   registrationContent.innerHTML = "<h3>Pending Registrations</h3>";
 
+  const snapshot = await get(ref(db, "Registrations"));
   snapshot.forEach(childSnap => {
     const data = childSnap.val();
     if (!data.approved) {
@@ -59,7 +60,7 @@ registrationTab.addEventListener("click", async () => {
   });
 });
 
-// ------------------- APPROVE STUDENT -------------------
+// ------------------- Approve Student -------------------
 window.approveStudent = async (studentId) => {
   try {
     await update(ref(db, `Registrations/${studentId}`), { approved: true });
@@ -70,8 +71,8 @@ window.approveStudent = async (studentId) => {
   }
 };
 
-// ------------------- LOGOUT -------------------
-adminLogoutBtn.addEventListener("click", async () => {
+// ------------------- Logout -------------------
+logoutBtn.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "index.html";
 });
