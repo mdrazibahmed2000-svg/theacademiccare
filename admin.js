@@ -144,42 +144,31 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ✅ UPDATED: STUDENTS SORTED SERIALLY BY STUDENT ID
   async function loadClassStudents(cls) {
     const snapshot = await get(ref(db, "Registrations"));
     const div = document.getElementById("classStudents");
     div.innerHTML = `<h3>Class ${cls}</h3><table border="1">
       <thead><tr>
-        <th>Serial</th><th>ID</th><th>Name</th><th>Roll</th><th>Tuition Details</th>
+        <th>ID</th><th>Name</th><th>Roll</th><th>Tuition Details</th>
       </tr></thead>
       <tbody></tbody>
     </table>`;
     const tbody = div.querySelector("tbody");
 
-    // Collect & sort students by ID
-    let students = [];
     snapshot.forEach(child => {
       const data = child.val();
       if (data.class == cls && data.approved) {
-        students.push({ id: child.key, ...data });
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${child.key}</td>
+          <td>${data.name}</td>
+          <td>${data.roll}</td>
+          <td>
+            <span class="tuitionIcon" style="cursor:pointer;" onclick="window.showTuitionModal('${child.key}')">💰</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
       }
-    });
-
-    students.sort((a, b) => a.id.localeCompare(b.id));
-
-    // Display serially
-    students.forEach((student, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${index + 1}</td>
-        <td>${student.id}</td>
-        <td>${student.name}</td>
-        <td>${student.roll}</td>
-        <td>
-          <span class="tuitionIcon" style="cursor:pointer;" onclick="window.showTuitionModal('${student.id}')">💰</span>
-        </td>
-      `;
-      tbody.appendChild(tr);
     });
   }
 
@@ -255,6 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
     await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
 
+    // Refresh modal to show updated status
     window.showTuitionModal(studentId);
   };
 
@@ -264,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
     await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
 
+    // Refresh modal to show updated status
     window.showTuitionModal(studentId);
   };
 

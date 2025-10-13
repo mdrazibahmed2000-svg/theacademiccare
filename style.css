@@ -18,19 +18,33 @@ header {
   color: #fff;
 }
 
+/* ===== HEADER & LOGO ===== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  background-color: #f5f5f5;
+  padding: 10px 20px;
+  border-bottom: 2px solid #ddd;
+}
+
+.site-logo {
+  height: 50px;  /* adjust size here */
+  width: auto;
+  border-radius: 8px;
+}
+
 header h1 {
-  font-size: 2rem;
+  font-size: 24px;
+  color: #2c3e50;
+  margin: 0;
 }
 
 header h3 {
-  font-size: 1.2rem;
-  font-weight: normal;
-}
-
-hr {
-  border: 0;
-  border-top: 2px solid #0066cc;
-  margin: 10px 0 20px 0;
+  font-size: 16px;
+  color: #555;
+  margin: 0;
 }
 
 /* ================== NAVIGATION ================== */
