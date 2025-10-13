@@ -1,0 +1,207 @@
+/* ================== GENERAL STYLES ================== */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background-color: #2b2b2b; /* Semi-dark background */
+  color: #e0e0e0; /* Light text for contrast */
+}
+
+h1, h2, h3 {
+  margin: 0.5em 0;
+  color: #c0d6f0; /* Soft light blue for headings */
+}
+
+/* ================== HEADER & LOGO ================== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background-color: #1f1f1f; /* Slightly darker than body */
+}
+
+.site-logo {
+  height: 50px;
+  width: auto;
+  border-radius: 8px;
+}
+
+header h1 {
+  font-size: 24px;
+  color: #6cb8f0; /* Medium soft blue */
+}
+
+header h3 {
+  font-size: 16px;
+  color: #8abce7; /* Lighter blue */
+}
+
+/* ================== NAVIGATION ================== */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
+  justify-content: center;
+}
+
+nav button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #3a5f8f; /* Soft blue */
+  color: #e0e0e0;
+  transition: 0.3s;
+}
+
+nav button:hover {
+  background-color: #5b7bbf; /* Lighter blue on hover */
+}
+
+nav button.active {
+  background-color: #1a3b5c; /* Darker blue for active tab */
+}
+
+#logoutBtn {
+  background-color: #c94c4c;
+}
+
+#logoutBtn:hover {
+  background-color: #e06666;
+}
+
+/* ================== TAB SECTIONS ================== */
+.tabSection {
+  background-color: #1f1f1f; /* Same as header */
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  transition: background 0.3s;
+}
+
+.tabSection:hover {
+  background-color: #272727; /* Slight hover effect */
+}
+
+/* ================== NOTIFICATIONS ================== */
+#notificationsDiv {
+  padding: 10px;
+  background-color: #2f2f2f;
+  border-radius: 6px;
+  color: #d0e6f5;
+}
+
+#notificationsDiv p {
+  margin: 5px 0;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background 0.3s, color 0.3s;
+  cursor: default;
+}
+
+#notificationsDiv p:hover {
+  background-color: #3a5f8f;
+  color: #fff;
+}
+
+/* ================== PROFILE ================== */
+#profileDiv p {
+  line-height: 1.6;
+  transition: color 0.3s;
+}
+
+#profileDiv p:hover {
+  color: #a0c4f0;
+}
+
+/* ================== TUITION TABLE ================== */
+#tuitionTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  color: #e0e0e0;
+}
+
+#tuitionTable th, #tuitionTable td {
+  padding: 10px;
+  border: 1px solid #444;
+  text-align: left;
+  font-size: 14px;
+  transition: background 0.3s, color 0.3s;
+}
+
+#tuitionTable th {
+  background-color: #3a5f8f; /* Soft blue header */
+  color: white;
+}
+
+#tuitionTable tbody tr:nth-child(even) {
+  background-color: #2b2b2b; /* Slightly different for row distinction */
+}
+
+#tuitionTable tbody tr:hover {
+  background-color: #3a5f8f;
+  color: #fff;
+}
+
+#tuitionTable tbody {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#tuitionTable tbody::-webkit-scrollbar {
+  width: 10px;
+}
+
+#tuitionTable tbody::-webkit-scrollbar-track {
+  background: #1f1f1f;
+  border-radius: 6px;
+}
+
+#tuitionTable tbody::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #5b7bbf, #3a5f8f);
+  border-radius: 6px;
+}
+
+#tuitionTable thead, #tuitionTable tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* ================== BREAK REQUEST BUTTON ================== */
+#breakRequestBtn {
+  background-color: #5b7bbf;
+  color: #e0e0e0;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#breakRequestBtn:hover {
+  background-color: #7aa3dc;
+}
+
+/* ================== RESPONSIVE ================== */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #tuitionTable th, #tuitionTable td {
+    font-size: 12px;
+  }
+
+  nav button {
+    width: 100%;
+    text-align: center;
+  }
+}
