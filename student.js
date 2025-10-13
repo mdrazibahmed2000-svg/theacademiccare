@@ -73,7 +73,6 @@ function loadProfile(data) {
 
 // ------------------- LOAD TUITION STATUS -------------------
 function loadTuition(tuition) {
-  document.getElementById("studentId").textContent = studentData.studentId; // Example: S2025123
   tuitionTableBody.innerHTML = "";
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1;
@@ -132,4 +131,3 @@ const notificationsRef = ref(db, `Notifications/${studentId}`);
 onValue(notificationsRef, (snapshot) => {
   loadNotifications(snapshot.val());
 });
-
