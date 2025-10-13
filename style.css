@@ -1,107 +1,252 @@
 /* ================== GENERAL STYLES ================== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  padding: 0 20px;
-  background: #f9f9f9;
+  padding: 0;
+  background: #eef1f5; /* Light, soft background */
   color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 h1, h2, h3 {
   margin: 0.5em 0;
+  font-weight: 600;
+  color: #004080; /* Primary color for headings */
 }
 
+/* ================== HEADER ================== */
 header {
   text-align: center;
-  padding: 10px 0;
-  background-color: #004080; /* Admin/Student panel primary color */
+  padding: 20px 0;
+  background-color: #004080; /* Deep blue primary color */
   color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
 }
 
 header h3 {
   font-size: 1.2rem;
-  font-weight: normal;
+  font-weight: 300;
+  color: #c9e0ff;
+  margin-top: 5px;
 }
 
 hr {
   border: 0;
-  border-top: 2px solid #0066cc;
-  margin: 10px 0 20px 0;
+  border-top: 1px solid #0066cc;
+  width: 80%;
+  margin: 15px auto;
+}
+
+/* ================== CONTAINERS (for index.html forms) ================== */
+.container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease-in-out;
+}
+
+.container:hover {
+  transform: translateY(-5px);
+}
+
+.container h3 {
+  text-align: center;
+  color: #0066cc;
+  margin-bottom: 25px;
+}
+
+/* Form Styles */
+form input[type="text"],
+form input[type="password"] {
+  width: calc(100% - 20px);
+  padding: 12px 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+form input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 5px rgba(0, 102, 204, 0.5);
+  outline: none;
+}
+
+form button[type="submit"] {
+  width: 100%;
+  padding: 12px;
+  background: #0066cc;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.1s;
+}
+
+form button[type="submit"]:hover {
+  background: #004d99;
+  transform: translateY(-1px);
+}
+
+.container a {
+  display: inline-block;
+  margin-top: 15px;
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.container a:hover {
+  color: #004d99;
+  text-decoration: underline;
 }
 
 /* ================== NAVIGATION ================== */
 nav {
-  margin: 10px 0 20px 0;
+  background: #ffffff;
+  padding: 15px 20px;
+  margin: 20px auto;
+  max-width: 1000px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
 }
 
 nav button {
-  padding: 10px 15px;
-  background: #0066cc; /* Matching primary color */
+  padding: 10px 20px;
+  background: #0099cc; /* Secondary action color */
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: 0.3s ease;
+  flex-grow: 0;
+  min-width: 120px;
 }
 
 nav button:hover {
-  background: #004d99;
+  background: #007399;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 #logoutBtn {
   margin-left: auto;
-  background: #cc0000;
+  background: #d9534f; /* Danger/Logout color */
+  min-width: 100px;
 }
 
 #logoutBtn:hover {
-  background: #990000;
+  background: #c9302c;
 }
 
 /* ================== SECTIONS ================== */
 .tabSection {
+  max-width: 1000px;
+  margin: 20px auto;
   background: #fff;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 /* ================== TABLES ================== */
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 15px;
+}
+
+table thead {
+  background-color: #f0f7ff; /* Light blue header */
 }
 
 table th, table td {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+  padding: 12px 15px;
+  border: none;
+  border-bottom: 1px solid #eee;
   text-align: left;
   vertical-align: middle;
 }
 
 table th {
-  background: #f0f0f0;
+  color: #004080;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  border-top: 1px solid #ddd;
+}
+
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Action buttons in tables */
+table td button {
+  padding: 6px 10px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+#registrationTable button:first-of-type { /* Approve */
+  background: #5cb85c;
+  color: white;
+}
+#registrationTable button:first-of-type:hover {
+  background: #4cae4c;
+}
+#registrationTable button:last-of-type { /* Deny */
+  background: #f0ad4e;
+  color: white;
+}
+#registrationTable button:last-of-type:hover {
+  background: #eea236;
 }
 
 /* ================== TUITION ICON ================== */
 .tuitionIcon {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   cursor: pointer;
   display: inline-block;
   padding: 4px;
-  transition: transform 0.2s, color 0.2s;
+  color: #009900;
+  transition: transform 0.2s, opacity 0.2s;
 }
 
 .tuitionIcon:hover {
-  transform: scale(1.2);
-  color: #009900;
+  transform: scale(1.3);
+  opacity: 0.8;
 }
 
 /* ================== MODAL ================== */
@@ -111,7 +256,7 @@ table th {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -120,19 +265,26 @@ table th {
 
 #tuitionModal > div {
   background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  max-height: 80%;
+  padding: 30px;
+  border-radius: 12px;
+  max-height: 90vh;
   overflow-y: auto;
-  width: 90%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 700px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+#tuitionModal h3 {
+  margin-top: 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
 }
 
 #tuitionModal button {
-  margin: 5px 5px 0 0;
-  padding: 6px 12px;
+  margin: 10px 5px 0 0;
+  padding: 8px 15px;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   background: #0066cc;
   color: #fff;
@@ -143,65 +295,182 @@ table th {
   background: #004d99;
 }
 
+/* Status colors */
+.tabSection td strong {
+  font-weight: bold;
+}
+.tabSection td[style*="green"] { color: #28a745; font-weight: bold; }
+.tabSection td[style*="red"] { color: #dc3545; font-weight: bold; }
+.tabSection td[style*="purple"] { color: #6f42c1; font-weight: bold; }
+
+
 /* ================== BREAK REQUEST BUTTON ================== */
 #breakRequestBtn {
-  margin-top: 10px;
-  padding: 10px 15px;
+  margin-top: 15px;
+  padding: 12px 25px;
   border: none;
-  border-radius: 5px;
-  background: #ff9900;
+  border-radius: 8px;
+  background: #ff9900; /* Warning/Action color */
   color: #fff;
+  font-weight: bold;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #breakRequestBtn:hover {
   background: #cc7a00;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* ================== NOTIFICATIONS ================== */
+#notificationsDiv {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fcfcfc;
+}
+
 #notificationsDiv p {
   border-bottom: 1px solid #eee;
-  padding: 5px 0;
+  padding: 8px 0;
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+#notificationsDiv p:last-child {
+  border-bottom: none;
 }
 
 /* ================== CLASS BUTTONS ================== */
+#classTabs {
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 #classTabs button {
-  padding: 6px 12px;
-  margin: 3px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  background: #0099cc;
-  color: #fff;
-  transition: 0.3s;
+  padding: 8px 15px;
+  margin: 0;
+  border-radius: 4px;
+  border: 1px solid #0099cc;
+  background: #e6f7ff;
+  color: #0099cc;
+  font-weight: 500;
 }
 
 #classTabs button:hover {
-  background: #007399;
+  background: #0099cc;
+  color: #fff;
 }
+
 
 /* ================== RESPONSIVE ================== */
 @media (max-width: 768px) {
+  body {
+    padding: 0 10px;
+  }
+  
+  header h1 {
+    font-size: 2rem;
+  }
+
   nav {
     flex-direction: column;
+    padding: 10px;
+    margin: 15px auto;
   }
 
   nav button {
     width: 100%;
     margin-left: 0;
+    min-width: 0;
+  }
+  
+  #logoutBtn {
+    margin-left: 0;
+  }
+
+  .tabSection {
+    padding: 15px;
   }
 
   table th, table td {
-    font-size: 0.9rem;
-    padding: 6px 8px;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: right;
+  }
+  
+  table thead {
+    display: none; /* Hide header on small screens */
   }
 
-  .tuitionIcon {
-    font-size: 1.1rem;
+  table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  table tr td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #004080;
+    margin-right: 10px;
+  }
+
+  /* Specific data labels for admin tables */
+  #registrationTable td:nth-child(1)::before { content: "Student ID:"; }
+  #registrationTable td:nth-child(2)::before { content: "Name:"; }
+  #registrationTable td:nth-child(3)::before { content: "Class:"; }
+  #registrationTable td:nth-child(4)::before { content: "Roll:"; }
+  #registrationTable td:nth-child(5)::before { content: "WhatsApp:"; }
+  #registrationTable td:nth-child(6) { text-align: center; }
+  #registrationTable td:nth-child(6)::before { content: "Action:"; float: left; }
+  
+  #breakTable td:nth-child(1)::before { content: "Student ID:"; }
+  #breakTable td:nth-child(2)::before { content: "Name:"; }
+  #breakTable td:nth-child(3)::before { content: "Class:"; }
+  #breakTable td:nth-child(4)::before { content: "Roll:"; }
+  #breakTable td:nth-child(5)::before { content: "WhatsApp:"; }
+  #breakTable td:nth-child(6)::before { content: "Status:"; }
+  
+  #tuitionTable td:nth-child(1)::before { content: "Month:"; }
+  #tuitionTable td:nth-child(2)::before { content: "Status:"; }
+  #tuitionTable td:nth-child(3)::before { content: "Date & Method:"; }
+  
+  #classStudents table tr td:nth-child(1)::before { content: "ID:"; }
+  #classStudents table tr td:nth-child(2)::before { content: "Name:"; }
+  #classStudents table tr td:nth-child(3)::before { content: "Roll:"; }
+  #classStudents table tr td:nth-child(4) { text-align: center; }
+  #classStudents table tr td:nth-child(4)::before { content: "Tuition:"; float: left; }
+  
+  /* Reset padding for the action cell in admin tables */
+  #registrationTable td:last-child {
+    text-align: center;
+  }
+  
+  #registrationTable td:last-child button {
+    margin: 5px;
+  }
+  
+  .container {
+    margin: 20px auto;
   }
 
   #tuitionModal > div {
-    width: 95%;
+    padding: 20px;
   }
 }
