@@ -41,16 +41,16 @@
 </div>
 
 <div class="container" id="forgotBox" style="display:none;">
-  <h3>Reset Password via WhatsApp OTP</h3>
+  <h3>Reset Password via WhatsApp</h3>
   <form id="forgotForm">
     <input type="text" id="forgotWhatsapp" placeholder="Registered WhatsApp Number" required>
-    <button type="submit">Send OTP</button>
+    <input type="password" id="newPassword" placeholder="New Password" required>
+    <input type="password" id="confirmNewPassword" placeholder="Confirm New Password" required>
+    <button type="submit">Reset Password</button>
   </form>
-  <div id="otpSection" style="display:none;"></div>
   <a href="#" id="backToLoginBtn2">Back to Login</a>
 </div>
 
 <script type="module" src="script.js"></script>
 </body>
 </html>
-
