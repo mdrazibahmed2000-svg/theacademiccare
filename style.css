@@ -1,21 +1,15 @@
 /* ================== GENERAL STYLES ================== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
   margin: 0;
   padding: 0 20px;
-  background: #f9f9f9;
-  color: #333;
+  background-color: #111; /* Dark soft background */
+  color: #ccc;
 }
 
 h1, h2, h3 {
   margin: 0.5em 0;
-}
-
-header {
-  text-align: center;
-  padding: 10px 0;
-  background-color: #004080; /* Admin/Student panel primary color */
-  color: #fff;
+  color: #4da6ff; /* Soft blue heading */
 }
 
 /* ===== HEADER & LOGO ===== */
@@ -24,98 +18,158 @@ header {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  background-color: #f5f5f5;
-  padding: 10px 20px;
-  border-bottom: 2px solid #ddd;
+  background-color: #1a1a1a; /* Dark card background */
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222; /* Soft UI effect */
+  margin-top: 20px;
 }
 
 .site-logo {
-  height: 50px;  /* adjust size here */
+  height: 60px;
   width: auto;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: inset 2px 2px 6px #000, inset -2px -2px 6px #222; /* Soft inner shadow */
 }
 
 header h1 {
-  font-size: 24px;
-  color: #2c3e50;
-  margin: 0;
+  font-size: 28px;
+  color: #3399ff;
 }
 
 header h3 {
   font-size: 16px;
-  color: #555;
-  margin: 0;
+  color: #66b3ff;
 }
 
 /* ================== NAVIGATION ================== */
 nav {
-  margin: 10px 0 20px 0;
   display: flex;
+  justify-content: center;
+  gap: 12px;
   flex-wrap: wrap;
-  gap: 10px;
+  margin: 20px 0;
 }
 
 nav button {
-  padding: 10px 15px;
-  background: #0066cc; /* Matching primary color */
-  color: #fff;
+  background-color: #1a1a1a;
+  color: #4da6ff;
   border: none;
-  border-radius: 5px;
+  padding: 10px 18px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 14px;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222;
+  transition: all 0.3s ease;
 }
 
 nav button:hover {
-  background: #004d99;
+  box-shadow: inset 5px 5px 15px #0a0a0a, inset -5px -5px 15px #222;
+  color: #66b3ff;
 }
 
-#logoutBtn {
-  margin-left: auto;
-  background: #cc0000;
+nav button.active {
+  background-color: #222;
+  color: #3399ff;
 }
 
-#logoutBtn:hover {
-  background: #990000;
-}
-
-/* ================== SECTIONS ================== */
-.tabSection {
-  background: #fff;
-  padding: 15px;
+/* ================== CONTAINER / CARDS ================== */
+.container, .tabSection {
+  background-color: #1a1a1a;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222;
   margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ================== FORM ELEMENTS ================== */
+input[type="text"], input[type="password"], input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-radius: 12px;
+  border: none;
+  background-color: #111;
+  color: #ccc;
+  box-shadow: inset 3px 3px 8px #0a0a0a, inset -3px -3px 8px #222;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: inset 2px 2px 8px #222, inset -2px -2px 8px #0a0a0a;
+}
+
+/* ================== BUTTONS ================== */
+button {
+  background-color: #1a1a1a;
+  color: #4da6ff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 14px;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  box-shadow: inset 5px 5px 15px #0a0a0a, inset -5px -5px 15px #222;
+  color: #66b3ff;
 }
 
 /* ================== TABLES ================== */
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-top: 15px;
 }
 
 table th, table td {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+  padding: 10px 12px;
   text-align: left;
-  vertical-align: middle;
+  font-size: 14px;
+  color: #ccc;
 }
 
 table th {
-  background: #f0f0f0;
+  background-color: #222;
+  color: #3399ff;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #1a1a1a;
+}
+
+table tbody tr:hover {
+  background-color: #222;
+}
+
+/* Make table scrollable on small screens */
+table tbody {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+table thead, table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
 }
 
 /* ================== TUITION ICON ================== */
 .tuitionIcon {
   font-size: 1.3rem;
   cursor: pointer;
-  display: inline-block;
   padding: 4px;
   transition: transform 0.2s, color 0.2s;
+  color: #4da6ff;
 }
 
 .tuitionIcon:hover {
   transform: scale(1.2);
-  color: #009900;
+  color: #66b3ff;
 }
 
 /* ================== MODAL ================== */
@@ -125,7 +179,7 @@ table th {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.7);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -133,82 +187,36 @@ table th {
 }
 
 #tuitionModal > div {
-  background: #fff;
+  background-color: #1a1a1a;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   max-height: 80%;
   overflow-y: auto;
   width: 90%;
   max-width: 600px;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222;
 }
 
 #tuitionModal button {
-  margin: 5px 5px 0 0;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background: #0066cc;
-  color: #fff;
-  transition: 0.3s;
+  background-color: #1a1a1a;
+  color: #4da6ff;
+  box-shadow: 5px 5px 15px #0a0a0a, -5px -5px 15px #222;
 }
 
 #tuitionModal button:hover {
-  background: #004d99;
-}
-
-/* ================== BREAK REQUEST BUTTON ================== */
-#breakRequestBtn {
-  margin-top: 10px;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  background: #ff9900;
-  color: #fff;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-#breakRequestBtn:hover {
-  background: #cc7a00;
-}
-
-/* ================== NOTIFICATIONS ================== */
-#notificationsDiv p {
-  border-bottom: 1px solid #eee;
-  padding: 5px 0;
-}
-
-/* ================== CLASS BUTTONS ================== */
-#classTabs button {
-  padding: 6px 12px;
-  margin: 3px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  background: #0099cc;
-  color: #fff;
-  transition: 0.3s;
-}
-
-#classTabs button:hover {
-  background: #007399;
+  box-shadow: inset 5px 5px 15px #0a0a0a, inset -5px -5px 15px #222;
+  color: #66b3ff;
 }
 
 /* ================== RESPONSIVE ================== */
 @media (max-width: 768px) {
   nav {
     flex-direction: column;
-  }
-
-  nav button {
-    width: 100%;
-    margin-left: 0;
+    align-items: center;
   }
 
   table th, table td {
-    font-size: 0.9rem;
-    padding: 6px 8px;
+    font-size: 12px;
   }
 
   .tuitionIcon {
@@ -217,5 +225,10 @@ table th {
 
   #tuitionModal > div {
     width: 95%;
+  }
+
+  header {
+    flex-direction: column;
+    text-align: center;
   }
 }
