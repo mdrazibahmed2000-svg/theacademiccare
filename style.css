@@ -1,264 +1,207 @@
-/* ===============================
-   THE ACADEMIC CARE - UNIFIED STYLE
-   For Admin & Student Panels
-   =============================== */
-
-/* -------- Global Reset -------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", Arial, sans-serif;
-}
-
+/* ================== GENERAL STYLES ================== */
 body {
-  background: #f4f8ff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background: #f9f9f9;
   color: #333;
-  line-height: 1.6;
-  transition: background-color 0.3s ease-in-out;
 }
 
-/* -------- Header -------- */
+h1, h2, h3 {
+  margin: 0.5em 0;
+}
+
 header {
   text-align: center;
-  background: linear-gradient(90deg, #004080, #0066cc);
+  padding: 10px 0;
+  background-color: #004080; /* Admin/Student panel primary color */
   color: #fff;
-  padding: 20px 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  border-radius: 0 0 12px 12px;
 }
 
 header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 5px;
+  font-size: 2rem;
 }
 
 header h3 {
-  font-weight: 400;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+  font-weight: normal;
 }
 
-/* -------- Navigation -------- */
+hr {
+  border: 0;
+  border-top: 2px solid #0066cc;
+  margin: 10px 0 20px 0;
+}
+
+/* ================== NAVIGATION ================== */
 nav {
+  margin: 10px 0 20px 0;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  background: #fff;
-  border-bottom: 2px solid #e0e0e0;
-  padding: 10px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  gap: 10px;
 }
 
 nav button {
-  background: #0066cc;
-  color: white;
+  padding: 10px 15px;
+  background: #0066cc; /* Matching primary color */
+  color: #fff;
   border: none;
-  padding: 10px 18px;
-  margin: 5px;
-  border-radius: 8px;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-nav button:hover {
-  background: #004080;
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-}
-
-nav button:active {
-  transform: scale(0.96);
-}
-
-/* -------- Sections -------- */
-.tabSection {
-  display: none;
-  padding: 25px;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.tabSection.active {
-  display: block;
-}
-
-/* -------- Fade In Animation -------- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* -------- Tables -------- */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
-  background: #fff;
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  animation: fadeIn 0.6s ease;
-}
-
-thead {
-  background: #0066cc;
-  color: white;
-}
-
-th, td {
-  text-align: left;
-  padding: 12px 15px;
-  border-bottom: 1px solid #ddd;
-}
-
-tbody tr:hover {
-  background: #f1f8ff;
   transition: 0.3s;
 }
 
-/* -------- Buttons (General) -------- */
-button, .action-btn {
-  transition: all 0.3s ease;
+nav button:hover {
+  background: #004d99;
 }
 
-button:focus, .action-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #0099cc;
+#logoutBtn {
+  margin-left: auto;
+  background: #cc0000;
 }
 
-/* -------- Cards / Containers -------- */
-#profileDiv, #notificationsDiv, #classStudents {
+#logoutBtn:hover {
+  background: #990000;
+}
+
+/* ================== SECTIONS ================== */
+.tabSection {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* ================== TABLES ================== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+  vertical-align: middle;
+}
+
+table th {
+  background: #f0f0f0;
+}
+
+/* ================== TUITION ICON ================== */
+.tuitionIcon {
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: inline-block;
+  padding: 4px;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.tuitionIcon:hover {
+  transform: scale(1.2);
+  color: #009900;
+}
+
+/* ================== MODAL ================== */
+#tuitionModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+#tuitionModal > div {
   background: #fff;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-  margin-top: 20px;
-  animation: fadeIn 0.6s ease;
-}
-
-#profileDiv p, #notificationsDiv p {
-  font-size: 1rem;
-  margin-bottom: 8px;
-}
-
-/* -------- Break Request Button -------- */
-#breakRequestBtn {
-  background: #0099cc;
-  border: none;
-  color: white;
-  padding: 10px 16px;
   border-radius: 8px;
+  max-height: 80%;
+  overflow-y: auto;
+  width: 90%;
+  max-width: 600px;
+}
+
+#tuitionModal button {
+  margin: 5px 5px 0 0;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  background: #0066cc;
+  color: #fff;
+  transition: 0.3s;
+}
+
+#tuitionModal button:hover {
+  background: #004d99;
+}
+
+/* ================== BREAK REQUEST BUTTON ================== */
+#breakRequestBtn {
+  margin-top: 10px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #ff9900;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
 #breakRequestBtn:hover {
-  background: #0077aa;
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: #cc7a00;
 }
 
-#breakRequestBtn:active {
-  transform: scale(0.96);
+/* ================== NOTIFICATIONS ================== */
+#notificationsDiv p {
+  border-bottom: 1px solid #eee;
+  padding: 5px 0;
 }
 
-/* -------- Footer (Optional) -------- */
-footer {
-  text-align: center;
-  padding: 20px;
-  background: #f4f8ff;
-  color: #777;
-  margin-top: 40px;
-}
-
-/* -------- Responsive Design -------- */
-@media (max-width: 768px) {
-  nav {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  nav button {
-    width: 90%;
-  }
-
-  table, thead, tbody, th, td, tr {
-    display: block;
-  }
-
-  thead {
-    display: none;
-  }
-
-  tr {
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
-
-  td {
-    border: none;
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 10px;
-  }
-
-  td::before {
-    content: attr(data-label);
-    font-weight: bold;
-    color: #004080;
-  }
-}
-/* -------- CLASS TABS FIX -------- */
-#classTabs {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
-  animation: fadeIn 0.5s ease-in-out;
-}
-
+/* ================== CLASS BUTTONS ================== */
 #classTabs button {
-  background: #0073e6;
-  color: white;
+  padding: 6px 12px;
+  margin: 3px;
+  border-radius: 5px;
   border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  min-width: 100px;
+  background: #0099cc;
+  color: #fff;
+  transition: 0.3s;
 }
 
 #classTabs button:hover {
-  background: #005bb5;
-  transform: scale(1.05);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  background: #007399;
 }
 
-#classTabs button:active {
-  transform: scale(0.96);
-}
-
-/* Mobile fix: Ensure all class tabs visible */
+/* ================== RESPONSIVE ================== */
 @media (max-width: 768px) {
-  #classTabs {
-    flex-direction: row;
-    flex-wrap: wrap;
-    overflow-x: auto;
-    padding-bottom: 10px;
+  nav {
+    flex-direction: column;
   }
 
-  #classTabs button {
-    flex: 1 0 45%;
-    margin: 5px;
+  nav button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  table th, table td {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+  }
+
+  .tuitionIcon {
+    font-size: 1.1rem;
+  }
+
+  #tuitionModal > div {
+    width: 95%;
   }
 }
-
-
