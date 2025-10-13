@@ -1,4 +1,32 @@
 /* ================== GENERAL STYLES ================== */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+  color: #222;
+}
+
+header h3 {
+  font-weight: normal;
+  color: #555;
+  margin: 5px 0 0 0;
+}
+
+.site-logo {
+  height: 70px;
+  width: auto;
+  border-radius: 10px;
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -204,4 +232,5 @@ table th {
   #tuitionModal > div {
     width: 95%;
   }
+
 }
