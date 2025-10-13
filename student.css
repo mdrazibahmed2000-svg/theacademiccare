@@ -4,12 +4,12 @@ body {
   margin: 0;
   padding: 0 20px;
   background-color: #2b2b2b; /* Semi-dark background */
-  color: #e0e0e0; /* Light text for contrast */
+  color: #e0e0e0;
 }
 
 h1, h2, h3 {
   margin: 0.5em 0;
-  color: #c0d6f0; /* Soft light blue for headings */
+  color: #c0d6f0;
 }
 
 /* ================== HEADER & LOGO ================== */
@@ -19,7 +19,7 @@ header {
   justify-content: center;
   gap: 15px;
   padding: 15px 20px;
-  background-color: #1f1f1f; /* Slightly darker than body */
+  background-color: #1f1f1f;
 }
 
 .site-logo {
@@ -30,12 +30,12 @@ header {
 
 header h1 {
   font-size: 24px;
-  color: #6cb8f0; /* Medium soft blue */
+  color: #6cb8f0;
 }
 
 header h3 {
   font-size: 16px;
-  color: #8abce7; /* Lighter blue */
+  color: #8abce7;
 }
 
 /* ================== NAVIGATION ================== */
@@ -47,58 +47,85 @@ nav {
   justify-content: center;
 }
 
-nav button {
+nav button,
+#breakRequestBtn,
+#logoutBtn {
+  position: relative;
+  overflow: hidden;
   padding: 10px 18px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
   font-size: 14px;
-  background-color: #3a5f8f; /* Soft blue */
   color: #e0e0e0;
-  transition: 0.3s;
+  background: linear-gradient(145deg, #3a5f8f, #5b7bbf);
+  transition: all 0.3s;
+  box-shadow: inset 3px 3px 6px #243d5b, inset -3px -3px 6px #466ba2; /* soft UI effect */
 }
 
-nav button:hover {
-  background-color: #5b7bbf; /* Lighter blue on hover */
-}
-
-nav button.active {
-  background-color: #1a3b5c; /* Darker blue for active tab */
-}
-
-#logoutBtn {
-  background-color: #c94c4c;
-}
-
+nav button:hover,
+#breakRequestBtn:hover,
 #logoutBtn:hover {
-  background-color: #e06666;
+  background: linear-gradient(145deg, #5b7bbf, #3a5f8f);
+  box-shadow: inset 2px 2px 4px #243d5b, inset -2px -2px 4px #466ba2;
+}
+
+/* ================== RIPPLE EFFECT ================== */
+nav button::after,
+#breakRequestBtn::after,
+#logoutBtn::after {
+  content: "";
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.3);
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.6s, opacity 1s;
+}
+
+nav button:active::after,
+#breakRequestBtn:active::after,
+#logoutBtn:active::after {
+  transform: scale(3);
+  opacity: 1;
+  transition: 0s;
+}
+
+/* Active nav button */
+nav button.active {
+  background: linear-gradient(145deg, #1a3b5c, #3a5f8f);
+  box-shadow: inset 2px 2px 4px #122536, inset -2px -2px 4px #35668a;
 }
 
 /* ================== TAB SECTIONS ================== */
 .tabSection {
-  background-color: #1f1f1f; /* Same as header */
+  background-color: #1f1f1f;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 12px;
   margin-bottom: 20px;
   transition: background 0.3s;
 }
 
 .tabSection:hover {
-  background-color: #272727; /* Slight hover effect */
+  background-color: #272727;
 }
 
 /* ================== NOTIFICATIONS ================== */
 #notificationsDiv {
   padding: 10px;
   background-color: #2f2f2f;
-  border-radius: 6px;
+  border-radius: 10px;
   color: #d0e6f5;
 }
 
 #notificationsDiv p {
   margin: 5px 0;
   padding: 6px 10px;
-  border-radius: 4px;
+  border-radius: 6px;
   transition: background 0.3s, color 0.3s;
   cursor: default;
 }
@@ -135,12 +162,12 @@ nav button.active {
 }
 
 #tuitionTable th {
-  background-color: #3a5f8f; /* Soft blue header */
+  background: linear-gradient(145deg, #3a5f8f, #5b7bbf);
   color: white;
 }
 
 #tuitionTable tbody tr:nth-child(even) {
-  background-color: #2b2b2b; /* Slightly different for row distinction */
+  background-color: #2b2b2b;
 }
 
 #tuitionTable tbody tr:hover {
@@ -172,21 +199,6 @@ nav button.active {
   display: table;
   width: 100%;
   table-layout: fixed;
-}
-
-/* ================== BREAK REQUEST BUTTON ================== */
-#breakRequestBtn {
-  background-color: #5b7bbf;
-  color: #e0e0e0;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-#breakRequestBtn:hover {
-  background-color: #7aa3dc;
 }
 
 /* ================== RESPONSIVE ================== */
