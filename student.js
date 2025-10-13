@@ -64,6 +64,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
 // ------------------- LOAD STUDENT PROFILE -------------------
 function loadProfile(data) {
   profileDiv.innerHTML = `
+    <p><strong style="color:#2b3e50; font-size:16px;">Student ID:</strong> <span style="font-weight:bold; color:#4a90e2;">${studentId}</span></p>
     <p><strong>Name:</strong> ${data.name}</p>
     <p><strong>Class:</strong> ${data.class}</p>
     <p><strong>Roll:</strong> ${data.roll}</p>
@@ -130,4 +131,5 @@ onValue(studentRef, (snapshot) => {
 const notificationsRef = ref(db, `Notifications/${studentId}`);
 onValue(notificationsRef, (snapshot) => {
   loadNotifications(snapshot.val());
+
 });
