@@ -1,14 +1,10 @@
 /* ================== GENERAL STYLES ================== */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   margin: 0;
   padding: 0 20px;
-  background-color: #f4f5f7;
-  color: #2c3e50;
-}
-
-h1, h2, h3 {
-  margin: 0.5em 0;
+  background-color: #f0f2f5; /* Light Soft UI background */
+  color: #333;
 }
 
 /* ================== HEADER & LOGO ================== */
@@ -17,11 +13,10 @@ header {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  padding: 15px 20px;
   background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-  border-radius: 10px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
 }
 
 .site-logo {
@@ -32,22 +27,22 @@ header {
 
 header h1 {
   font-size: 24px;
-  font-weight: 700;
-  color: #4a90e2;
+  color: #3a5fcd; /* medium blue for text */
+  margin: 0;
 }
 
 header h3 {
   font-size: 16px;
-  font-weight: 400;
-  color: #555;
+  color: #6b8de3; /* lighter blue */
+  margin: 0;
 }
 
 /* ================== NAVIGATION ================== */
 nav {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
   gap: 12px;
+  flex-wrap: wrap;
   margin: 20px 0;
 }
 
@@ -56,89 +51,27 @@ nav button {
   color: #fff;
   border: none;
   padding: 10px 18px;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: 0.3s;
   font-size: 14px;
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.7);
+  box-shadow: 3px 3px 6px rgba(0,0,0,0.05);
 }
 
 nav button:hover {
   background-color: #357abd;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
 }
 
 nav button.active {
-  background-color: #2b3e50;
+  background-color: #2c3e50;
 }
 
-/* ================== FORM CONTAINERS ================== */
-.container {
-  background-color: #ffffff;
-  padding: 25px;
-  border-radius: 15px;
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.08), -8px -8px 16px rgba(255,255,255,0.7);
-  max-width: 450px;
-  margin: 30px auto;
-}
-
-.container h3 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #4a90e2;
-}
-
-.container form input {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 15px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.05), inset -2px -2px 5px rgba(255,255,255,0.7);
-  transition: 0.3s;
-}
-
-.container form input:focus {
-  border-color: #4a90e2;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,0.8);
-  outline: none;
-}
-
-.container form button {
-  width: 100%;
-  background-color: #4a90e2;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.3s;
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.1), -4px -4px 10px rgba(255,255,255,0.7);
-}
-
-.container form button:hover {
-  background-color: #357abd;
-  box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1);
-}
-
-.container a {
-  color: #4a90e2;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.container a:hover {
-  text-decoration: underline;
-}
-
-/* ================== SECTIONS / CARDS ================== */
+/* ================== SECTIONS ================== */
 .tabSection {
   background-color: #ffffff;
   padding: 20px;
-  border-radius: 15px;
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.08), -8px -8px 16px rgba(255,255,255,0.7);
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
   margin-bottom: 20px;
 }
 
@@ -146,55 +79,38 @@ nav button.active {
 table {
   width: 100%;
   border-collapse: collapse;
-  background-color: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 4px 4px 12px rgba(0,0,0,0.05), -4px -4px 12px rgba(255,255,255,0.6);
 }
 
 table th, table td {
-  padding: 12px 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
   text-align: left;
   font-size: 14px;
-  border-bottom: 1px solid #eee;
 }
 
 table th {
   background-color: #4a90e2;
-  color: #fff;
+  color: white;
 }
 
 table tbody tr:nth-child(even) {
-  background-color: #f4f5f7;
+  background-color: #f5f7fa;
 }
 
-/* Scrollable table body */
-table tbody {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-table thead, table tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* ================== TUITION ICON ================== */
+/* ================== ICONS & MODALS ================== */
 .tuitionIcon {
   font-size: 1.3rem;
   cursor: pointer;
+  display: inline-block;
   padding: 4px;
   transition: transform 0.2s, color 0.2s;
 }
 
 .tuitionIcon:hover {
   transform: scale(1.2);
-  color: #4a90e2;
+  color: #3a5fcd;
 }
 
-/* ================== MODAL ================== */
 #tuitionModal {
   position: fixed;
   top: 0;
@@ -209,21 +125,21 @@ table thead, table tbody tr {
 }
 
 #tuitionModal > div {
-  background-color: #ffffff;
-  padding: 25px;
-  border-radius: 15px;
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
   max-height: 80%;
   overflow-y: auto;
   width: 90%;
   max-width: 600px;
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.08), -8px -8px 16px rgba(255,255,255,0.7);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 #tuitionModal button {
   margin: 5px 5px 0 0;
   padding: 8px 14px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   background-color: #4a90e2;
   color: #fff;
@@ -234,29 +150,58 @@ table thead, table tbody tr {
   background-color: #357abd;
 }
 
-/* ================== BREAK REQUEST ================== */
+/* ================== BREAK REQUEST & LOGOUT ================== */
 #breakRequestBtn {
-  background-color: #e67e22;
+  background-color: #f5a623;
   color: #fff;
   border: none;
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: 0.3s;
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.08), -4px -4px 10px rgba(255,255,255,0.6);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
 }
 
 #breakRequestBtn:hover {
-  background-color: #cf6c0c;
+  background-color: #d48806;
 }
 
-/* ================== LOGOUT BUTTON ================== */
 #logoutBtn {
   background-color: #e74c3c;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.05);
 }
 
 #logoutBtn:hover {
   background-color: #c0392b;
+}
+
+/* ================== NOTIFICATIONS ================== */
+#notificationsDiv {
+  padding: 12px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+}
+
+/* ================== CLASS BUTTONS ================== */
+#classTabs button {
+  padding: 8px 14px;
+  margin: 4px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background-color: #4a90e2;
+  color: #fff;
+  transition: 0.3s;
+}
+
+#classTabs button:hover {
+  background-color: #357abd;
 }
 
 /* ================== RESPONSIVE ================== */
@@ -268,6 +213,7 @@ table thead, table tbody tr {
 
   table th, table td {
     font-size: 12px;
+    padding: 6px 8px;
   }
 
   .tuitionIcon {
@@ -276,10 +222,5 @@ table thead, table tbody tr {
 
   #tuitionModal > div {
     width: 95%;
-  }
-
-  .container {
-    margin: 20px;
-    padding: 20px;
   }
 }
