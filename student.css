@@ -3,18 +3,12 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0 20px;
-  background-color: #2b2b2b; /* Semi-dark background */
-  color: #e0e0e0;
+  background-color: #1f1f1f; /* semi-dark background */
+  color: #dbe6f2; /* soft light text */
 }
 
 h1, h2, h3 {
   margin: 0.5em 0;
-  color: #c0d6f0;
-  transition: text-shadow 0.3s;
-}
-
-h1:hover, h2:hover, h3:hover {
-  text-shadow: 0 0 8px #5b7bbf;
 }
 
 /* ================== HEADER & LOGO ================== */
@@ -25,132 +19,97 @@ header {
   gap: 15px;
   padding: 15px 20px;
   background-color: #1f1f1f;
+  border-bottom: 2px solid #3a5f8f;
 }
 
 .site-logo {
-  height: 50px;
+  height: 60px;
   width: auto;
   border-radius: 8px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.site-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #5b7bbf;
 }
 
 header h1 {
-  font-size: 24px;
+  font-size: 28px;
   color: #6cb8f0;
+  text-shadow: 0 0 6px #3a5f8f;
+  transition: text-shadow 0.3s, color 0.3s;
+}
+
+header h1:hover {
+  color: #9cc8f8;
+  text-shadow: 0 0 12px #5b7bbf, 0 0 6px #3a5f8f;
 }
 
 header h3 {
   font-size: 16px;
   color: #8abce7;
+  margin-top: 4px;
+  text-shadow: 0 0 4px #3a5f8f;
+  transition: text-shadow 0.3s, color 0.3s;
+}
+
+header h3:hover {
+  color: #b0d4f8;
+  text-shadow: 0 0 10px #5b7bbf;
 }
 
 /* ================== NAVIGATION ================== */
 nav {
   display: flex;
+  justify-content: center;
   flex-wrap: wrap;
   gap: 10px;
   margin: 20px 0;
-  justify-content: center;
 }
 
-nav button,
-#breakRequestBtn,
-#logoutBtn {
-  position: relative;
-  overflow: hidden;
-  padding: 10px 18px;
+nav button {
+  background-color: #3a5f8f;
+  color: #fff;
   border: none;
-  border-radius: 10px;
+  padding: 10px 18px;
   cursor: pointer;
+  border-radius: 8px;
   font-size: 14px;
-  color: #e0e0e0;
-  background: linear-gradient(145deg, #3a5f8f, #5b7bbf);
-  transition: all 0.3s, box-shadow 0.3s;
-  box-shadow: inset 3px 3px 6px #243d5b, inset -3px -3px 6px #466ba2;
+  transition: all 0.3s;
 }
 
-nav button:hover,
-#breakRequestBtn:hover,
-#logoutBtn:hover {
-  background: linear-gradient(145deg, #5b7bbf, #3a5f8f);
-  box-shadow: 0 0 8px #5b7bbf, inset 2px 2px 4px #243d5b, inset -2px -2px 4px #466ba2;
-}
-
-/* ================== RIPPLE EFFECT ================== */
-nav button::after,
-#breakRequestBtn::after,
-#logoutBtn::after {
-  content: "";
-  position: absolute;
-  width: 100px;
-  height: 100px;
-  background: rgba(255, 255, 255, 0.3);
-  display: block;
-  border-radius: 50%;
-  pointer-events: none;
-  transform: scale(0);
-  opacity: 0;
-  transition: transform 0.6s, opacity 1s;
-}
-
-nav button:active::after,
-#breakRequestBtn:active::after,
-#logoutBtn:active::after {
-  transform: scale(3);
-  opacity: 1;
-  transition: 0s;
-}
-
-/* Active nav button */
-nav button.active {
-  background: linear-gradient(145deg, #1a3b5c, #3a5f8f);
-  box-shadow: 0 0 8px #5b7bbf, inset 2px 2px 4px #122536, inset -2px -2px 4px #35668a;
+nav button:hover, nav button.active {
+  background-color: #5b7bbf;
+  color: #f0f8ff;
+  transform: translateY(-2px);
 }
 
 /* ================== TAB SECTIONS ================== */
 .tabSection {
-  background-color: #1f1f1f;
+  background-color: #2a2a2a;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 10px;
   margin-bottom: 20px;
-  transition: background 0.3s;
-}
-
-.tabSection:hover {
-  background-color: #272727;
-  box-shadow: 0 0 8px #5b7bbf;
 }
 
 /* ================== NOTIFICATIONS ================== */
 #notificationsDiv {
   padding: 10px;
-  background-color: #2f2f2f;
-  border-radius: 10px;
-  color: #d0e6f5;
+  border-radius: 8px;
+  background-color: #333;
+  border: 1px solid #3a5f8f;
 }
 
 #notificationsDiv p {
-  margin: 5px 0;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
-  cursor: default;
-}
-
-#notificationsDiv p:hover {
-  background-color: #3a5f8f;
-  color: #fff;
-  box-shadow: 0 0 8px #5b7bbf;
+  padding: 6px 0;
+  border-bottom: 1px solid #555;
 }
 
 /* ================== PROFILE ================== */
 #profileDiv p {
   line-height: 1.6;
-  transition: color 0.3s, text-shadow 0.3s;
-}
-
-#profileDiv p:hover {
-  color: #a0c4f0;
-  text-shadow: 0 0 6px #5b7bbf;
+  color: #cce0ff;
 }
 
 /* ================== TUITION TABLE ================== */
@@ -158,56 +117,62 @@ nav button.active {
   width: 100%;
   border-collapse: collapse;
   margin-top: 15px;
-  color: #e0e0e0;
 }
 
 #tuitionTable th, #tuitionTable td {
   padding: 10px;
-  border: 1px solid #444;
+  border: 1px solid #555;
   text-align: left;
   font-size: 14px;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  color: #dbe6f2;
 }
 
 #tuitionTable th {
-  background: linear-gradient(145deg, #3a5f8f, #5b7bbf);
-  color: white;
+  background-color: #3a5f8f;
+  color: #fff;
 }
 
 #tuitionTable tbody tr:nth-child(even) {
-  background-color: #2b2b2b;
+  background-color: #2a2a2a;
 }
 
-#tuitionTable tbody tr:hover {
-  background-color: #3a5f8f;
-  color: #fff;
-  box-shadow: 0 0 8px #5b7bbf;
-}
-
+/* Make table scrollable on small screens */
 #tuitionTable tbody {
   display: block;
   max-height: 300px;
   overflow-y: auto;
 }
 
-#tuitionTable tbody::-webkit-scrollbar {
-  width: 10px;
-}
-
-#tuitionTable tbody::-webkit-scrollbar-track {
-  background: #1f1f1f;
-  border-radius: 6px;
-}
-
-#tuitionTable tbody::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #5b7bbf, #3a5f8f);
-  border-radius: 6px;
-}
-
 #tuitionTable thead, #tuitionTable tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
+}
+
+/* ================== BREAK REQUEST ================== */
+#breakRequestBtn {
+  background-color: #5b7bbf;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#breakRequestBtn:hover {
+  background-color: #7aa0dc;
+  transform: translateY(-2px);
+}
+
+/* ================== LOGOUT BUTTON ================== */
+#logoutBtn {
+  background-color: #e74c3c;
+}
+
+#logoutBtn:hover {
+  background-color: #ff5c5c;
+  transform: translateY(-2px);
 }
 
 /* ================== RESPONSIVE ================== */
@@ -219,10 +184,6 @@ nav button.active {
 
   #tuitionTable th, #tuitionTable td {
     font-size: 12px;
-  }
-
-  nav button {
-    width: 100%;
-    text-align: center;
+    padding: 8px;
   }
 }
