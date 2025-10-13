@@ -17,6 +17,14 @@ h1, h2, h3 {
   color: #004080; /* Primary color for headings */
 }
 
+/* Specific styling for the main panel title on student.html */
+body > h1:not(header h1) {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 20px;
+  color: #0066cc;
+}
+
 /* ================== HEADER ================== */
 header {
   text-align: center;
@@ -143,7 +151,7 @@ nav button {
   font-size: 1rem;
   font-weight: 500;
   transition: 0.3s ease;
-  flex-grow: 0;
+  flex-grow: 1; /* Allows buttons to take up available space */
   min-width: 120px;
 }
 
@@ -156,6 +164,7 @@ nav button:hover {
   margin-left: auto;
   background: #d9534f; /* Danger/Logout color */
   min-width: 100px;
+  flex-grow: 0; /* Override flex-grow for logout to prevent it stretching too much */
 }
 
 #logoutBtn:hover {
@@ -172,7 +181,75 @@ nav button:hover {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* ================== TABLES ================== */
+/* ================== STUDENT PROFILE SPECIFIC STYLES ================== */
+#profileDiv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 30px;
+  padding: 10px;
+}
+
+#profileDiv p {
+  margin: 0;
+  padding: 5px 0;
+  font-size: 1.1rem;
+  border-bottom: 1px dashed #eee;
+}
+
+#profileDiv p:nth-last-child(2),
+#profileDiv p:last-child {
+  border-bottom: none;
+}
+
+#profileDiv strong {
+  color: #004080;
+  font-weight: 600;
+  min-width: 100px;
+  display: inline-block;
+}
+
+/* ================== NOTIFICATIONS SPECIFIC STYLES ================== */
+#notificationsDiv {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fcfcfc;
+}
+
+#notificationsDiv p {
+  border-bottom: 1px solid #eee;
+  padding: 8px 0;
+  margin: 0;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+#notificationsDiv p:last-child {
+  border-bottom: none;
+}
+
+/* ================== BREAK REQUEST BUTTON (Student Panel) ================== */
+#breakRequestBtn {
+  margin-top: 15px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  background: #ff9900; /* Warning/Action color */
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#breakRequestBtn:hover {
+  background: #cc7a00;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ================== TABLES (Shared & Tuition) ================== */
 table {
   width: 100%;
   border-collapse: separate;
@@ -208,7 +285,19 @@ table tbody tr:hover {
   background-color: #f9f9f9;
 }
 
-/* Action buttons in tables */
+/* Status colors */
+.tabSection td strong,
+.tabSection td[style*="green"],
+.tabSection td[style*="red"],
+.tabSection td[style*="purple"] {
+  font-weight: bold;
+}
+.tabSection td[style*="green"] { color: #28a745; }
+.tabSection td[style*="red"] { color: #dc3545; }
+.tabSection td[style*="purple"] { color: #6f42c1; }
+
+
+/* Action buttons in admin tables */
 table td button {
   padding: 6px 10px;
   margin-right: 5px;
@@ -234,7 +323,7 @@ table td button {
   background: #eea236;
 }
 
-/* ================== TUITION ICON ================== */
+/* ================== TUITION ICON (for admin.html) ================== */
 .tuitionIcon {
   font-size: 1.5rem;
   cursor: pointer;
@@ -295,57 +384,7 @@ table td button {
   background: #004d99;
 }
 
-/* Status colors */
-.tabSection td strong {
-  font-weight: bold;
-}
-.tabSection td[style*="green"] { color: #28a745; font-weight: bold; }
-.tabSection td[style*="red"] { color: #dc3545; font-weight: bold; }
-.tabSection td[style*="purple"] { color: #6f42c1; font-weight: bold; }
-
-
-/* ================== BREAK REQUEST BUTTON ================== */
-#breakRequestBtn {
-  margin-top: 15px;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 8px;
-  background: #ff9900; /* Warning/Action color */
-  color: #fff;
-  font-weight: bold;
-  font-size: 1.05rem;
-  cursor: pointer;
-  transition: 0.3s;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-#breakRequestBtn:hover {
-  background: #cc7a00;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* ================== NOTIFICATIONS ================== */
-#notificationsDiv {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  background: #fcfcfc;
-}
-
-#notificationsDiv p {
-  border-bottom: 1px solid #eee;
-  padding: 8px 0;
-  margin: 0;
-  color: #555;
-  font-size: 0.95rem;
-}
-
-#notificationsDiv p:last-child {
-  border-bottom: none;
-}
-
-/* ================== CLASS BUTTONS ================== */
+/* ================== CLASS BUTTONS (Admin Panel) ================== */
 #classTabs {
   margin-bottom: 15px;
   border-bottom: 1px solid #ddd;
@@ -371,43 +410,71 @@ table td button {
 }
 
 
-/* ================== RESPONSIVE ================== */
+/* ================== RESPONSIVE MOBILE STYLES (Max Width 768px) ================== */
 @media (max-width: 768px) {
+  
+  /* Reset overall padding and margin for small screens */
   body {
-    padding: 0 10px;
+    padding: 0;
+  }
+  
+  .container, .tabSection {
+    margin: 20px 10px;
+    max-width: calc(100% - 20px);
+    padding: 20px;
   }
   
   header h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+  
+  /* Hide the extra 'Student Panel' H1 for space */
+  body > h1:not(header h1) {
+    display: none;
   }
 
+  /* --- Navigation --- */
   nav {
     flex-direction: column;
     padding: 10px;
-    margin: 15px auto;
+    margin: 15px 10px;
   }
 
   nav button {
     width: 100%;
     margin-left: 0;
     min-width: 0;
+    flex-grow: 1; 
   }
   
   #logoutBtn {
     margin-left: 0;
   }
 
-  .tabSection {
-    padding: 15px;
+  /* --- Profile Section --- */
+  #profileDiv {
+    grid-template-columns: 1fr; /* Stack profile items vertically */
+    gap: 10px;
+  }
+  
+  #profileDiv p {
+    font-size: 1rem;
+    padding: 8px 0;
   }
 
+  /* --- Tables (Card View) --- */
+  table {
+    border: 1px solid #ddd; /* Add a slight border around the whole table/card area */
+    border-radius: 8px;
+  }
+  
   table th, table td {
     font-size: 0.85rem;
     padding: 8px 10px;
     display: block;
     width: 100%;
     box-sizing: border-box;
-    text-align: right;
+    text-align: right; /* Align data to the right */
   }
   
   table thead {
@@ -416,12 +483,18 @@ table td button {
 
   table tr {
     display: block;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    background: #fff;
+    border-radius: 0;
     overflow: hidden;
   }
-
+  
+  /* Remove last row's bottom border on the tr, not the td */
+  table tbody tr:last-child {
+      border-bottom: none;
+  }
+  
   table tr td::before {
     content: attr(data-label);
     float: left;
@@ -431,15 +504,22 @@ table td button {
     margin-right: 10px;
   }
 
-  /* Specific data labels for admin tables */
+  /* Universal Table Data Labels (Ensuring all tables are covered) */
+  /* --- Tuition Table Labels (student.html) --- */
+  #tuitionTable td:nth-child(1)::before { content: "Month's Name:"; }
+  #tuitionTable td:nth-child(2)::before { content: "Status:"; }
+  #tuitionTable td:nth-child(3)::before { content: "Date & Method:"; }
+  
+  /* --- Registration Table Labels (admin.html) --- */
   #registrationTable td:nth-child(1)::before { content: "Student ID:"; }
   #registrationTable td:nth-child(2)::before { content: "Name:"; }
   #registrationTable td:nth-child(3)::before { content: "Class:"; }
   #registrationTable td:nth-child(4)::before { content: "Roll:"; }
   #registrationTable td:nth-child(5)::before { content: "WhatsApp:"; }
-  #registrationTable td:nth-child(6) { text-align: center; }
+  #registrationTable td:nth-child(6) { text-align: center; } /* Center the action buttons */
   #registrationTable td:nth-child(6)::before { content: "Action:"; float: left; }
   
+  /* --- Break Request Table Labels (admin.html) --- */
   #breakTable td:nth-child(1)::before { content: "Student ID:"; }
   #breakTable td:nth-child(2)::before { content: "Name:"; }
   #breakTable td:nth-child(3)::before { content: "Class:"; }
@@ -447,10 +527,7 @@ table td button {
   #breakTable td:nth-child(5)::before { content: "WhatsApp:"; }
   #breakTable td:nth-child(6)::before { content: "Status:"; }
   
-  #tuitionTable td:nth-child(1)::before { content: "Month:"; }
-  #tuitionTable td:nth-child(2)::before { content: "Status:"; }
-  #tuitionTable td:nth-child(3)::before { content: "Date & Method:"; }
-  
+  /* --- Class Students Table Labels (admin.html) --- */
   #classStudents table tr td:nth-child(1)::before { content: "ID:"; }
   #classStudents table tr td:nth-child(2)::before { content: "Name:"; }
   #classStudents table tr td:nth-child(3)::before { content: "Roll:"; }
@@ -460,17 +537,17 @@ table td button {
   /* Reset padding for the action cell in admin tables */
   #registrationTable td:last-child {
     text-align: center;
+    border-bottom: none;
   }
   
   #registrationTable td:last-child button {
     margin: 5px;
-  }
-  
-  .container {
-    margin: 20px auto;
+    width: 45%; /* Make buttons roughly half-width */
   }
 
+  /* --- Modal --- */
   #tuitionModal > div {
-    padding: 20px;
+    padding: 20px 15px;
+    max-width: 90%;
   }
 }
