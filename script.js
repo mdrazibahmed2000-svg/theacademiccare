@@ -42,7 +42,8 @@ document.getElementById("backToLoginBtn2").addEventListener("click", () => {
   loginBox.style.display = "block";
 });
 
-// ------------------- STUDENT REGISTRATION -------------------
+
+    // ------------------- STUDENT REGISTRATION -------------------
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -62,21 +63,37 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   const studentId = `S${year}${cls}${roll}`;
 
   try {
+    const existingSnap = await get(ref(db, `Registrations/${studentId}`));
+
+    if (existingSnap.exists()) {
+      const existingData = existingSnap.val();
+      if (existingData.approved === true) {
+        alert(`Registration denied! The Student ID "${studentId}" is already approved.`);
+        return;
+      } else {
+        alert(`This Student ID (${studentId}) is pending approval. Please wait for admin verification.`);
+        return;
+      }
+    }
+
+    // Proceed with new registration
     await set(ref(db, `Registrations/${studentId}`), {
       name,
       class: cls,
       roll,
       whatsapp,
-      password, // Insecure, but kept for your current system
+      password, // kept for now — should later be hashed for security
       approved: false
     });
-    alert(`Registration submitted! Your Student ID: ${studentId}`);
+
+    alert(`Registration submitted successfully! Your Student ID: ${studentId}`);
     registerBox.style.display = "none";
     loginBox.style.display = "block";
   } catch (err) {
     alert("Error submitting registration: " + err.message);
   }
 });
+
 
 // ------------------- LOGIN (ADMIN / STUDENT) -------------------
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
