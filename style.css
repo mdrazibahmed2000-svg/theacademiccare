@@ -214,3 +214,51 @@ footer {
     color: #004080;
   }
 }
+/* -------- CLASS TABS FIX -------- */
+#classTabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+#classTabs button {
+  background: #0073e6;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+#classTabs button:hover {
+  background: #005bb5;
+  transform: scale(1.05);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+#classTabs button:active {
+  transform: scale(0.96);
+}
+
+/* Mobile fix: Ensure all class tabs visible */
+@media (max-width: 768px) {
+  #classTabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  #classTabs button {
+    flex: 1 0 45%;
+    margin: 5px;
+  }
+}
+
+
