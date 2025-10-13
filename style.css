@@ -1,207 +1,569 @@
-/* ================== GENERAL STYLES ================== */
+/* ========================================================
+    FULL APPLICATION STYLES (Merged student, login, and admin base styles)
+    ========================================================
+*/
+
+/* ================== GENERAL STYLES (Based on Student.css for modern look) ================== */
 body {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
-  padding: 0 20px;
-  background: #f9f9f9;
+  padding: 0;
+  background: #f5f7fa; /* Light, soft background for comfort */
   color: #333;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 h1, h2, h3 {
   margin: 0.5em 0;
+  font-weight: 600;
+  color: #1a73e8; /* Primary Color (Blue for stability/growth) */
 }
 
+/* Specific styling for the main panel title (used by student and admin) */
+body > h1:not(header h1) {
+  text-align: center;
+  font-size: 2rem;
+  margin-top: 20px;
+  color: #004080;
+}
+
+/* ================== HEADER (Based on Student.css for consistency) ================== */
 header {
   text-align: center;
-  padding: 10px 0;
-  background-color: #004080; /* Admin/Student panel primary color */
+  padding: 20px 0;
+  background-color: #004080; /* Deep blue primary color for header */
   color: #fff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
 }
 
 header h3 {
   font-size: 1.2rem;
-  font-weight: normal;
+  font-weight: 300;
+  color: #c9e0ff;
+  margin-top: 5px;
 }
 
 hr {
   border: 0;
-  border-top: 2px solid #0066cc;
-  margin: 10px 0 20px 0;
+  border-top: 1px solid #1a73e8;
+  width: 80%;
+  margin: 15px auto;
 }
 
-/* ================== NAVIGATION ================== */
+/* ================== NAVIGATION (Used by Admin and Student panels) ================== */
 nav {
-  margin: 10px 0 20px 0;
+  background: #ffffff;
+  padding: 15px 20px;
+  margin: 20px auto;
+  max-width: 1000px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
 }
 
 nav button {
-  padding: 10px 15px;
-  background: #0066cc; /* Matching primary color */
+  padding: 10px 20px;
+  background: #1a73e8; 
   color: #fff;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: 0.3s ease;
+  flex-grow: 1; 
+  min-width: 100px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 nav button:hover {
-  background: #004d99;
+  background: #145cb3;
+  transform: translateY(-1px);
 }
 
 #logoutBtn {
   margin-left: auto;
-  background: #cc0000;
+  background: #dc3545; /* Danger/Logout color */
+  min-width: 100px;
+  flex-grow: 0; 
 }
 
 #logoutBtn:hover {
-  background: #990000;
+  background: #c82333;
 }
 
-/* ================== SECTIONS ================== */
+/* ================== SECTION CONTAINERS (Used by Admin and Student panels) ================== */
 .tabSection {
+  max-width: 1000px;
+  margin: 20px auto;
   background: #fff;
-  padding: 15px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
-/* ================== TABLES ================== */
-table {
+
+/* ================== LOGIN/REGISTRATION/FORGOT BOX STYLES ================== */
+.container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 30px; /* Slightly larger padding for better look */
+  background-color: #fff;
+  border-radius: 12px; /* Consistent rounded corners */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+.container h3 {
+  color: #004080;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Spacing between form elements */
+}
+.container input[type="text"], 
+.container input[type="password"] {
   width: 100%;
-  border-collapse: collapse;
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+.container input[type="text"]:focus, 
+.container input[type="password"]:focus {
+    border-color: #1a73e8;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+.container button[type="submit"] {
+  width: 100%;
+  background-color: #1a73e8; /* Consistent primary color */
+  color: white;
+  padding: 16px 20px;
+  margin-top: 5px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 3px 8px rgba(26, 115, 232, 0.3);
+}
+.container button[type="submit"]:hover {
+  background-color: #145cb3;
+  transform: translateY(-1px);
+}
+.container a {
+  color: #1a73e8;
+  text-decoration: none;
+  margin: 15px 5px 0 5px;
+  display: inline-block;
+  font-size: 0.95rem;
+}
+.container a:hover {
+  text-decoration: underline;
 }
 
-table th, table td {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
+/* ================== STUDENT PANEL SPECIFIC STYLES ================== */
+
+/* --- PROFILE SECTION --- */
+#profileDiv {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 30px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fcfcfc;
+}
+
+#profileDiv p {
+  margin: 0;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+}
+
+#profileDiv p:last-child {
+  border-bottom: none;
+}
+
+#profileDiv strong {
+  color: #004080;
+  font-weight: 600;
+  min-width: 100px;
+  margin-right: 15px;
+}
+
+/* --- NOTIFICATIONS --- */
+#notificationsDiv {
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fffbe6; /* Light yellow background for attention */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#notificationsDiv h2 {
+    color: #cc9900;
+    margin-bottom: 10px;
+}
+
+#notificationsDiv p {
+  border-bottom: 1px dashed #ffd700;
+  padding: 10px 0;
+  margin: 0;
+  color: #555;
+  font-size: 1rem;
+}
+
+#notificationsDiv p:last-child {
+  border-bottom: none;
+}
+
+/* --- TUITION STATUS TABLE --- */
+#tuitionTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+#tuitionTable thead {
+  background-color: #e6f7ff; /* Light blue header */
+}
+
+#tuitionTable th, #tuitionTable td {
+  padding: 15px;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
   text-align: left;
   vertical-align: middle;
 }
 
-table th {
-  background: #f0f0f0;
+#tuitionTable th {
+  color: #004080;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
 }
 
-/* ================== TUITION ICON ================== */
-.tuitionIcon {
-  font-size: 1.3rem;
-  cursor: pointer;
-  display: inline-block;
-  padding: 4px;
-  transition: transform 0.2s, color 0.2s;
+#tuitionTable tbody tr:last-child td {
+  border-bottom: none;
 }
 
-.tuitionIcon:hover {
-  transform: scale(1.2);
-  color: #009900;
+#tuitionTable tbody tr:hover {
+  background-color: #f9fcff;
 }
 
-/* ================== MODAL ================== */
-#tuitionModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+/* Status colors */
+#tuitionTable td strong {
+    font-weight: 700;
+}
+.status-paid { color: #28a745; } /* Green */
+.status-unpaid { color: #dc3545; } /* Red */
+.status-break { color: #6f42c1; } /* Purple */
+
+/* --- BREAK REQUEST SECTION --- */
+#breakRequestDiv {
+    padding: 10px;
+    text-align: center;
 }
 
-#tuitionModal > div {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  max-height: 80%;
-  overflow-y: auto;
-  width: 90%;
-  max-width: 600px;
-}
-
-#tuitionModal button {
-  margin: 5px 5px 0 0;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  background: #0066cc;
-  color: #fff;
-  transition: 0.3s;
-}
-
-#tuitionModal button:hover {
-  background: #004d99;
-}
-
-/* ================== BREAK REQUEST BUTTON ================== */
 #breakRequestBtn {
-  margin-top: 10px;
-  padding: 10px 15px;
+  margin-top: 15px;
+  padding: 15px 30px;
   border: none;
-  border-radius: 5px;
-  background: #ff9900;
+  border-radius: 10px;
+  background: #ff9900; /* Warning/Action color */
   color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: 0.3s;
+  box-shadow: 0 4px 6px rgba(255, 153, 0, 0.4);
+  text-transform: uppercase;
 }
 
 #breakRequestBtn:hover {
   background: #cc7a00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 10px rgba(255, 153, 0, 0.5);
 }
 
-/* ================== NOTIFICATIONS ================== */
-#notificationsDiv p {
-  border-bottom: 1px solid #eee;
-  padding: 5px 0;
+/* Break Status Message */
+#breakRequestDiv p {
+    font-size: 1.1rem;
+    font-style: italic;
+    color: #555;
+    margin-top: 15px;
 }
 
-/* ================== CLASS BUTTONS ================== */
-#classTabs button {
-  padding: 6px 12px;
-  margin: 3px;
-  border-radius: 5px;
-  border: none;
+/* ================== ADMIN/GLOBAL TABLE STYLES ================== */
+/* This also applies to registrationSection/breakSection tables in admin.html */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+table th, table td {
+    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+table th {
+    background-color: #e6f7ff;
+    color: #004080;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+table tbody tr:hover {
+    background-color: #f9fcff;
+}
+
+
+/* ================== MODAL STYLES (Used by Admin Panel) ================== */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6); /* Darker overlay */
+  padding-top: 50px;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 700px;
+  position: relative;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.close:hover,
+.close:focus {
+  color: #dc3545;
+  text-decoration: none;
   cursor: pointer;
-  background: #0099cc;
+}
+
+/* Admin Tuition Modal specifics */
+#tuitionModalContent {
+  background-color: #fff;
+  padding: 0; /* Content padding is handled by modal-content */
+  border-radius: 8px;
+  max-height: 80vh;
+  overflow-y: auto;
+  width: 100%;
+}
+
+#tuitionModalContent table {
+    margin-top: 10px;
+}
+
+#tuitionModal button {
+  margin: 5px 10px 0 0;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
   color: #fff;
   transition: 0.3s;
+  font-size: 0.9rem;
 }
 
-#classTabs button:hover {
-  background: #007399;
+#tuitionModal button.paid {
+    background: #28a745;
+}
+#tuitionModal button.paid:hover {
+    background: #218838;
+}
+#tuitionModal button.break {
+    background: #6f42c1;
+}
+#tuitionModal button.break:hover {
+    background: #5a3698;
+}
+#tuitionModal button.undo {
+    background: #ffc107;
+    color: #333;
+}
+#tuitionModal button.undo:hover {
+    background: #e0a800;
+}
+#tuitionModal button.close-btn {
+    background: #6c757d;
+}
+#tuitionModal button.close-btn:hover {
+    background: #5a6268;
 }
 
-/* ================== RESPONSIVE ================== */
+/* ================== RESPONSIVE MOBILE STYLES (Max Width 768px) ================== */
 @media (max-width: 768px) {
+  
+  .tabSection {
+    margin: 15px 10px;
+    padding: 20px;
+    border-radius: 8px;
+  }
+  
+  header h1 {
+    font-size: 1.8rem;
+  }
+  
+  /* Hide the extra 'Student Panel' H1 for space */
+  body > h1:not(header h1) {
+    display: none;
+  }
+  
+  /* --- Login/Registration Form --- */
+  .container {
+      margin: 20px auto;
+      padding: 20px;
+  }
+  
+  /* --- Navigation --- */
   nav {
     flex-direction: column;
+    padding: 10px;
+    margin: 15px 10px;
   }
 
   nav button {
     width: 100%;
+    min-width: 0;
+  }
+  
+  #logoutBtn {
     margin-left: 0;
   }
 
-  table th, table td {
+  /* --- Profile Section (Stacking) --- */
+  #profileDiv {
+    grid-template-columns: 1fr; /* Stack profile items vertically */
+    gap: 5px;
+  }
+  
+  #profileDiv p {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 0;
+  }
+  
+  #profileDiv strong {
+      margin-bottom: 3px;
+      font-size: 0.95rem;
+  }
+
+  /* --- Tuition Table (Card View - for Student Panel) --- */
+  #tuitionTable {
+    border: 1px solid #ddd; 
+    border-radius: 8px;
+    box-shadow: none;
+  }
+  
+  #tuitionTable th, #tuitionTable td {
     font-size: 0.9rem;
-    padding: 6px 8px;
+    padding: 12px 10px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: right; 
+  }
+  
+  #tuitionTable thead {
+    display: none; /* Hide header on small screens */
   }
 
-  .tuitionIcon {
-    font-size: 1.1rem;
+  #tuitionTable tr {
+    display: block;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  #tuitionTable tbody tr:last-child {
+      border-bottom: none;
+  }
+  
+  #tuitionTable tr td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #004080;
+    margin-right: 10px;
   }
 
-  #tuitionModal > div {
-    width: 95%;
+  /* Specific Table Data Labels for Student Tuition Table */
+  #tuitionTable td:nth-child(1)::before { content: "Month's Name"; }
+  #tuitionTable td:nth-child(2)::before { content: "Status"; }
+  #tuitionTable td:nth-child(3)::before { content: "Date & Method"; }
+
+  /* Notification styling adjustment for mobile */
+  #notificationsDiv {
+    padding: 10px;
+  }
+
+  /* --- Admin Table (Registration/Break tables on Admin Panel) --- */
+  table th, table td {
+      font-size: 0.9rem;
+      padding: 10px 8px;
+  }
+
+  /* Modal responsiveness */
+  .modal-content {
+      margin: 10% auto;
+      padding: 20px;
   }
 }
