@@ -213,7 +213,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const dateMethod = updatedTuition[monthKey]?.date ? `${updatedTuition[monthKey].date} (${updatedTuition[monthKey].method})` : "";
 
         let actionHtml = "";
-        // Pass the studentId and monthKey to the functions
         if (status === "unpaid") {
           actionHtml = `
             <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
@@ -235,60 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ------------------- TUITION ACTIONS -------------------
-    // NOTE: These functions must be defined in the global scope (window) 
-    // OR called via an event listener inside the modal logic 
-    // to dynamically update the modal content without a full refresh.
-    // For simplicity, we'll keep them on the window object but update the logic.
-    // **IMPORTANT:** Since these functions are defined globally (on `window`), 
-    // they don't have direct access to the `populateTable` and `tuition` variables 
-    // defined inside `window.showTuitionModal`. You must redefine the
-    // `showTuitionModal` to either use more specific event handlers 
-    // *or* make `populateTable` accessible, but since `populateTable` uses 
-    // local variables (`currentYear`, `currentMonth`, `tbody`), the easiest
-    // fix is to **move the logic of re-fetching the data and calling `populateTable`
-    // into a self-contained helper function.**
-
-    async function refreshTuitionModal(studentId) {
-        const snapshot = await get(ref(db, `Registrations/${studentId}`));
-        const data = snapshot.val();
-        const updatedTuition = data.tuition || {};
-        const tbody = document.querySelector("#tuitionModal tbody");
-        
-        if (!tbody) return; // Modal is closed, do nothing
-
-        // Redefine populateTable logic locally to use the updated tbody and data
-        const currentYear = new Date().getFullYear();
-        const currentMonth = new Date().getMonth() + 1;
-        
-        tbody.innerHTML = "";
-        for (let month = 1; month <= currentMonth; month++) {
-            const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
-            const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
-            const status = updatedTuition[monthKey]?.status || "unpaid";
-            const dateMethod = updatedTuition[monthKey]?.date ? `${updatedTuition[monthKey].date} (${updatedTuition[monthKey].method})` : "";
-
-            let actionHtml = "";
-            if (status === "unpaid") {
-                actionHtml = `
-                    <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
-                    <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
-                `;
-            } else {
-                actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
-            }
-
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${monthName}</td>
-                <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
-                <td>${dateMethod}</td>
-                <td>${actionHtml}</td>
-            `;
-            tbody.appendChild(tr);
-        }
-    }
-
-
     window.markPaid = async (studentId, monthKey) => {
       const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
       if (!method) return;
@@ -297,8 +242,9 @@ document.addEventListener("DOMContentLoaded", () => {
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
       await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
 
-      // Update the modal content dynamically
-      await refreshTuitionModal(studentId);
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
 
     window.markBreak = async (studentId, monthKey) => {
@@ -306,15 +252,17 @@ document.addEventListener("DOMContentLoaded", () => {
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
       await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
 
-      // Update the modal content dynamically
-      await refreshTuitionModal(studentId);
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
 
     window.undoStatus = async (studentId, monthKey) => {
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
 
-      // Update the modal content dynamically
-      await refreshTuitionModal(studentId);
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
 
     // Initial table population
@@ -332,3 +280,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBreakRequests();
   loadClasses();
 });
+
+Read the codes carefully and help me by updating the admin.js. Currently there is a tuition details table in the page. If admin take action clicking on "Mark Paid" then he needs to confirm payment method. Then the status change from unpaid to paid. But admin can see the changes reopening the table after closing the table. 
+Now ensure that the admin can see the changing status dynamically without closing the table and reopening
