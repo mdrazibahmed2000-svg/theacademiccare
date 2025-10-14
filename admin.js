@@ -225,44 +225,94 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${monthName}</td>
-        <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
-        <td>${dateMethod}</td>
-        <td>${actionHtml}</td>
-      `;
-      tbody.appendChild(tr);
+tr.setAttribute("data-month", monthKey); // used for instant updates
+tr.innerHTML = `
+  <td>${monthName}</td>
+  <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">
+    ${status.charAt(0).toUpperCase()+status.slice(1)}
+  </td>
+  <td>${dateMethod}</td>
+  <td>${actionHtml}</td>
+`;
+tbody.appendChild(tr);
+
     }
   };
 
-  // ------------------- TUITION ACTIONS -------------------
-  window.markPaid = async (studentId, monthKey) => {
-    const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
-    if (!method) return;
-    const date = new Date().toISOString().split("T")[0];
+  // ------------------- TUITION ACTIONS (Dynamic Update) -------------------
+window.markPaid = async (studentId, monthKey) => {
+  const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
+  if (!method) return;
+  const date = new Date().toISOString().split("T")[0];
 
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
-    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
+  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
+    status: "paid",
+    date,
+    method
+  });
+  await push(ref(db, `Notifications/${studentId}`), {
+    message: `${monthKey} tuition marked Paid.`,
+    date
+  });
 
-    // Refresh modal to show updated status
-    window.showTuitionModal(studentId);
-  };
+  // ✅ Dynamically update table row without closing modal
+  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
+  if (row) {
+    row.querySelector("td:nth-child(2)").style.color = "green";
+    row.querySelector("td:nth-child(2)").textContent = "Paid";
+    row.querySelector("td:nth-child(3)").textContent = `${date} (${method})`;
+    row.querySelector("td:nth-child(4)").innerHTML =
+      `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+  }
+};
 
-  window.markBreak = async (studentId, monthKey) => {
-    const date = new Date().toISOString().split("T")[0];
+window.markBreak = async (studentId, monthKey) => {
+  const date = new Date().toISOString().split("T")[0];
 
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
-    await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
+  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
+    status: "break"
+  });
+  await push(ref(db, `Notifications/${studentId}`), {
+    message: `${monthKey} tuition marked Break.`,
+    date
+  });
 
-    // Refresh modal to show updated status
-    window.showTuitionModal(studentId);
-  };
+  // ✅ Dynamically update table row
+  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
+  if (row) {
+    row.querySelector("td:nth-child(2)").style.color = "purple";
+    row.querySelector("td:nth-child(2)").textContent = "Break";
+    row.querySelector("td:nth-child(3)").textContent = "";
+    row.querySelector("td:nth-child(4)").innerHTML =
+      `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+  }
+};
 
-  window.undoStatus = async (studentId, monthKey) => {
-    await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
-    alert(`Status reset for ${monthKey}.`);
-    window.showTuitionModal(studentId);
-  };
+window.undoStatus = async (studentId, monthKey) => {
+  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
+    status: "unpaid",
+    date: null,
+    method: null
+  });
+  const date = new Date().toISOString().split("T")[0];
+  await push(ref(db, `Notifications/${studentId}`), {
+    message: `${monthKey} tuition status reset to Unpaid.`,
+    date
+  });
+
+  // ✅ Dynamically update table row
+  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
+  if (row) {
+    row.querySelector("td:nth-child(2)").style.color = "red";
+    row.querySelector("td:nth-child(2)").textContent = "Unpaid";
+    row.querySelector("td:nth-child(3)").textContent = "";
+    row.querySelector("td:nth-child(4)").innerHTML = `
+      <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
+      <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
+    `;
+  }
+};
+
 
   // ------------------- INITIAL LOAD -------------------
   switchTab("home");
