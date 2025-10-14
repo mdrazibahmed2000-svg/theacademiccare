@@ -185,9 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const modal = document.createElement("div");
     modal.id = "tuitionModal";
-    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;";
     modal.innerHTML = `
-      <div style="background:white;padding:20px;border-radius:10px;max-height:80%;overflow:auto;">
+      <div class="modal-content">
         <h3>Tuition Details: ${data.name} (${studentId})</h3>
         <table border="1" id="tuitionTable">
           <thead><tr>
@@ -200,119 +199,70 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
     document.body.appendChild(modal);
 
-    document.getElementById("closeModalBtn").addEventListener("click", () => {
-      modal.remove();
-    });
-
     const tbody = modal.querySelector("tbody");
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
-    for (let month = 1; month <= currentMonth; month++) {
-      const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
-      const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
-      const status = tuition[monthKey]?.status || "unpaid";
-      const dateMethod = tuition[monthKey]?.date ? `${tuition[monthKey].date} (${tuition[monthKey].method})` : "";
+    function populateTable() {
+      tbody.innerHTML = "";
+      for (let month = 1; month <= currentMonth; month++) {
+        const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
+        const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
+        const status = tuition[monthKey]?.status || "unpaid";
+        const dateMethod = tuition[monthKey]?.date ? `${tuition[monthKey].date} (${tuition[monthKey].method})` : "";
 
-      let actionHtml = "";
-      if (status === "unpaid") {
-        actionHtml = `
-          <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
-          <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
+        let actionHtml = "";
+        if (status === "unpaid") {
+          actionHtml = `
+            <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
+            <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
+          `;
+        } else {
+          actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${monthName}</td>
+          <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
+          <td>${dateMethod}</td>
+          <td>${actionHtml}</td>
         `;
-      } else {
-        actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
+        tbody.appendChild(tr);
       }
-
-      const tr = document.createElement("tr");
-tr.setAttribute("data-month", monthKey); // used for instant updates
-tr.innerHTML = `
-  <td>${monthName}</td>
-  <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">
-    ${status.charAt(0).toUpperCase()+status.slice(1)}
-  </td>
-  <td>${dateMethod}</td>
-  <td>${actionHtml}</td>
-`;
-tbody.appendChild(tr);
-
     }
+
+    // Initial populate
+    populateTable();
+
+    // Close button
+    document.getElementById("closeModalBtn").addEventListener("click", () => modal.remove());
+
+    // ------------------- TUITION ACTIONS -------------------
+    window.markPaid = async (studentId, monthKey) => {
+      const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
+      if (!method) return;
+      const date = new Date().toISOString().split("T")[0];
+      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
+      await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
+      tuition[monthKey] = { status: "paid", date, method };
+      populateTable();
+    };
+
+    window.markBreak = async (studentId, monthKey) => {
+      const date = new Date().toISOString().split("T")[0];
+      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
+      await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
+      tuition[monthKey] = { status: "break" };
+      populateTable();
+    };
+
+    window.undoStatus = async (studentId, monthKey) => {
+      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
+      tuition[monthKey] = { status: "unpaid" };
+      populateTable();
+    };
   };
-
-  // ------------------- TUITION ACTIONS (Dynamic Update) -------------------
-window.markPaid = async (studentId, monthKey) => {
-  const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
-  if (!method) return;
-  const date = new Date().toISOString().split("T")[0];
-
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
-    status: "paid",
-    date,
-    method
-  });
-  await push(ref(db, `Notifications/${studentId}`), {
-    message: `${monthKey} tuition marked Paid.`,
-    date
-  });
-
-  // ✅ Dynamically update table row without closing modal
-  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
-  if (row) {
-    row.querySelector("td:nth-child(2)").style.color = "green";
-    row.querySelector("td:nth-child(2)").textContent = "Paid";
-    row.querySelector("td:nth-child(3)").textContent = `${date} (${method})`;
-    row.querySelector("td:nth-child(4)").innerHTML =
-      `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
-  }
-};
-
-window.markBreak = async (studentId, monthKey) => {
-  const date = new Date().toISOString().split("T")[0];
-
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
-    status: "break"
-  });
-  await push(ref(db, `Notifications/${studentId}`), {
-    message: `${monthKey} tuition marked Break.`,
-    date
-  });
-
-  // ✅ Dynamically update table row
-  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
-  if (row) {
-    row.querySelector("td:nth-child(2)").style.color = "purple";
-    row.querySelector("td:nth-child(2)").textContent = "Break";
-    row.querySelector("td:nth-child(3)").textContent = "";
-    row.querySelector("td:nth-child(4)").innerHTML =
-      `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
-  }
-};
-
-window.undoStatus = async (studentId, monthKey) => {
-  await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), {
-    status: "unpaid",
-    date: null,
-    method: null
-  });
-  const date = new Date().toISOString().split("T")[0];
-  await push(ref(db, `Notifications/${studentId}`), {
-    message: `${monthKey} tuition status reset to Unpaid.`,
-    date
-  });
-
-  // ✅ Dynamically update table row
-  const row = document.querySelector(`#tuitionTable tbody tr[data-month="${monthKey}"]`);
-  if (row) {
-    row.querySelector("td:nth-child(2)").style.color = "red";
-    row.querySelector("td:nth-child(2)").textContent = "Unpaid";
-    row.querySelector("td:nth-child(3)").textContent = "";
-    row.querySelector("td:nth-child(4)").innerHTML = `
-      <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
-      <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
-    `;
-  }
-};
-
 
   // ------------------- INITIAL LOAD -------------------
   switchTab("home");
