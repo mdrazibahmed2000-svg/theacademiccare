@@ -280,6 +280,3 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBreakRequests();
   loadClasses();
 });
-
-Read the codes carefully and help me by updating the admin.js. Currently there is a tuition details table in the page. If admin take action clicking on "Mark Paid" then he needs to confirm payment method. Then the status change from unpaid to paid. But admin can see the changes reopening the table after closing the table. 
-Now ensure that the admin can see the changing status dynamically without closing the table and reopening
