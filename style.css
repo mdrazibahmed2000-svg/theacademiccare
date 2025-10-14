@@ -1,3 +1,4 @@
+
 /* ================== GENERAL STYLES ================== */
 body {
   font-family: Arial, sans-serif;
@@ -11,52 +12,46 @@ h1, h2, h3 {
   margin: 0.5em 0;
 }
 
-/* ================== HEADER & LOGO ================== */
+/* ================== HEADER & LOGO (Soft Light UI) ================== */
 header {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 15px;
   padding: 15px 20px;
-  background-color: #ffffff; /* soft light UI */
-  border-bottom: 2px solid #cce0ff;
+  background: #fdfefe; /* very soft light tone */
+  border-bottom: 2px solid #dce9ff; /* subtle soft blue border */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05); /* faint depth */
 }
 
 .site-logo {
-  height: 60px;
+  height: 65px;
   width: auto;
-  border-radius: 8px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .site-logo:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 12px #b0d4f8;
+  box-shadow: 0 0 8px rgba(80, 160, 255, 0.3);
 }
 
 header h1 {
   font-size: 28px;
-  color: #2a5d9f; /* medium blue */
-  text-shadow: 0 0 6px #a0c4ff;
-  transition: color 0.3s, text-shadow 0.3s;
+  color: #2f6fd3; /* soft medium blue */
+  text-shadow: 0 0 6px rgba(180, 210, 255, 0.5);
+  transition: color 0.3s ease;
 }
 
 header h1:hover {
-  color: #4a7fcf;
-  text-shadow: 0 0 12px #b0d4f8;
+  color: #3f85e3; /* slightly lighter blue */
 }
 
 header h3 {
   font-size: 16px;
-  color: #6b8acb;
-  text-shadow: 0 0 4px #a0c4ff;
+  color: #709ae0; /* gentle light blue */
   margin-top: 4px;
-  transition: color 0.3s, text-shadow 0.3s;
-}
-
-header h3:hover {
-  color: #8aa6e0;
-  text-shadow: 0 0 8px #b0d4f8;
+  font-weight: 500;
 }
 
 /* ================== NAVIGATION ================== */
