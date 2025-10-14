@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const snapshot = await get(ref(db, `Registrations/${studentId}`));
     if (!snapshot.exists()) return alert("Student not found!");
     const data = snapshot.val();
-    const tuition = data.tuition || {};
+    let tuition = data.tuition || {};
 
     // Remove existing modal if exists
     const oldModal = document.getElementById("tuitionModal");
@@ -185,8 +185,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const modal = document.createElement("div");
     modal.id = "tuitionModal";
+    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;";
     modal.innerHTML = `
-      <div class="modal-content">
+      <div style="background:white;padding:20px;border-radius:10px;max-height:80%;overflow:auto;">
         <h3>Tuition Details: ${data.name} (${studentId})</h3>
         <table border="1" id="tuitionTable">
           <thead><tr>
@@ -203,13 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
 
-    function populateTable() {
+    function populateTable(updatedTuition = tuition) {
       tbody.innerHTML = "";
       for (let month = 1; month <= currentMonth; month++) {
         const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
         const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
-        const status = tuition[monthKey]?.status || "unpaid";
-        const dateMethod = tuition[monthKey]?.date ? `${tuition[monthKey].date} (${tuition[monthKey].method})` : "";
+        const status = updatedTuition[monthKey]?.status || "unpaid";
+        const dateMethod = updatedTuition[monthKey]?.date ? `${updatedTuition[monthKey].date} (${updatedTuition[monthKey].method})` : "";
 
         let actionHtml = "";
         if (status === "unpaid") {
@@ -232,36 +233,44 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Initial populate
-    populateTable();
-
-    // Close button
-    document.getElementById("closeModalBtn").addEventListener("click", () => modal.remove());
-
     // ------------------- TUITION ACTIONS -------------------
     window.markPaid = async (studentId, monthKey) => {
       const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
       if (!method) return;
       const date = new Date().toISOString().split("T")[0];
+
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
       await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
-      tuition[monthKey] = { status: "paid", date, method };
-      populateTable();
+
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
 
     window.markBreak = async (studentId, monthKey) => {
       const date = new Date().toISOString().split("T")[0];
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
       await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
-      tuition[monthKey] = { status: "break" };
-      populateTable();
+
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
 
     window.undoStatus = async (studentId, monthKey) => {
       await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
-      tuition[monthKey] = { status: "unpaid" };
-      populateTable();
+
+      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
+      tuition = snapshot.val() || {};
+      populateTable(tuition);
     };
+
+    // Initial table population
+    populateTable();
+
+    document.getElementById("closeModalBtn").addEventListener("click", () => {
+      modal.remove();
+    });
   };
 
   // ------------------- INITIAL LOAD -------------------
