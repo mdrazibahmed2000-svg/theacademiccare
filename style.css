@@ -1,249 +1,203 @@
-/* --- Global Styles --- */
-:root {
-    /* Colors based on the logo's professional aesthetic */
-    --color-primary: #1e3a8a; /* Deep Blue for main text/accents */
-    --color-secondary: #58c0ff; /* Sky Blue for highlights/gradients */
-    --color-background-light: #f4f2e9; /* Light Beige/Tan for background */
-    --color-background-dark: #333333; /* Dark Gray for table headers/footer */
-    --color-text-dark: #2c2c2c; /* Dark text for readability */
-    --color-border: #cccccc;
-    --color-success: #10b981;
-    --color-error: #ef4444;
-
-    --font-serif: Georgia, serif; /* For main titles, matching logo text */
-    --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif; /* For body text and buttons */
-}
-
+/* ==================== GENERAL PAGE STYLES ==================== */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", Arial, sans-serif;
 }
 
 body {
-    font-family: var(--font-sans);
-    background-color: var(--color-background-light);
-    color: var(--color-text-dark);
-    line-height: 1.6;
-    padding: 20px;
+  background: linear-gradient(to bottom right, #f5f8ff, #e8eef9);
+  color: #222;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* --- Header Styling --- */
+/* ==================== HEADER ==================== */
 header {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    padding: 15px 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 15px;
+  text-align: center;
+  background: #ffffffcc;
+  backdrop-filter: blur(5px);
+  width: 100%;
+  border-bottom: 2px solid #cfd8f0;
 }
 
 .site-logo {
-    /* The provided logo is a square image, we'll size it appropriately */
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-right: 15px;
-    object-fit: cover;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
 }
 
 header h1 {
-    font-family: var(--font-serif);
-    color: var(--color-primary);
-    font-size: 1.8em;
-    margin-bottom: 2px;
+  color: #1a3c8b;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 header h3 {
-    font-family: var(--font-sans);
-    color: var(--color-text-dark);
-    font-size: 0.9em;
-    font-weight: 400;
+  color: #444;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-hr {
-    border: 0;
-    border-top: 1px solid var(--color-border);
-    margin: 15px 0 25px 0;
-}
-
-/* --- Container (Login/Registration) Styling --- */
-.container {
-    max-width: 400px;
-    margin: 40px auto;
-    padding: 30px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    text-align: center;
-}
-
-.container h3 {
-    color: var(--color-primary);
-    margin-bottom: 20px;
-    font-family: var(--font-serif);
-    font-size: 1.5em;
-}
-
-/* --- Form and Input Styling --- */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-input[type="text"],
-input[type="password"] {
-    padding: 12px 15px;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    font-size: 1em;
-    transition: border-color 0.3s;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus {
-    border-color: var(--color-secondary);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(88, 192, 255, 0.2);
-}
-
-button[type="submit"] {
-    padding: 12px 20px;
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: background-color 0.3s;
-}
-
-button[type="submit"]:hover {
-    background-color: #1a3377;
-}
-
-.container a {
-    color: var(--color-primary);
-    text-decoration: none;
-    font-size: 0.9em;
-    margin-top: 15px;
-    display: inline-block;
-}
-
-.container a:hover {
-    text-decoration: underline;
-}
-
-/* --- Admin Navigation Styling (Admin.html specific) --- */
+/* ==================== NAVIGATION ==================== */
 nav {
-    display: flex;
-    justify-content: flex-start;
-    gap: 10px;
-    margin-bottom: 30px;
-    padding: 0 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  padding: 15px;
+  background: #f0f4ff;
+  border-bottom: 1px solid #ccd5f0;
+  width: 100%;
 }
 
 nav button {
-    padding: 10px 20px;
-    border: 1px solid var(--color-primary);
-    border-radius: 4px;
-    background-color: transparent;
-    color: var(--color-primary);
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s, color 0.2s;
+  padding: 10px 20px;
+  border: none;
+  background: #1a3c8b;
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 nav button:hover {
-    background-color: rgba(30, 58, 138, 0.1);
+  background: #2c54c0;
 }
 
-nav button.active {
-    background-color: var(--color-primary);
-    color: white;
-    border-color: var(--color-primary);
+/* ==================== SECTIONS ==================== */
+section {
+  padding: 25px;
+  max-width: 1000px;
+  width: 95%;
+  margin: 20px auto;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #dce3f5;
 }
 
-/* --- Admin Section Styling --- */
-.tabSection {
-    max-width: 1200px;
-    margin: 0 auto 40px auto;
-    padding: 30px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+section h2 {
+  text-align: center;
+  color: #1a3c8b;
+  font-size: 1.6rem;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #c3cff9;
+  padding-bottom: 8px;
 }
 
-.tabSection h2 {
-    color: var(--color-primary);
-    font-family: var(--font-serif);
-    margin-bottom: 25px;
-    border-bottom: 2px solid var(--color-secondary);
-    padding-bottom: 10px;
+/* ==================== LOGIN PAGE ==================== */
+.login-container {
+  background: white;
+  border: 1px solid #ccd4f3;
+  border-radius: 10px;
+  padding: 35px 40px;
+  width: 360px;
+  margin-top: 70px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
 }
 
-/* Home Section Stats */
-#homeSection p {
-    font-size: 1.2em;
-    margin-bottom: 15px;
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #ccd4f3;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
-#homeSection span {
-    font-weight: bold;
-    color: var(--color-secondary);
+.login-container input:focus {
+  border-color: #1a3c8b;
+  outline: none;
 }
 
-/* --- Table Styling --- */
+.login-container button {
+  width: 100%;
+  background: #1a3c8b;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 1rem;
+  border-radius: 6px;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-container button:hover {
+  background: #2c54c0;
+}
+
+/* ==================== TABLES ==================== */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-    font-size: 0.95em;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
 
-table thead tr {
-    background-color: var(--color-primary);
-    color: white;
+th, td {
+  border: 1px solid #d1daf5;
+  padding: 10px 12px;
+  text-align: center;
+  font-size: 0.95rem;
 }
 
-table th, table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid var(--color-border);
+th {
+  background: #e3e8fb;
+  color: #1a3c8b;
+  font-weight: 600;
 }
 
-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
+td {
+  background: #f9fbff;
+  color: #333;
 }
 
-table tbody tr:hover {
-    background-color: #f1f1f1;
+tr:nth-child(even) td {
+  background: #f2f5ff;
 }
 
-/* Action Buttons in Tables */
-.action-btn {
-    padding: 6px 10px;
-    margin-right: 5px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: opacity 0.2s;
+/* ==================== BUTTONS INSIDE TABLES ==================== */
+.table-btn {
+  background: #1a3c8b;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.action-btn:hover {
-    opacity: 0.85;
+.table-btn:hover {
+  background: #2c54c0;
 }
 
-.approve-btn {
-    background-color: var(--color-success);
-    color: white;
-}
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+  }
 
-.reject-btn {
-    background-color: var(--color-error);
-    color: white;
+  nav {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .login-container {
+    width: 90%;
+  }
+
+  table, th, td {
+    font-size: 0.85rem;
+  }
 }
