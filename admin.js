@@ -93,9 +93,10 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.deny = async (id) => {
-    await update(ref(db, `Registrations/${id}`), { approved: false });
-    alert(`${id} denied!`);
-  };
+  // Remove the registration entirely
+  await set(ref(db, `Registrations/${id}`), null); 
+  alert(`${id} denied and removed!`);
+};
 
   // ------------------- BREAK REQUESTS -------------------
   function loadBreakRequests() {
@@ -257,3 +258,4 @@ document.addEventListener("DOMContentLoaded", () => {
   loadBreakRequests();
   loadClasses();
 });
+
