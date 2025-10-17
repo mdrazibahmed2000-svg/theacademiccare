@@ -1,282 +1,83 @@
-// ------------------- IMPORT FIREBASE -------------------
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, update, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
 
-document.addEventListener("DOMContentLoaded", () => {
+   <!-- HEADER -->
+ <header>
+  <img src="logo-4.png" alt="The Academic Care Logo" class="site-logo">
+  <div>
+    <h1>The Academic Care</h1>
+    <h3>Academic Year 2025</h3>
+  </div>
+</header>
+<hr>
 
-  // ------------------- FIREBASE CONFIG -------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyDIMfGe50jxcyMV5lUqVsQUGSeZyLYpc84",
-    authDomain: "the-academic-care-de611.firebaseapp.com",
-    databaseURL: "https://the-academic-care-de611-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "the-academic-care-de611",
-    storageBucket: "the-academic-care-de611.firebasestorage.app",
-    messagingSenderId: "142271027321",
-    appId: "1:142271027321:web:b26f1f255dd9d988f75ca8",
-    measurementId: "G-Q7MCGKTYMX"
-  };
+  <!-- Navigation -->
+  <nav>
+    <button id="homeTab">Home</button>
+    <button id="registrationTab">Registration</button>
+    <button id="breakTab">Break Requests</button>
+    <button id="classesTab">Classes</button>
+    <button id="logoutBtn">Logout</button>
+  </nav>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
+  <!-- HOME SECTION -->
+  <section id="homeSection" class="tabSection">
+    <h2>Welcome, Admin!</h2>
+    <p>Total Students: <span id="totalStudents">0</span></p>
+    <p>Pending Approvals: <span id="pendingStudents">0</span></p>
+  </section>
 
-  // ------------------- LOGOUT -------------------
-  document.getElementById("logoutBtn").addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "index.html";
-  });
+  <!-- REGISTRATION SECTION -->
+  <section id="registrationSection" class="tabSection" style="display:none">
+    <h2>Student Registrations</h2>
+    <table id="registrationTable">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Roll</th>
+          <th>WhatsApp</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
-  // ------------------- TAB SWITCHING -------------------
-  const sections = {
-    home: document.getElementById("homeSection"),
-    registration: document.getElementById("registrationSection"),
-    break: document.getElementById("breakSection"),
-    classes: document.getElementById("classesSection")
-  };
+  <!-- BREAK REQUEST SECTION -->
+  <section id="breakSection" class="tabSection" style="display:none">
+    <h2>Break Requests</h2>
+    <table id="breakTable">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Class</th>
+          <th>Roll</th>
+          <th>WhatsApp</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
 
-  document.getElementById("homeTab").addEventListener("click", () => switchTab("home"));
-  document.getElementById("registrationTab").addEventListener("click", () => switchTab("registration"));
-  document.getElementById("breakTab").addEventListener("click", () => switchTab("break"));
-  document.getElementById("classesTab").addEventListener("click", () => switchTab("classes"));
+  <!-- CLASSES SECTION -->
+  <section id="classesSection" class="tabSection" style="display:none">
+    <h2>Classes</h2>
+    <div id="classTabs"></div>
+    <div id="classStudents"></div>
+  </section>
 
-  function switchTab(tabName) {
-    for (const key in sections) sections[key].style.display = "none";
-    sections[tabName].style.display = "block";
-  }
-
-  // ------------------- HELPER: CREATE REGISTRATIONS NODE IF MISSING -------------------
-  async function ensureRegistrationsNode() {
-    const snapshot = await get(ref(db, "Registrations"));
-    if (!snapshot.exists()) {
-      await set(ref(db, "Registrations"), {});
-    }
-  }
-
-  // ------------------- HOME STATS -------------------
-  async function loadHomeStats() {
-    await ensureRegistrationsNode();
-    const snapshot = await get(ref(db, "Registrations"));
-    let total = 0, pending = 0;
-    snapshot.forEach(child => {
-      total++;
-      if (child.val().approved === false) pending++;
-    });
-    document.getElementById("totalStudents").textContent = total;
-    document.getElementById("pendingStudents").textContent = pending;
-  }
-
-  // ------------------- LOAD REGISTRATIONS -------------------
-  async function loadRegistrations() {
-    await ensureRegistrationsNode();
-    const snapshot = await get(ref(db, "Registrations"));
-    const tbody = document.querySelector("#registrationTable tbody");
-    tbody.innerHTML = "";
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (data.approved === false) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${child.key}</td>
-          <td>${data.name}</td>
-          <td>${data.class}</td>
-          <td>${data.roll}</td>
-          <td>${data.whatsapp}</td>
-          <td>
-            <button onclick="window.approve('${child.key}')">Approve</button>
-            <button onclick="window.deny('${child.key}')">Deny</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  }
-
-  window.approve = async (id) => {
-    await update(ref(db, `Registrations/${id}`), { approved: true });
-    alert(`${id} approved!`);
-    loadRegistrations();
-    loadHomeStats();
-  };
-
-  window.deny = async (id) => {
-    await update(ref(db, `Registrations/${id}`), { approved: false });
-    alert(`${id} denied!`);
-    loadRegistrations();
-    loadHomeStats();
-  };
-
-  // ------------------- BREAK REQUESTS -------------------
-  async function loadBreakRequests() {
-    await ensureRegistrationsNode();
-    const snapshot = await get(ref(db, "Registrations"));
-    const tbody = document.querySelector("#breakTable tbody");
-    tbody.innerHTML = "";
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (data.breakRequest) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${child.key}</td>
-          <td>${data.name}</td>
-          <td>${data.class}</td>
-          <td>${data.roll}</td>
-          <td>${data.whatsapp}</td>
-          <td>Requested</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  }
-
-  // ------------------- CLASSES TAB -------------------
-  async function loadClasses() {
-    const classTabs = document.getElementById("classTabs");
-    const classStudentsDiv = document.getElementById("classStudents");
-    classTabs.innerHTML = "";
-    classStudentsDiv.innerHTML = "";
-
-    for (let cls = 6; cls <= 12; cls++) {
-      const btn = document.createElement("button");
-      btn.textContent = "Class " + cls;
-      btn.addEventListener("click", () => loadClassStudents(cls));
-      classTabs.appendChild(btn);
-    }
-  }
-
-  async function loadClassStudents(cls) {
-    const snapshot = await get(ref(db, "Registrations"));
-    const div = document.getElementById("classStudents");
-    div.innerHTML = `<h3>Class ${cls}</h3><table border="1">
-      <thead><tr>
-        <th>ID</th><th>Name</th><th>Roll</th><th>Tuition Details</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>`;
-    const tbody = div.querySelector("tbody");
-
-    snapshot.forEach(child => {
-      const data = child.val();
-      if (data.class == cls && data.approved) {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${child.key}</td>
-          <td>${data.name}</td>
-          <td>${data.roll}</td>
-          <td>
-            <span class="tuitionIcon" style="cursor:pointer;" onclick="window.showTuitionModal('${child.key}')">💰</span>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  }
-
-  // ------------------- TUITION MODAL -------------------
-  window.showTuitionModal = async (studentId) => {
-    const snapshot = await get(ref(db, `Registrations/${studentId}`));
-    if (!snapshot.exists()) return alert("Student not found!");
-    const data = snapshot.val();
-    let tuition = data.tuition || {};
-
-    // Remove existing modal if exists
-    const oldModal = document.getElementById("tuitionModal");
-    if (oldModal) oldModal.remove();
-
-    const modal = document.createElement("div");
-    modal.id = "tuitionModal";
-    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:center;";
-    modal.innerHTML = `
-      <div style="background:white;padding:20px;border-radius:10px;max-height:80%;overflow:auto;">
-        <h3>Tuition Details: ${data.name} (${studentId})</h3>
-        <table border="1" id="tuitionTable">
-          <thead><tr>
-            <th>Month's Name</th><th>Status</th><th>Date & Method</th><th>Action</th>
-          </tr></thead>
-          <tbody></tbody>
-        </table>
-        <button id="closeModalBtn">Close</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    const tbody = modal.querySelector("tbody");
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth() + 1;
-
-    function populateTable(updatedTuition = tuition) {
-      tbody.innerHTML = "";
-      for (let month = 1; month <= currentMonth; month++) {
-        const monthKey = `${currentYear}-${month.toString().padStart(2,"0")}`;
-        const monthName = new Date(currentYear, month-1).toLocaleString('default',{month:'long'});
-        const status = updatedTuition[monthKey]?.status || "unpaid";
-        const dateMethod = updatedTuition[monthKey]?.date ? `${updatedTuition[monthKey].date} (${updatedTuition[monthKey].method})` : "";
-
-        let actionHtml = "";
-        if (status === "unpaid") {
-          actionHtml = `
-            <button onclick="window.markPaid('${studentId}','${monthKey}')">Mark Paid</button>
-            <button onclick="window.markBreak('${studentId}','${monthKey}')">Mark Break</button>
-          `;
-        } else {
-          actionHtml = `<button onclick="window.undoStatus('${studentId}','${monthKey}')">Undo</button>`;
-        }
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${monthName}</td>
-          <td style="color:${status==="paid"?"green":status==="unpaid"?"red":"purple"}">${status.charAt(0).toUpperCase()+status.slice(1)}</td>
-          <td>${dateMethod}</td>
-          <td>${actionHtml}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    }
-
-    // ------------------- TUITION ACTIONS -------------------
-    window.markPaid = async (studentId, monthKey) => {
-      const method = prompt("Enter payment method (e.g., Bank Transfer, Cash):");
-      if (!method) return;
-      const date = new Date().toISOString().split("T")[0];
-
-      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "paid", date, method });
-      await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Paid.`, date });
-
-      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
-      tuition = snapshot.val() || {};
-      populateTable(tuition);
-    };
-
-    window.markBreak = async (studentId, monthKey) => {
-      const date = new Date().toISOString().split("T")[0];
-      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "break" });
-      await push(ref(db, `Notifications/${studentId}`), { message: `${monthKey} tuition marked Break.`, date });
-
-      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
-      tuition = snapshot.val() || {};
-      populateTable(tuition);
-    };
-
-    window.undoStatus = async (studentId, monthKey) => {
-      await update(ref(db, `Registrations/${studentId}/tuition/${monthKey}`), { status: "unpaid", date:null, method:null });
-
-      const snapshot = await get(ref(db, `Registrations/${studentId}/tuition`));
-      tuition = snapshot.val() || {};
-      populateTable(tuition);
-    };
-
-    // Initial table population
-    populateTable();
-
-    document.getElementById("closeModalBtn").addEventListener("click", () => {
-      modal.remove();
-    });
-  };
-
-  // ------------------- INITIAL LOAD -------------------
-  switchTab("home");
-  loadHomeStats();
-  loadRegistrations();
-  loadBreakRequests();
-  loadClasses();
-});
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
