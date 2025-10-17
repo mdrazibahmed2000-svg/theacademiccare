@@ -1,329 +1,225 @@
-/* ===================================================
-   GLOBAL STYLES — Soft Light Academic UI
-   Compatible with: index.html & admin.html
-   =================================================== */
-
+/* =======================
+   GLOBAL STYLES
+======================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
 }
 
 body {
-  background: linear-gradient(180deg, #f9fbff 0%, #eef3fb 100%);
-  color: #333;
+  background: linear-gradient(to right, #e8f0ff, #f9fcff);
+  color: #222;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* ================== HEADER ================== */
+/* =======================
+   HEADER
+======================= */
 header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  padding: 18px 25px;
-  background: radial-gradient(circle at center, #e8f0ff 0%, #f9fbff 100%);
-  border-bottom: 3px solid #a5c8ff;
-  box-shadow: 0 4px 15px rgba(0, 40, 100, 0.05);
-  background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-  background-size: 250px;
+  gap: 20px;
+  width: 100%;
+  background: #ffffffc5;
+  padding: 20px 0;
+  border-bottom: 3px solid #0066cc;
 }
 
 .site-logo {
-  height: 80px;
-  width: auto;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255,255,255,0.6), transparent 70%);
-  padding: 5px;
-  box-shadow: 0 0 15px rgba(90, 170, 255, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.site-logo:hover {
-  transform: scale(1.07);
-  box-shadow: 0 0 22px rgba(70, 140, 255, 0.45);
+  background: #fff;
+  object-fit: contain;
+  border: 2px solid #0066cc;
 }
 
 header h1 {
-  font-family: 'Georgia', serif;
-  font-size: 30px;
+  font-size: 1.8rem;
+  color: #004c99;
+  font-weight: 700;
   letter-spacing: 1px;
-  color: #245bb7;
-  text-shadow: 0 0 10px rgba(170, 210, 255, 0.8);
-  margin-bottom: 3px;
 }
 
 header h3 {
-  font-size: 17px;
-  color: #5f88d6;
-  text-shadow: 0 0 6px rgba(180, 210, 255, 0.6);
+  color: #0073e6;
+  font-weight: 500;
 }
 
-/* ================== CONTAINER ================== */
-.container {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 30px;
-  background: #ffffffc9;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(0, 50, 100, 0.08);
-  backdrop-filter: blur(4px);
-  background-image: url('https://www.transparenttextures.com/patterns/paper-fibers.png');
-  background-size: 300px;
-}
-
-/* ================== BUTTONS ================== */
-button {
-  background: linear-gradient(135deg, #6ea8ff, #457dff);
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
+/* =======================
+   LOGIN PAGE (index.html)
+======================= */
+.login-container {
+  margin-top: 80px;
+  background: #ffffff;
   border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s ease;
-  box-shadow: 0 4px 12px rgba(70, 120, 255, 0.2);
-}
-
-button:hover {
-  background: linear-gradient(135deg, #5a99ff, #3469ff);
-  box-shadow: 0 6px 15px rgba(60, 100, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-/* ================== INPUT FIELDS ================== */
-input, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccd9f5;
-  margin-bottom: 15px;
-  font-size: 15px;
-  background: #fdfefe;
-  transition: 0.2s ease;
-}
-
-input:focus, select:focus {
-  border-color: #6ea8ff;
-  box-shadow: 0 0 8px rgba(110, 168, 255, 0.3);
-  outline: none;
-}
-
-/* ================== TABLE ================== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 4px 15px rgba(0, 40, 100, 0.05);
-}
-
-th, td {
+  padding: 30px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   text-align: center;
-  padding: 12px 10px;
-  border-bottom: 1px solid #e3eaf8;
+  width: 350px;
 }
 
-th {
-  background: #e9f0ff;
-  color: #245bb7;
-  font-weight: 600;
+.login-container h2 {
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+  color: #004c99;
 }
 
-tr:hover {
-  background: #f5f9ff;
+.login-container input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  outline: none;
+  font-size: 15px;
+  transition: 0.2s;
 }
 
-/* ================== ADMIN PANEL MENU ================== */
-.admin-menu {
+.login-container input:focus {
+  border-color: #0066cc;
+  box-shadow: 0 0 5px #0066cc77;
+}
+
+.login-container button {
+  width: 100%;
+  background: #0066cc;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login-container button:hover {
+  background: #004c99;
+}
+
+/* =======================
+   NAVIGATION (Admin Page)
+======================= */
+nav {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 25px;
-}
-
-.admin-menu button {
-  background: linear-gradient(135deg, #73b0ff, #4a8bff);
-  padding: 12px 22px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.admin-menu button:hover {
-  background: linear-gradient(135deg, #5a9aff, #3a7cff);
-}
-
-/* ================== STATUS ICONS ================== */
-.status-icon {
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 14px;
-}
-
-.status-paid {
-  background: #4CAF50;
-}
-
-.status-pending {
-  background: #FFB300;
-}
-
-.status-overdue {
-  background: #E53935;
-}
-
-/* ================== LINKS ================== */
-a {
-  color: #245bb7;
-  text-decoration: none;
-  transition: 0.3s ease;
-}
-
-a:hover {
-  color: #457dff;
-  text-decoration: underline;
-}
-
-/* ================== RESPONSIVE ================== */
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 22px;
-  }
-  header h3 {
-    font-size: 15px;
-  }
-  .container {
-    padding: 20px;
-  }
-  button {
-    width: 100%;
-  }
-}
-/* ================== TUITION MODAL ================== */
-#tuitionModal {
-  position: fixed;
-  top: 0;
-  left: 0;
+  background: #f1f7ff;
+  padding: 10px;
+  border-bottom: 2px solid #0066cc;
   width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
 }
 
-#tuitionModal > div {
-  background: #ffffff; /* soft light background */
-  padding: 25px;
-  border-radius: 12px;
-  max-height: 80%;
-  overflow-y: auto;
+nav button {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  margin: 5px;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+nav button:hover {
+  background: #004c99;
+  transform: translateY(-2px);
+}
+
+/* =======================
+   CONTENT SECTIONS
+======================= */
+.tabSection {
+  display: none;
   width: 90%;
-  max-width: 700px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-width: 1200px;
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 25px;
+  margin-top: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-#tuitionModal h3 {
-  text-align: center;
-  color: #2f6fd3;
-  margin-bottom: 20px;
-  font-size: 22px;
+.tabSection h2 {
+  color: #004c99;
+  margin-bottom: 15px;
 }
 
-#tuitionModal table {
+.tabSection.active {
+  display: block;
+}
+
+/* =======================
+   TABLE STYLES
+======================= */
+table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  margin-top: 10px;
 }
 
-#tuitionModal table th,
-#tuitionModal table td {
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 14px;
-  border: 1px solid #cce0ff;
-}
-
-#tuitionModal table th {
-  background-color: #4a90e2;
-  color: #fff;
-}
-
-#tuitionModal table tbody tr:nth-child(even) {
-  background-color: #f4f7fb;
-}
-
-#tuitionModal table tbody tr:hover {
-  background-color: #e0f0ff;
-}
-
-#tuitionModal table tbody td button {
-  margin: 2px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.3s ease;
-}
-
-#tuitionModal table tbody td button:hover {
-  transform: translateY(-2px);
-}
-
-#tuitionModal table tbody td button:nth-child(1) { /* Mark Paid */
-  background-color: #4caf50;
-  color: #fff;
-}
-
-#tuitionModal table tbody td button:nth-child(2) { /* Mark Break */
-  background-color: #9c27b0;
-  color: #fff;
-}
-
-#tuitionModal table tbody td button:nth-child(3) { /* Undo */
-  background-color: #f16a6a;
-  color: #fff;
-}
-
-#closeModalBtn {
-  display: block;
-  width: 100%;
+th, td {
+  border: 1px solid #ccc;
+  text-align: center;
   padding: 10px;
-  border-radius: 10px;
+  font-size: 14px;
+}
+
+th {
+  background: #0066cc;
+  color: #fff;
+}
+
+tr:nth-child(even) {
+  background: #f5f9ff;
+}
+
+/* =======================
+   BUTTONS & ACTIONS
+======================= */
+.action-btn {
+  background: #007bff;
   border: none;
-  background-color: #4a90e2;
   color: white;
-  font-size: 16px;
+  padding: 6px 10px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: 0.3s;
 }
 
-#closeModalBtn:hover {
-  background-color: #6ba0f0;
-  transform: translateY(-2px);
+.action-btn:hover {
+  background: #0056b3;
 }
 
-/* Status text colors */
-#tuitionModal td[style*="color:green"] {
-  font-weight: bold;
-}
+/* =======================
+   RESPONSIVE DESIGN
+======================= */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    gap: 10px;
+  }
 
-#tuitionModal td[style*="color:red"] {
-  font-weight: bold;
-}
+  .login-container {
+    width: 85%;
+  }
 
-#tuitionModal td[style*="color:purple"] {
-  font-weight: bold;
+  nav {
+    flex-direction: column;
+  }
+
+  nav button {
+    width: 90%;
+  }
+
+  table {
+    font-size: 13px;
+  }
 }
