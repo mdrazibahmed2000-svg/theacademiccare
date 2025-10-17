@@ -1,240 +1,189 @@
-/* ===================================================
-   STUDENT PANEL STYLES — Semi-Dark Academic UI
-   =================================================== */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
-}
-
+/* ================== GENERAL STYLES ================== */
 body {
-  background-color: #1a1f2c;
-  color: #d3e0ff;
-  min-height: 100vh;
-  background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); /* subtle academic pattern */
-  background-size: 400px;
-  background-repeat: repeat;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0 20px;
+  background-color: #1f1f1f; /* semi-dark background */
+  color: #dbe6f2; /* soft light text */
 }
 
-/* ================== HEADER ================== */
+h1, h2, h3 {
+  margin: 0.5em 0;
+}
+
+/* ================== HEADER & LOGO ================== */
 header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 20px 30px;
-  background: rgba(20, 25, 40, 0.95);
-  border-bottom: 3px solid #4a5a8c;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  gap: 15px;
+  padding: 15px 20px;
+  background-color: #1f1f1f;
+  border-bottom: 2px solid #3a5f8f;
 }
 
 .site-logo {
-  height: 90px;
+  height: 60px;
   width: auto;
-  border-radius: 50%;
-  padding: 8px;
-  background: radial-gradient(circle, rgba(255,255,255,0.25), transparent 70%);
-  box-shadow: 0 0 35px rgba(74, 110, 255, 0.85);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 8px;
+  transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .site-logo:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 50px rgba(74, 110, 255, 1);
+  transform: scale(1.05);
+  box-shadow: 0 0 12px #5b7bbf;
 }
 
 header h1 {
-  font-family: 'Georgia', serif;
-  font-size: 34px;
-  color: #a8caff;
-  text-shadow: 0 0 15px rgba(120, 180, 255, 0.9);
+  font-size: 28px;
+  color: #6cb8f0;
+  text-shadow: 0 0 6px #3a5f8f;
+  transition: text-shadow 0.3s, color 0.3s;
+}
+
+header h1:hover {
+  color: #9cc8f8;
+  text-shadow: 0 0 12px #5b7bbf, 0 0 6px #3a5f8f;
 }
 
 header h3 {
-  font-size: 18px;
-  color: #cfdfff;
-  text-shadow: 0 0 8px rgba(150, 180, 255, 0.7);
+  font-size: 16px;
+  color: #8abce7;
+  margin-top: 4px;
+  text-shadow: 0 0 4px #3a5f8f;
+  transition: text-shadow 0.3s, color 0.3s;
 }
 
-/* ================== CONTAINER ================== */
-.container {
-  max-width: 1100px;
-  margin: 40px auto;
-  padding: 30px;
-  background: rgba(26, 32, 50, 0.85); /* semi-transparent to show background */
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
+header h3:hover {
+  color: #b0d4f8;
+  text-shadow: 0 0 10px #5b7bbf;
 }
 
-/* ================== BUTTONS ================== */
-button {
-  background: linear-gradient(135deg, #4a90ff, #1a59d6);
-  color: #fff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.3s ease;
-  box-shadow: 0 5px 15px rgba(26, 59, 120, 0.5);
-}
-
-button:hover {
-  background: linear-gradient(135deg, #3575d6, #153e9e);
-  box-shadow: 0 7px 20px rgba(20, 40, 100, 0.7);
-  transform: translateY(-2px);
-}
-
-/* ================== INPUT FIELDS ================== */
-input, select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #3a4a6c;
-  margin-bottom: 15px;
-  font-size: 15px;
-  background: #222938;
-  color: #d3e0ff;
-  transition: 0.2s ease;
-}
-
-input:focus, select:focus {
-  border-color: #4a90ff;
-  box-shadow: 0 0 10px rgba(74, 110, 255, 0.7);
-  outline: none;
-}
-
-/* ================== TABLES ================== */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: rgba(34, 41, 56, 0.95);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-}
-
-th, td {
-  text-align: center;
-  padding: 12px 10px;
-  border-bottom: 1px solid #3a4a6c;
-  color: #d3e0ff;
-}
-
-th {
-  background: #3a4a6c;
-  color: #a8caff;
-  font-weight: 600;
-}
-
-tr:hover {
-  background: #3f4f6c;
-}
-
-/* ================== TUITION TABLE & MODAL ================== */
-#tuitionModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+/* ================== NAVIGATION ================== */
+nav {
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 20px 0;
 }
 
-#tuitionModal > div {
-  background: rgba(26, 32, 50, 0.95);
-  padding: 30px;
-  border-radius: 14px;
-  max-height: 80%;
-  overflow-y: auto;
-  width: 90%;
-  max-width: 720px;
-  box-shadow: 0 5px 20px rgba(0,0,0,0.6);
-}
-
-#tuitionModal h3 {
-  text-align: center;
-  color: #a8caff;
-  margin-bottom: 20px;
-  font-size: 24px;
-  text-shadow: 0 0 10px rgba(120, 180, 255, 0.8);
-}
-
-#tuitionModal table th {
-  background-color: #3a4a6c;
-  color: #a8caff;
-}
-
-#tuitionModal table tbody tr:nth-child(even) {
-  background-color: #2b3245;
-}
-
-#tuitionModal table tbody tr:hover {
-  background-color: #3f4f6c;
-}
-
-#tuitionModal td[style*="color:green"] {
-  font-weight: bold;
-}
-
-#tuitionModal td[style*="color:red"] {
-  font-weight: bold;
-}
-
-#tuitionModal td[style*="color:purple"] {
-  font-weight: bold;
-}
-
-#closeModalBtn {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  border-radius: 12px;
-  border: none;
-  background-color: #4a90ff;
+nav button {
+  background-color: #3a5f8f;
   color: #fff;
-  font-size: 16px;
+  border: none;
+  padding: 10px 18px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
 }
 
-#closeModalBtn:hover {
-  background-color: #3575d6;
+nav button:hover, nav button.active {
+  background-color: #5b7bbf;
+  color: #f0f8ff;
   transform: translateY(-2px);
 }
 
-/* ================== LINKS ================== */
-a {
-  color: #a8caff;
-  text-decoration: none;
+/* ================== TAB SECTIONS ================== */
+.tabSection {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
 }
 
-a:hover {
-  color: #4a90ff;
-  text-decoration: underline;
+/* ================== NOTIFICATIONS ================== */
+#notificationsDiv {
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #333;
+  border: 1px solid #3a5f8f;
+}
+
+#notificationsDiv p {
+  padding: 6px 0;
+  border-bottom: 1px solid #555;
+}
+
+/* ================== PROFILE ================== */
+#profileDiv p {
+  line-height: 1.6;
+  color: #cce0ff;
+}
+
+/* ================== TUITION TABLE ================== */
+#tuitionTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+#tuitionTable th, #tuitionTable td {
+  padding: 10px;
+  border: 1px solid #555;
+  text-align: left;
+  font-size: 14px;
+  color: #dbe6f2;
+}
+
+#tuitionTable th {
+  background-color: #3a5f8f;
+  color: #fff;
+}
+
+#tuitionTable tbody tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+
+/* Make table scrollable on small screens */
+#tuitionTable tbody {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+#tuitionTable thead, #tuitionTable tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* ================== BREAK REQUEST ================== */
+#breakRequestBtn {
+  background-color: #5b7bbf;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#breakRequestBtn:hover {
+  background-color: #7aa0dc;
+  transform: translateY(-2px);
+}
+
+/* ================== LOGOUT BUTTON ================== */
+#logoutBtn {
+  background-color: #e74c3c;
+}
+
+#logoutBtn:hover {
+  background-color: #ff5c5c;
+  transform: translateY(-2px);
 }
 
 /* ================== RESPONSIVE ================== */
 @media (max-width: 768px) {
-  header h1 {
-    font-size: 24px;
+  nav {
+    flex-direction: column;
+    align-items: center;
   }
-  header h3 {
-    font-size: 16px;
-  }
-  .container {
-    padding: 20px;
-  }
-  button {
-    width: 100%;
+
+  #tuitionTable th, #tuitionTable td {
+    font-size: 12px;
+    padding: 8px;
   }
 }
