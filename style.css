@@ -214,6 +214,23 @@ tr:nth-child(even) {
   nav {
     flex-direction: column;
   }
+   /* Fade-in animation for tab switch */
+.tabSection {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.active-section {
+  opacity: 1;
+}
+
+/* Active tab highlight */
+nav button.active-tab {
+  background: linear-gradient(90deg, #0073e6, #003366);
+  color: #fff;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
 
   nav button {
     width: 90%;
@@ -223,3 +240,4 @@ tr:nth-child(even) {
     font-size: 13px;
   }
 }
+
